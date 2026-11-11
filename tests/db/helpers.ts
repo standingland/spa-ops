@@ -137,4 +137,21 @@ export async function resetDb(): Promise<Base> {
   });
 }
 
+export type BookingRow = Record<string, any>;
+
+/** Calls create_booking with sensible defaults; returns the booking row. */
+export async function book(
+  c: PoolClient, b: Base,
+  over: Partial<{ customer: string; service: string; therapist: string; position: string; start: string; source: string; key: string; party: string | null; note: string | null }> = {},
+): Promise<BookingRow> {
+  const o = {
+    customer: b.c1, service: b.svc60, therapist: b.t1, position: b.pos[0], start: bkk('10:00'),
+    source: 'advance', key: randomUUID(), party: null, note: null, ...over,
+  };
+  const r = await c.query(
+    'select * from create_booking($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+    [o.customer, o.service, o.therapist, o.position, o.start, o.source, o.key, o.party, o.note]);
+  return r.rows[0];
+}
+
 export { randomUUID };
