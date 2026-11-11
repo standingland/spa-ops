@@ -6,7 +6,10 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { uiErrorKey } from '@/lib/errors';
 import { useLiveRefresh } from '@/lib/realtime';
 import { addDays, bangkokDay, formatTime } from '@/lib/time';
+import { DndContext, PointerSensor, pointerWithin, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { moveBooking, setBookingStatus, type BoardRow } from '../actions';
+import { isDraggable, moveFromDrop } from '../drop';
+import type { MoveBookingInput } from '../schema';
 import type { BookingStatus } from '../schema';
 import { NewBookingForm } from './NewBookingForm';
 import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
@@ -63,6 +66,32 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const open = rows.find((r) => r.bookingId === selected) ?? null;
   const q = (d: string, v = view) => `/calendar?day=${d}&view=${v}`;
 
+  const te = useTranslations();
+  const router = useRouter();
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const [pending, setPending] = useState<{ row: BoardRow; input: MoveBookingInput } | null>(null);
+  const [dropError, setDropError] = useState<string | null>(null);
+  const [dropBusy, setDropBusy] = useState(false);
+
+  function onDragEnd(e: DragEndEvent) {
+    const row = rows.find((r) => r.bookingId === e.active.id);
+    if (!row || !e.over) return;
+    const input = moveFromDrop(row, { view, columnId: String(e.over.id), day, minutesFromMidnight: minOf(row.startsAt) + Math.round(e.delta.y / PX_PER_MIN) }, rooms);
+    if (input.start === new Date(row.startsAt).toISOString() && input.therapistId === row.therapistId && input.positionId === row.positionId) return;
+    setDropError(null);
+    setPending({ row, input });
+  }
+  async function confirmDrop() {
+    if (!pending) return;
+    setDropBusy(true);
+    const r = await moveBooking(pending.input);
+    setDropBusy(false);
+    setPending(null);
+    if (!r.ok) { setDropError(te(uiErrorKey(r.code))); return; }
+    router.refresh();
+  }
+  const posCode = (positionId: string) => rooms.find((x) => x.room_positions.some((p) => p.id === positionId))?.code ?? '';
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
@@ -85,6 +114,17 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
       {open && <BookingPanel key={open.bookingId + open.version} row={open} role={role} therapists={therapists} rooms={rooms}
         svcName={svcName(open.serviceId)} therapistName={therapistName(open.therapistId)} roomCode={roomOf(open.roomId)?.code ?? ''} onClose={() => setSelected(null)} />}
 
+      {dropError && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{dropError}</p>}
+      {pending && (
+        <div data-testid="drop-bar" className="tnum flex flex-wrap items-center gap-3 rounded border border-charcoal bg-white p-3 text-sm">
+          <span>{pending.row.customerDisplayName}: {formatTime(pending.row.startsAt)} → <strong>{formatTime(pending.input.start)}</strong></span>
+          <span>{therapistName(pending.row.therapistId)} → <strong>{therapistName(pending.input.therapistId)}</strong></span>
+          <span>{posCode(pending.row.positionId)} → <strong>{posCode(pending.input.positionId)}</strong></span>
+          <button disabled={dropBusy} onClick={confirmDrop} data-testid="drop-confirm" className="ml-auto rounded bg-charcoal px-3 py-1.5 text-ivory">{t('confirmMove')}</button>
+          <button onClick={() => setPending(null)} data-testid="drop-undo" className="underline">{c('cancel')}</button>
+        </div>
+      )}
+
       {rows.length === 0 && <p className="text-stone-dark" data-testid="calendar-empty">{t('noBookings')}</p>}
 
       <div className="overflow-x-auto rounded border border-stone bg-white" data-testid="calendar-scroll">
@@ -95,37 +135,60 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
               {hours.map((h) => <div key={h} className="tnum absolute left-0 w-full pr-1 text-right text-xs text-stone-dark" style={{ top: (h - startHour) * 60 * PX_PER_MIN }}>{String(h).padStart(2, '0')}:00</div>)}
             </div>
           </div>
+          <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={onDragEnd}>
           {columns.map((col) => (
-            <div key={col.id} data-testid="calendar-column" data-column-id={col.id} className="w-44 shrink-0 border-r border-stone">
-              <div className="flex h-10 flex-col justify-center border-b border-stone px-2 text-sm font-medium">
-                <span>{col.title}</span>{col.zone && <span className="text-xs font-normal text-stone-dark">{col.zone}</span>}
-              </div>
-              <div className="relative" style={{ height }}>
-                {hours.map((h) => <div key={h} className="absolute w-full border-t border-stone/60" style={{ top: (h - startHour) * 60 * PX_PER_MIN }} />)}
-                {rows.filter(col.match).map((r) => {
-                  const top = (minOf(r.startsAt) - startHour * 60) * PX_PER_MIN;
-                  const h = Math.max(28, (minOf(r.endsAt) - minOf(r.startsAt)) * PX_PER_MIN);
-                  const lane = col.lane(r);
-                  return (
-                    <button key={r.bookingId} data-testid="booking-card" data-booking-id={r.bookingId} data-status={r.status} data-start={r.startsAt}
-                      onClick={() => setSelected(r.bookingId)}
-                      className={`absolute overflow-hidden rounded px-1.5 py-1 text-left text-xs leading-tight ${STATUS_BG[r.status]} ${selected === r.bookingId ? 'ring-2 ring-charcoal' : ''}`}
-                      style={{ top, height: h, left: `calc(${(lane / col.lanes) * 100}% + 2px)`, width: `calc(${100 / col.lanes}% - 4px)` }}>
-                      <span className="tnum font-semibold">{formatTime(r.startsAt)}–{formatTime(r.endsAt)}</span>
-                      <span className="block truncate">{svcName(r.serviceId)}</span>
-                      <span className="block truncate">{r.customerDisplayName}</span>
-                      <span className="block truncate">{therapistName(r.therapistId)} · {roomOf(r.roomId)?.code}</span>
-                      <span className="block truncate font-medium">{t(`status.${r.status}`)}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <Column key={col.id} id={col.id} title={col.title} zone={col.zone} height={height}>
+              {hours.map((h) => <div key={h} className="absolute w-full border-t border-stone/60" style={{ top: (h - startHour) * 60 * PX_PER_MIN }} />)}
+              {rows.filter(col.match).map((r) => {
+                const top = (minOf(r.startsAt) - startHour * 60) * PX_PER_MIN;
+                const h = Math.max(28, (minOf(r.endsAt) - minOf(r.startsAt)) * PX_PER_MIN);
+                const lane = col.lane(r);
+                return (
+                  <Card key={r.bookingId} row={r} draggable={isDraggable(r, role)} onClick={() => setSelected(r.bookingId)}
+                    className={`${STATUS_BG[r.status]} ${selected === r.bookingId ? 'ring-2 ring-charcoal' : ''}`}
+                    style={{ top, height: h, left: `calc(${(lane / col.lanes) * 100}% + 2px)`, width: `calc(${100 / col.lanes}% - 4px)` }}>
+                    <span className="tnum font-semibold">{formatTime(r.startsAt)}–{formatTime(r.endsAt)}</span>
+                    <span className="block truncate">{svcName(r.serviceId)}</span>
+                    <span className="block truncate">{r.customerDisplayName}</span>
+                    <span className="block truncate">{therapistName(r.therapistId)} · {roomOf(r.roomId)?.code}</span>
+                    <span className="block truncate font-medium">{t(`status.${r.status}`)}</span>
+                  </Card>
+                );
+              })}
+            </Column>
           ))}
+          </DndContext>
           {columns.length === 0 && <p className="p-4 text-stone-dark">{c('empty')}</p>}
         </div>
       </div>
     </div>
+  );
+}
+
+function Column({ id, title, zone, height, children }: { id: string; title: string; zone: string; height: number; children: React.ReactNode }) {
+  const { setNodeRef } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} data-testid="calendar-column" data-column-id={id} className="w-44 shrink-0 border-r border-stone">
+      <div className="flex h-10 flex-col justify-center border-b border-stone px-2 text-sm font-medium">
+        <span>{title}</span>{zone && <span className="text-xs font-normal text-stone-dark">{zone}</span>}
+      </div>
+      <div className="relative" style={{ height }}>{children}</div>
+    </div>
+  );
+}
+
+function Card({ row, draggable, className, style, onClick, children }: {
+  row: BoardRow; draggable: boolean; className: string; style: React.CSSProperties; onClick: () => void; children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: row.bookingId, disabled: !draggable });
+  return (
+    <button ref={setNodeRef} {...(draggable ? attributes : {})} {...(draggable ? listeners : {})}
+      data-testid="booking-card" data-booking-id={row.bookingId} data-status={row.status} data-start={row.startsAt}
+      onClick={onClick}
+      className={`absolute overflow-hidden rounded px-1.5 py-1 text-left text-xs leading-tight ${className}`}
+      style={{ ...style, ...(transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : {}), zIndex: isDragging ? 30 : undefined, touchAction: draggable ? 'none' : undefined }}>
+      {children}
+    </button>
   );
 }
 
