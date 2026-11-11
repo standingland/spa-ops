@@ -15,7 +15,8 @@
     "notifications": "Customer messages",
     "settings": "Settings",
     "payments": "Payments",
-    "customers": "Customers"
+    "customers": "Customers",
+    "reports": "Reports"
   },
   "login": {
     "title": "Sign in",
@@ -506,5 +507,113 @@
     "anonymiseKeeps": "Bookings and payments stay for the accounts, but are no longer linked to a person.",
     "typeName": "Type \"{name}\" to confirm",
     "anonymiseNow": "Remove permanently"
+  },
+  "reports": {
+    "title": "Reports",
+    "from": "From",
+    "to": "To",
+    "apply": "Show report",
+    "grain": "Group by",
+    "headline": "Headline figures",
+    "none": "No data in this period",
+    "export": "Export CSV",
+    "presets": {
+      "today": "Today",
+      "7days": "7 days",
+      "month": "This month",
+      "lastMonth": "Last month"
+    },
+    "grains": {
+      "day": "Daily",
+      "week": "Weekly",
+      "month": "Monthly"
+    },
+    "kpi": {
+      "booked": "Booked revenue",
+      "collected": "Collected revenue",
+      "net": "Net collected",
+      "bookings": "Bookings",
+      "avg": "Average transaction value",
+      "cancelRate": "Cancellation rate",
+      "noShowRate": "No-show rate",
+      "returningRate": "Returning customer rate"
+    },
+    "revenueOverTime": "Revenue over time",
+    "byService": "Revenue by service",
+    "byTherapist": "Revenue by therapist",
+    "roomUtilization": "Room utilisation",
+    "therapistUtilization": "Therapist utilisation",
+    "peaks": "Peak periods",
+    "groupBy": "Group by",
+    "byZone": "Zone",
+    "byCategory": "Room category",
+    "col": {
+      "service": "Service",
+      "therapist": "Therapist",
+      "completed": "Completed",
+      "minutes": "Minutes",
+      "booked": "Booked revenue",
+      "room": "Room",
+      "openMinutes": "Open minutes",
+      "bookedMinutes": "Booked minutes",
+      "utilization": "Utilisation",
+      "turnovers": "Turnovers",
+      "avgTurnover": "Average (min)",
+      "onTime": "On time",
+      "shiftMinutes": "Shift minutes",
+      "timeOffMinutes": "Time-off minutes"
+    },
+    "weekdays": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "metrics": {
+      "booked": "Booked revenue: for bookings whose service starts in the period, the discounted price of completed bookings plus the fee on cancelled and no-show bookings. A rescheduled booking is one booking, counted on the day it finally starts.",
+      "collected": "Collected revenue: payments received in the period, not counting voided ones. Money still awaiting verification is included here and shown separately under Payments.",
+      "refunded": "Refunded: refunds recorded in the period, not counting voided ones.",
+      "net": "Net collected: collected revenue minus refunds.",
+      "avgTransaction": "Average transaction value: booked revenue of completed bookings divided by the number of completed bookings (fees excluded).",
+      "cancellationRate": "Cancellation rate: cancelled bookings divided by all bookings starting in the period.",
+      "noShowRate": "No-show rate: no-show bookings divided by all bookings starting in the period.",
+      "reschedules": "Bookings: all bookings starting in the period, whatever their status. Reschedules are counted from the booking history, and a moved booking is still one booking.",
+      "returningRate": "Returning customer rate: of customers with a completed booking in the period, the share who had a completed booking before their first one in the period.",
+      "roomUtilization": "Room utilisation: booked room minutes divided by open minutes, less maintenance or closed blocks on that room. Open minutes are the minutes covered by at least one rostered therapist shift. Turnover: the average minutes from start to ready and the share marked ready on time.",
+      "therapistUtilization": "Therapist utilisation: booked minutes divided by shift minutes, less time off inside shifts.",
+      "turnover": "Turnover efficiency: for turnovers started in the period, the average minutes from start to ready and the share marked ready by the due time.",
+      "peaks": "Peak periods: bookings that are not cancelled or no-show, by weekday and by hour of the start time (Bangkok time).",
+      "byService": "Revenue by service: completed bookings only, discounted price, fees not attributed. Retired services still appear when they have completed bookings in the period.",
+      "byTherapist": "Revenue by therapist: completed bookings only, discounted price, fees not attributed. Therapists who left still appear when they have completed bookings in the period.",
+      "openMinutes": "Open minutes: the minutes in the period covered by at least one therapist shift."
+    },
+    "csv": {
+      "bucket": "Period",
+      "booked": "Booked revenue (THB)",
+      "collected": "Collected revenue (THB)",
+      "refunded": "Refunded (THB)",
+      "net": "Net collected (THB)",
+      "service": "Service",
+      "therapist": "Therapist",
+      "completed": "Completed",
+      "minutes": "Minutes",
+      "room": "Room",
+      "zone": "Zone",
+      "category": "Room category",
+      "openMinutes": "Open minutes",
+      "bookedMinutes": "Booked minutes",
+      "utilization": "Utilisation",
+      "turnovers": "Turnovers",
+      "avgTurnoverMin": "Average (min)",
+      "onTimeRate": "On time",
+      "shiftMinutes": "Shift minutes",
+      "timeOffMinutes": "Time-off minutes",
+      "weekday": "Weekday",
+      "hour": "Hour",
+      "bookings": "Bookings"
+    }
   }
 }

@@ -5,12 +5,13 @@ import { requireRole, type Role } from '@/modules/identity/session';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
 import { LiveStatus } from '@/modules/identity/components/LiveStatus';
 
-const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff' | '/admin/notifications' | '/admin/settings' | '/payments' | '/customers'; key: string; roles: Role[] }[] = [
+const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff' | '/admin/notifications' | '/admin/settings' | '/payments' | '/customers' | '/reports'; key: string; roles: Role[] }[] = [
   { href: '/today', key: 'today', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
   { href: '/rooms', key: 'rooms', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
   { href: '/calendar', key: 'calendar', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
   { href: '/customers', key: 'customers', roles: ['owner', 'manager', 'receptionist'] },
   { href: '/payments', key: 'payments', roles: ['owner', 'manager'] },
+  { href: '/reports', key: 'reports', roles: ['owner', 'manager'] },
   { href: '/admin/rooms', key: 'adminRooms', roles: ['owner', 'manager'] },
   { href: '/admin/services', key: 'services', roles: ['owner', 'manager'] },
   { href: '/admin/therapists', key: 'therapists', roles: ['owner', 'manager'] },
@@ -23,6 +24,12 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const session = await requireRole();
   const t = await getTranslations('nav');
   const locale = await getLocale();
+  // The owner can switch reports off for managers; hide the link then (the database refuses either way).
+  let managerReports = true;
+  if (session.role === 'manager') {
+    const { data } = await (await createClient()).rpc('get_settings');
+    managerReports = (data as Record<string, unknown> | null)?.['reports.manager_can_view'] !== false;
+  }
 
   async function signOut() {
     'use server';
@@ -35,7 +42,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-stone bg-white px-4 py-3">
         <span className="font-serif text-lg">Spa Ops</span>
         <nav className="flex flex-wrap gap-4 text-sm">
-          {NAV.filter((n) => n.roles.includes(session.role)).map((n) => (
+          {NAV.filter((n) => n.roles.includes(session.role) && (n.href !== '/reports' || managerReports)).map((n) => (
             <Link key={n.href} href={n.href} className="hover:underline">{t(n.key)}</Link>
           ))}
         </nav>
