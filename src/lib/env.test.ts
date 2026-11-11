@@ -8,7 +8,7 @@ test('development accepts local values', () => {
   expect(parseEnv(dev)).toMatchObject({ appEnv: 'development', cronSecret: null, senderName: 'Studio' });
 });
 test('every missing value is named at once', () => {
-  expect(() => parseEnv({})).toThrow(/NEXT_PUBLIC_SUPABASE_URL[sS]*NEXT_PUBLIC_SUPABASE_KEY[sS]*SUPABASE_SERVICE_KEY/);
+  expect(() => parseEnv({})).toThrow(/NEXT_PUBLIC_SUPABASE_URL[\s\S]*NEXT_PUBLIC_SUPABASE_KEY[\s\S]*SUPABASE_SERVICE_KEY/);
 });
 test.each([
   [{ ...dev, APP_ENV: 'production', CRON_SECRET: 'x'.repeat(32) }, /NEXT_PUBLIC_SUPABASE_URL/],

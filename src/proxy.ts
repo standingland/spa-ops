@@ -32,4 +32,5 @@ export async function proxy(original: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ['/((?!api|_next|_vercel|.*\..*).*)'] };
+// Every page request except API routes, framework files and anything with a file extension (\\. is a literal dot).
+export const config = { matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'] };
