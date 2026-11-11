@@ -93,6 +93,27 @@ export async function resetDb(): Promise<Base> {
     if (await tableExists(c, 'staff'))
      for (const r of ['owner', 'manager', 'receptionist', 'therapist'] as const)
       await c.query('insert into staff(user_id, role, display_name) values ($1,$2,$3)', [b.users[r], r, r]);
+    // catalog and rooms (Task 3)
+    if (await tableExists(c, 'rooms')) {
+      const cat = async (name: string, i: number) =>
+        (await c.query('insert into room_categories(name_th, name_en, sort_order) values ($1,$1,$2) returning id', [name, i])).rows[0].id;
+      b.cat = { standard: await cat('standard', 1), couple: await cat('couple', 2) };
+      for (let i = 1; i <= 6; i++) {
+        const r = await c.query(
+          `insert into rooms(code, display_name, category_id, turnover_min, sort_order) values ($1,$1,$2,15,$3) returning id`,
+          ['R' + i, b.cat.standard, i]);
+        b.rooms.push(r.rows[0].id);
+        b.pos.push((await c.query('select id from room_positions where room_id=$1 and label=$2', [r.rows[0].id, '1'])).rows[0].id);
+      }
+      const cr = (await c.query(
+        `insert into rooms(code, display_name, category_id, turnover_min, sort_order) values ('C1','C1',$1,15,7) returning id`, [b.cat.couple])).rows[0].id;
+      const p1 = (await c.query('select id from room_positions where room_id=$1 and label=$2', [cr, '1'])).rows[0].id;
+      const p2 = (await c.query(`insert into room_positions(room_id, label) values ($1,'2') returning id`, [cr])).rows[0].id;
+      b.couple = { room: cr, pos: [p1, p2] };
+      b.svc60 = (await c.query(
+        `insert into services(name_th, name_en, duration_min, price_satang) values ('นวด 60','Massage 60',60,150000) returning id`)).rows[0].id;
+      await c.query('insert into service_room_categories(service_id, room_category_id) values ($1,$2)', [b.svc60, b.cat.standard]);
+    }
     // SEED-END
     return b;
   });
