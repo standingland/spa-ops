@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Spa Ops
 
-## Getting Started
+A booking and daily-operations system for a spa: therapists, rooms and beds, bookings that cannot double-book, a room dashboard, customer records, payments and reconciliation, and management reports. Thai first, English ready. Rooms, therapists, services and policies are all configured in the system (nothing is hard-coded), and the database itself refuses a double booking.
 
-First, run the development server:
+## Requirements
+
+* Node.js 22
+* Docker Desktop (runs the local Supabase stack: PostgreSQL, Auth, Realtime)
+
+## First run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx supabase start
+cp .env.example .env.local        # then paste the keys printed by `npx supabase status -o env`
+npx supabase db reset             # applies the migrations and the small development seed
+npx playwright install chromium
+npm run dev                       # http://localhost:3000/th/login
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The seed creates four logins, **for local development only** (password `local-dev-only`): `owner@spa.test`, `manager@spa.test`, `reception@spa.test`, `therapist@spa.test`. They do not exist in production, where the first owner is created with `scripts/bootstrap-owner.mjs` (see `docs/deployment.md`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+|---|---|
+| `npm run dev` | development server |
+| `npm run build` | production build |
+| `npm run start` | serve the production build |
+| `npm run lint` | ESLint |
+| `npm test` | unit tests under `src/` (Vitest) |
+| `npm run test:db` | builds a throwaway PostgreSQL and runs the database tests: constraints, permissions, money, reports, security catalog |
+| `npx playwright test` | browser tests on desktop and phone sizes (needs the local Supabase stack running and freshly seeded) |
+| `npm run test:prod` | security-header tests against the production build (port 3200) |
+| `npm run test:perf` | load budgets and the concurrency storm on a year of generated data |
+| `npm run test:scale` | loads the local stack with the year of data, then times the screens on the production build; run `npx supabase db reset` afterwards |
+| `npm run test:restore` | backup-and-restore drill on the local stack |
+| `npm run backup` | writes `backups/<timestamp>/` (roles, schema, data); contains personal data |
 
-## Learn More
+## Where to read more
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* `docs/architecture.md` — data model, rules, permission matrix, acceptance evidence per plan
+* `docs/operations.md` — backups, restore, rollback, schedules, logs, monthly checklist
+* `docs/deployment.md` — the go-live runbook (every cloud or paid step is the owner's decision)
+* `docs/security-report.md` and `docs/acceptance.md` — what was verified, and what is still open
+* `docs/superpowers/plans/` — the four implementation plans
