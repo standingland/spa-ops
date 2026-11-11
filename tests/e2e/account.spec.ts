@@ -8,7 +8,6 @@ test.beforeEach(async () => { await resetTestData(); });
 test.afterAll(async () => { await resetTestData(); });
 
 const idOf = async (email: string) => (await admin.auth.admin.listUsers({ perPage: 200 })).data.users.find((u) => u.email === email)!.id;
-const setPasswordViaAdmin = async (email: string, password: string) => { await admin.auth.admin.updateUserById(await idOf(email), { password }); };
 const deleteUserViaAdmin = async (email: string) => { const u = (await admin.auth.admin.listUsers({ perPage: 200 })).data.users.find((x) => x.email === email); if (u) await admin.auth.admin.deleteUser(u.id); };
 
 async function resetPassword(page: Page, email: string, password: string) {
@@ -30,20 +29,25 @@ test('a deactivated employee is locked out on their next click, not at their nex
   }
 });
 test('the owner resets a password and the employee signs in with the new one only', async ({ page, browser }) => {
-  await signIn(page, 'owner@spa.test'); await page.goto('/th/admin/staff');
-  await resetPassword(page, 'therapist@spa.test', 'brand-new-pass-1');
+  // a throwaway account: changing a seeded account's password would invalidate the saved sign-in used by other tests
+  const email = 'reset-target@spa.test';
+  await admin.auth.admin.createUser({ email, password: 'old-password-123', email_confirm: true });
+  const id = await idOf(email);
+  await admin.from('staff').insert({ user_id: id, role: 'receptionist', display_name: 'Reset Target' });
   const ctx = await browser.newContext();
-  const p2 = await ctx.newPage();
   try {
-    await signInFresh(p2, 'therapist@spa.test', 'brand-new-pass-1');
+    await signIn(page, 'owner@spa.test'); await page.goto('/th/admin/staff');
+    await resetPassword(page, email, 'brand-new-pass-1');
+    const p2 = await ctx.newPage();
+    await signInFresh(p2, email, 'brand-new-pass-1');
     await expect(p2).toHaveURL(/\/th\/today/);
     const p3 = await (await browser.newContext()).newPage();
     await p3.goto('/th/login');
-    await p3.getByTestId('login-email').fill('therapist@spa.test');
-    await p3.getByTestId('login-password').fill('local-dev-only');
+    await p3.getByTestId('login-email').fill(email);
+    await p3.getByTestId('login-password').fill('old-password-123');
     await p3.getByTestId('login-submit').click();
     await expect(p3.getByTestId('login-error')).toBeVisible();
-  } finally { await setPasswordViaAdmin('therapist@spa.test', 'local-dev-only'); await ctx.close(); }
+  } finally { await ctx.close(); await admin.from('staff').delete().eq('user_id', id); await deleteUserViaAdmin(email); }
 });
 test('staff change their own password; a wrong current password or a short new one is refused', async ({ page }) => {
   await admin.auth.admin.createUser({ email: 'temp@spa.test', password: 'temp-pass-0001', email_confirm: true });
