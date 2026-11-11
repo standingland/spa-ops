@@ -33,7 +33,7 @@ create table bookings (
 create index bookings_service_during_idx on bookings using gist (service_during);
 
 create function private.bookings_room_matches_position() returns trigger
-  language plpgsql set search_path = ''
+  language plpgsql security definer set search_path = ''
 as $$
 begin
   if new.room_id is distinct from (select p.room_id from public.room_positions p where p.id = new.position_id) then
