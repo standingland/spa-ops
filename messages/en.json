@@ -400,8 +400,11 @@
       "policy_no_show_fee_percent": "No-show fee (% of the discounted price)",
       "payments_receptionist_can_record": "Reception may record payments",
       "reports_manager_can_view": "Managers may view reports",
-      "retention_inactive_months": "List customers for review after no activity for"
-    }
+      "retention_inactive_months": "List customers for review after no activity for",
+      "retention_audit_months": "Keep the audit log for",
+      "retention_prune_enabled": "Delete old data automatically (cannot be undone)"
+    },
+    "pruneHelp": "When automatic deletion is on, every day the system deletes audit-log entries older than the months set here, and customer messages sent more than 90 days ago. It never touches bookings, payments or customer records. Deletion cannot be undone. It is off by default."
   },
   "payments": {
     "record": "Record a payment",

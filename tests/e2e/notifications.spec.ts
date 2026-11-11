@@ -37,3 +37,9 @@ test('a dead message can be retried by a manager; reception cannot open the page
   await p2.goto('/th/admin/notifications');
   await expect(p2.getByTestId('forbidden')).toBeVisible();
 });
+
+test('the maintenance endpoint needs the secret and deletes nothing while pruning is off', async ({ request }) => {
+  expect((await request.post('/api/internal/maintenance')).status()).toBe(401);
+  const r = await request.post('/api/internal/maintenance', { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } });
+  expect([r.status(), await r.json()]).toEqual([200, { enabled: false }]);
+});

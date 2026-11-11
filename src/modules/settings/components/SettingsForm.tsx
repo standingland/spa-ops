@@ -38,6 +38,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       {SETTING_GROUPS.map((g) => (
         <fieldset key={g} className="flex flex-col gap-3 rounded border border-stone bg-white p-4">
           <legend className="px-1 font-serif text-lg">{t(`groups.${g}`)}</legend>
+          {g === 'retention' && <p className="text-sm text-clay" data-testid="prune-help">{t('pruneHelp')}</p>}
           {SETTING_KEYS.filter((k) => SETTING_META[k].group === g).map((k) => {
             const m = SETTING_META[k];
             return (

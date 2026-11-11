@@ -9,10 +9,10 @@ function walk(dir: string): string[] {
   });
 }
 
-test('the service-key client is imported only by identity/actions.ts and notifications/outbox.ts', () => {
+test('the service-key client is imported only by identity/actions.ts, notifications/outbox.ts and the maintenance route', () => {
   const importers = walk('src')
     .filter((f) => /\.(ts|tsx)$/.test(f) && !f.endsWith('.test.ts'))
     .filter((f) => /supabase\/admin['"]/.test(fs.readFileSync(f, 'utf8')))
     .map((f) => f.split(path.sep).join('/'));
-  expect(importers.sort()).toEqual(['src/modules/identity/actions.ts', 'src/modules/notifications/outbox.ts']);
+  expect(importers.sort()).toEqual(['src/app/api/internal/maintenance/route.ts', 'src/modules/identity/actions.ts', 'src/modules/notifications/outbox.ts']);
 });

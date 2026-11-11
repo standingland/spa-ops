@@ -12,6 +12,8 @@ export type Settings = {
   'payments.receptionist_can_record': boolean;
   'reports.manager_can_view': boolean;
   'retention.inactive_months': number;
+  'retention.audit_months': number;
+  'retention.prune_enabled': boolean;
 };
 export type SettingKey = keyof Settings;
 
@@ -34,6 +36,8 @@ export const SETTING_META: Record<SettingKey, SettingMeta> = {
   'payments.receptionist_can_record': { group: 'payments', kind: 'bool' },
   'reports.manager_can_view': { group: 'reports', kind: 'bool' },
   'retention.inactive_months': { group: 'retention', kind: 'int', min: 6, max: 120, unit: 'months' },
+  'retention.audit_months': { group: 'retention', kind: 'int', min: 12, max: 120, unit: 'months' },
+  'retention.prune_enabled': { group: 'retention', kind: 'bool' },
 };
 export const SETTING_KEYS = Object.keys(SETTING_META) as SettingKey[];
 
