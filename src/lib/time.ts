@@ -29,3 +29,14 @@ export function addDays(day: string, n: number): string {
 export function bangkokInstant(day: string, hhmm: string): string {
   return new Date(`${day}T${hhmm}:00+07:00`).toISOString();
 }
+
+/** Parses a PostgREST tstzrange string like ["2030-01-15 03:00:00+00","2030-01-15 04:00:00+00") into ISO instants. */
+export function parseRange(range: string): { start: string; end: string } {
+  const [a, b] = range.slice(1, -1).split(',').map((s) => s.replace(/"/g, '').trim());
+  const iso = (s: string) => {
+    let x = s.replace(' ', 'T');
+    if (/[+-]\d\d$/.test(x)) x += ':00';
+    return new Date(x).toISOString();
+  };
+  return { start: iso(a), end: iso(b) };
+}

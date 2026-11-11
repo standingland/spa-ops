@@ -1,10 +1,55 @@
 {
-  "app": { "name": "Spa Ops" },
-  "nav": { "calendar": "Calendar", "rooms": "Rooms", "services": "Services", "therapists": "Therapists", "staff": "Staff", "signOut": "Sign out", "language": "Language" },
-  "login": { "title": "Sign in", "email": "Email", "password": "Password", "submit": "Sign in", "failed": "Incorrect email or password" },
-  "forbidden": { "title": "Access denied", "body": "Your account is not allowed to open this page.", "back": "Back to the calendar" },
-  "common": { "save": "Save", "cancel": "Cancel", "confirm": "Confirm", "loading": "Loading…", "empty": "Nothing here yet", "failed": "Something went wrong", "active": "Active", "inactive": "Inactive", "all": "All", "search": "Search", "add": "Add", "edit": "Edit", "close": "Close", "deactivate": "Deactivate", "activate": "Activate", "deactivateConfirm": "Confirm deactivation?", "minutes": "min", "none": "None" },
-  "status": { "available": "Available", "reserved": "Reserved", "occupied": "Occupied", "cleaning": "Cleaning", "outOfService": "Out of service" },
+  "app": {
+    "name": "Spa Ops"
+  },
+  "nav": {
+    "calendar": "Calendar",
+    "rooms": "Rooms",
+    "services": "Services",
+    "therapists": "Therapists",
+    "staff": "Staff",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "failed": "Incorrect email or password"
+  },
+  "forbidden": {
+    "title": "Access denied",
+    "body": "Your account is not allowed to open this page.",
+    "back": "Back to the calendar"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading…",
+    "empty": "Nothing here yet",
+    "failed": "Something went wrong",
+    "active": "Active",
+    "inactive": "Inactive",
+    "all": "All",
+    "search": "Search",
+    "add": "Add",
+    "edit": "Edit",
+    "close": "Close",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "deactivateConfirm": "Confirm deactivation?",
+    "minutes": "min",
+    "none": "None"
+  },
+  "status": {
+    "available": "Available",
+    "reserved": "Reserved",
+    "occupied": "Occupied",
+    "cleaning": "Cleaning",
+    "outOfService": "Out of service"
+  },
   "errors": {
     "NOT_AUTHORIZED": "You are not allowed to do this",
     "THERAPIST_BUSY": "The therapist is busy at this time",
@@ -20,6 +65,60 @@
     "INVALID_TRANSITION": "This status change is not allowed",
     "STALE_VERSION": "This record was changed by someone else. Please refresh.",
     "CONFLICTS_WITH_BOOKINGS": "Unfinished bookings still use this resource",
-    "UNKNOWN": "Something unexpected went wrong"
+    "UNKNOWN": "Something unexpected went wrong",
+    "INVALID_INPUT": "Invalid input",
+    "DUPLICATE": "That value already exists"
+  },
+  "rooms": {
+    "title": "Rooms and beds",
+    "add": "Add room",
+    "edit": "Edit room",
+    "code": "Room code",
+    "name": "Room name",
+    "category": "Room category",
+    "floor": "Floor",
+    "zone": "Zone",
+    "noZone": "No zone",
+    "turnover": "Turnover buffer (min)",
+    "equipment": "Equipment (comma separated)",
+    "notes": "Notes",
+    "positions": "Beds",
+    "addPosition": "Add bed",
+    "positionLabel": "Bed label",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "dragHint": "Drag to reorder",
+    "filterCategory": "Category",
+    "filterActive": "Status",
+    "blocks": "Room blocks",
+    "addBlock": "Add block",
+    "blockStart": "Start",
+    "blockEnd": "End",
+    "blockKind": "Reason",
+    "blockNote": "Note",
+    "removeBlock": "Remove block",
+    "kind": {
+      "maintenance": "Maintenance",
+      "cleaning": "Cleaning",
+      "closed": "Closed"
+    },
+    "categories": "Room categories",
+    "categoryNameTh": "Name (Thai)",
+    "categoryNameEn": "Name (English)",
+    "addCategory": "Add category",
+    "invalid": "Invalid input"
+  },
+  "services": {
+    "title": "Services",
+    "add": "Add service",
+    "edit": "Edit service",
+    "nameTh": "Name (Thai)",
+    "nameEn": "Name (English)",
+    "duration": "Duration (min)",
+    "price": "Price (THB)",
+    "equipment": "Required equipment (comma separated)",
+    "categories": "Allowed room categories (none = any)",
+    "anyCategory": "Any room category",
+    "invalid": "Invalid input"
   }
 }

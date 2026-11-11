@@ -18,3 +18,8 @@ export function codeFromError(err: { message?: string; code?: string } | null | 
   if (err?.code === '42501') return 'NOT_AUTHORIZED';
   return 'UNKNOWN';
 }
+
+/** Like errorMessageKey, but also knows the client-side validation codes. */
+export function uiErrorKey(code: string): string {
+  return code === 'INVALID_INPUT' || code === 'DUPLICATE' ? `errors.${code}` : errorMessageKey(code);
+}
