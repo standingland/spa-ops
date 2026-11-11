@@ -132,6 +132,11 @@ export async function resetDb(): Promise<Base> {
       b.c1 = (await c.query(`insert into customers(user_id, display_name, full_name, phone) values ($1,'C1','Customer One','0800000001') returning id`, [b.users.customer])).rows[0].id;
       b.c2 = (await c.query(`insert into customers(display_name, full_name, phone) values ('C2','Customer Two','0800000002') returning id`)).rows[0].id;
     }
+    // payment methods (Plan 3)
+    if (await tableExists(c, 'payment_methods')) {
+      await c.query(`insert into payment_methods(code, name_th, name_en, needs_verification, sort_order) values
+        ('cash','เงินสด','Cash',false,1), ('bank_transfer','โอนเงิน','Bank transfer',true,2), ('promptpay','พร้อมเพย์','PromptPay',true,3)`);
+    }
     // SEED-END
     return b;
   });
@@ -191,6 +196,33 @@ export async function asService<T>(fn: (c: PoolClient) => Promise<T>): Promise<T
   } finally {
     c.release();
   }
+}
+
+export type MethodCode = 'cash' | 'bank_transfer' | 'promptpay';
+
+export async function methodId(code: MethodCode): Promise<string> {
+  return asAdmin(async (c) => (await c.query(`select id from payment_methods where code=$1`, [code])).rows[0].id);
+}
+
+/** Records a payment through record_payment as the given actor; returns the payments row. */
+export async function pay(
+  b: Base, a: Actor, bookingId: string, amount: number,
+  over: Partial<{ method: MethodCode; key: string; reference: string | null; note: string | null }> = {},
+): Promise<Record<string, any>> {
+  const o = { method: 'cash' as MethodCode, key: randomUUID(), reference: null, note: null, ...over };
+  const m = await methodId(o.method);
+  return asRole(b, a, async (c) =>
+    (await c.query(`select * from record_payment($1,$2,$3,$4,$5,$6)`, [bookingId, m, amount, o.key, o.reference, o.note])).rows[0]);
+}
+
+/** The booking_money row for one booking, read as manager. */
+export async function money(b: Base, bookingId: string): Promise<Record<string, any>> {
+  return asRole(b, 'manager', async (c) => (await c.query(`select * from booking_money(array[$1::uuid])`, [bookingId])).rows[0]);
+}
+
+/** Bangkok calendar date of now(), 'YYYY-MM-DD'. */
+export async function today(): Promise<string> {
+  return asAdmin(async (c) => (await c.query(`select ((now() at time zone 'Asia/Bangkok')::date)::text d`)).rows[0].d);
 }
 
 export { randomUUID };
