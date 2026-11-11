@@ -3,11 +3,11 @@
 :root {
   --ivory: #F6F2EA;
   --stone: #D9D2C5;
-  --stone-dark: #8F877A;
+  --stone-dark: #6B645A;
   --charcoal: #23211E;
   --sage: #7C8A72;
   --brass: #A68A56;
-  --clay: #A9745B;
+  --clay: #8A5340;
   /* status colours: every status also carries a text label */
   --status-available: var(--sage);
   --status-reserved: var(--brass);

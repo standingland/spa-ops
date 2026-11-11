@@ -18,10 +18,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const t = await getTranslations('booking');
 
   const supabase = await createClient();
-  const [ths, rooms, svcs] = await Promise.all([
+  const [ths, rooms, svcs, retired] = await Promise.all([
     supabase.from('therapists').select('id, display_name').eq('active', true).order('sort_order'),
     supabase.from('rooms').select('id, code, display_name, zone, room_positions(id, label, active)').eq('active', true).order('zone', { nullsFirst: false }).order('sort_order'),
     supabase.from('services').select('id, name_th, name_en, duration_min').order('sort_order'),
+    supabase.from('rooms').select('id, code').eq('active', false),
   ]);
   const therapists = (ths.data ?? []) as TherapistOpt[];
   const roomOpts = (rooms.data ?? []) as RoomOpt[];
@@ -42,5 +43,5 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   }
   const board = await getBoard(day);
   if (!board.ok) return failed;
-  return <BookingCalendar day={day} view={view} role={session.role} rows={board.rows} therapists={therapists} rooms={roomOpts} services={services} />;
+  return <BookingCalendar day={day} view={view} role={session.role} rows={board.rows} therapists={therapists} rooms={roomOpts} services={services} retiredRooms={retired.data ?? []} />;
 }

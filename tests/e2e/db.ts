@@ -235,3 +235,15 @@ export async function sql(text: string, params: unknown[] = []) {
   await client.connect();
   try { return await client.query(text, params); } finally { await client.end(); }
 }
+
+/** Gives every active therapist a shift from an hour ago to three hours ahead, so "now" is always bookable whatever the clock says. */
+export async function shiftsAroundNow() {
+  const from = new Date(Date.now() - 3600000).toISOString();
+  const to = new Date(Date.now() + 3 * 3600000).toISOString();
+  const { data: ths } = await admin.from('therapists').select('id').eq('active', true);
+  for (const t of ths ?? []) {
+    const { data: over } = await admin.from('therapist_shifts').select('id').eq('therapist_id', t.id).filter('during', 'ov', `[${from},${to})`);
+    if (over?.length) await admin.from('therapist_shifts').delete().in('id', over.map((x) => x.id));
+    await admin.from('therapist_shifts').insert({ therapist_id: t.id, during: `[${from},${to})` });
+  }
+}

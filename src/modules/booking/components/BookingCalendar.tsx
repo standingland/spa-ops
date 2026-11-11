@@ -35,7 +35,9 @@ const DESK_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = {
 };
 const THERAPIST_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = { checked_in: ['in_treatment'], in_treatment: ['completed'] };
 
-export function BookingCalendar({ day, view, role, rows, therapists, rooms, services }: {
+export function BookingCalendar({ day, view, role, rows, therapists, rooms, services, retiredRooms = [] }: {
+  /** Deactivated rooms: not offered or shown as columns, but their code still appears on past bookings. */
+  retiredRooms?: { id: string; code: string }[];
   day: string; view: 'therapists' | 'rooms'; role: Role; rows: BoardRow[];
   therapists: TherapistOpt[]; rooms: RoomOpt[]; services: ServiceOpt[];
 }) {
@@ -58,6 +60,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const svcName = (id: string) => { const s = svc(id); return s ? (locale === 'en' && s.name_en ? s.name_en : s.name_th) : ''; };
   const therapistName = (id: string) => therapists.find((x) => x.id === id)?.display_name ?? '';
   const roomOf = (id: string) => rooms.find((r) => r.id === id);
+  const roomCodeOf = (id: string) => roomOf(id)?.code ?? retiredRooms.find((r) => r.id === id)?.code ?? '';
 
   const columns = useMemo(() => {
     if (view === 'therapists') return therapists.map((x) => ({ id: x.id, title: x.display_name, zone: '', lanes: 1, match: (r: BoardRow) => r.therapistId === x.id, lane: () => 0 }));
@@ -117,7 +120,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
       )}
 
       {open && <BookingPanel key={open.bookingId + open.version} row={open} role={role} therapists={therapists} rooms={rooms}
-        svcName={svcName(open.serviceId)} therapistName={therapistName(open.therapistId)} roomCode={roomOf(open.roomId)?.code ?? ''} onClose={() => setSelected(null)} />}
+        svcName={svcName(open.serviceId)} therapistName={therapistName(open.therapistId)} roomCode={roomCodeOf(open.roomId)} onClose={() => setSelected(null)} />}
 
       {dropError && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={dropError} /></p>}
       {pending && (
@@ -155,7 +158,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
                     <span className="tnum font-semibold">{formatTime(r.startsAt)}–{formatTime(r.endsAt)}</span>
                     <span className="block truncate">{svcName(r.serviceId)}</span>
                     <span className="block truncate">{r.customerDisplayName}</span>
-                    <span className="block truncate">{therapistName(r.therapistId)} · {roomOf(r.roomId)?.code}</span>
+                    <span className="block truncate">{therapistName(r.therapistId)} · {roomCodeOf(r.roomId)}</span>
                     <span className="block truncate font-medium">{t(`status.${r.status}`)}</span>
                   </Card>
                 );
