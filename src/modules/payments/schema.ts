@@ -30,15 +30,15 @@ export const RecordPaymentInput = z.object({
 export type RecordPaymentInput = z.input<typeof RecordPaymentInput>;
 
 export const AdjustChargeInput = z.object({
-  bookingId: z.uuid(), discount: text, fee: text, reason: z.string().trim().min(1).max(300), expectedVersion: z.number().int().positive(),
+  bookingId: z.uuid(), discount: text, fee: text, reason: z.string().trim().max(300), expectedVersion: z.number().int().positive(),
 });
 export type AdjustChargeInput = z.input<typeof AdjustChargeInput>;
 
 export const VerifyInput = z.uuid();
-export const VoidInput = z.object({ id: z.uuid(), reason: z.string().trim().min(1).max(300) });
+export const VoidInput = z.object({ id: z.uuid(), reason: z.string().trim().max(300) });
 export type VoidInput = z.input<typeof VoidInput>;
 export const RefundInput = z.object({
-  paymentId: z.uuid(), amount: z.string().trim().min(1).max(20), reason: z.string().trim().min(1).max(300), idempotencyKey: z.string().min(8).max(100),
+  paymentId: z.uuid(), amount: z.string().trim().min(1).max(20), reason: z.string().trim().max(300), idempotencyKey: z.string().min(8).max(100),
 });
 export type RefundInput = z.input<typeof RefundInput>;
 export const CloseCashInput = z.object({ day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), counted: z.string().trim().min(1).max(20), note: text });

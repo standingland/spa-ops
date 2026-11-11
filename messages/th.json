@@ -13,7 +13,8 @@
     "today": "วันนี้",
     "adminRooms": "จัดการห้อง",
     "notifications": "ข้อความถึงลูกค้า",
-    "settings": "ตั้งค่า"
+    "settings": "ตั้งค่า",
+    "payments": "การเงิน"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -424,5 +425,44 @@
       "overpaid": "ชำระเกิน",
       "refunded": "คืนเงินแล้ว"
     }
+  },
+  "reconciliation": {
+    "title": "ตรวจสอบรายรับรายวัน",
+    "day": "วันที่",
+    "byMethod": "สรุปตามวิธีชำระ",
+    "none": "ไม่มีรายการ",
+    "method": "วิธีชำระ",
+    "recorded": "บันทึกแล้ว",
+    "verified": "ยืนยันแล้ว",
+    "awaiting": "รอตรวจสอบ",
+    "refunded": "คืนเงิน",
+    "voided": "ยกเลิกรายการ",
+    "total": "รวม",
+    "entries": "รายการของวัน",
+    "payment": "รับชำระ",
+    "refund": "คืนเงิน",
+    "verify": "ยืนยัน",
+    "void": "ยกเลิกรายการ",
+    "reason": "เหตุผล",
+    "refundAmount": "จำนวนที่คืน (บาท)",
+    "state": {
+      "verified": "ยืนยันแล้ว",
+      "unverified": "รอตรวจสอบ",
+      "voided": "ยกเลิกแล้ว"
+    },
+    "cash": "ปิดยอดเงินสด",
+    "counted": "นับได้",
+    "expected": "ควรมี",
+    "difference": "ส่วนต่าง",
+    "note": "หมายเหตุ",
+    "closeDay": "ปิดยอดวันนี้",
+    "cashChanged": "เงินสดเปลี่ยนหลังปิดยอด: ปัจจุบันควรมี {now}",
+    "methods": "วิธีชำระเงิน",
+    "methodCode": "รหัส (a-z, 0-9, _)",
+    "methodName": "ชื่อ",
+    "needsVerification": "ต้องตรวจสอบก่อน",
+    "addMethod": "เพิ่มวิธีชำระ",
+    "activate": "เปิดใช้",
+    "deactivate": "ปิดใช้"
   }
 }

@@ -13,7 +13,8 @@
     "today": "Today",
     "adminRooms": "Manage rooms",
     "notifications": "Customer messages",
-    "settings": "Settings"
+    "settings": "Settings",
+    "payments": "Payments"
   },
   "login": {
     "title": "Sign in",
@@ -424,5 +425,44 @@
       "overpaid": "Overpaid",
       "refunded": "Refunded"
     }
+  },
+  "reconciliation": {
+    "title": "Daily reconciliation",
+    "day": "Day",
+    "byMethod": "Totals by method",
+    "none": "Nothing recorded",
+    "method": "Method",
+    "recorded": "Recorded",
+    "verified": "Verified",
+    "awaiting": "Awaiting verification",
+    "refunded": "Refunded",
+    "voided": "Voided",
+    "total": "Total",
+    "entries": "Entries of the day",
+    "payment": "Payment",
+    "refund": "Refund",
+    "verify": "Verify",
+    "void": "Void",
+    "reason": "Reason",
+    "refundAmount": "Refund amount (baht)",
+    "state": {
+      "verified": "Verified",
+      "unverified": "Awaiting verification",
+      "voided": "Voided"
+    },
+    "cash": "Close the cash drawer",
+    "counted": "Counted",
+    "expected": "Expected",
+    "difference": "Difference",
+    "note": "Note",
+    "closeDay": "Close the day",
+    "cashChanged": "Cash changed after closing: it should now be {now}",
+    "methods": "Payment methods",
+    "methodCode": "Code (a-z, 0-9, _)",
+    "methodName": "Name",
+    "needsVerification": "Needs verification",
+    "addMethod": "Add method",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
   }
 }
