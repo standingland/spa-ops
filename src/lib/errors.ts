@@ -21,5 +21,5 @@ export function codeFromError(err: { message?: string; code?: string } | null | 
 
 /** Like errorMessageKey, but also knows the client-side validation codes. */
 export function uiErrorKey(code: string): string {
-  return code === 'INVALID_INPUT' || code === 'DUPLICATE' ? `errors.${code}` : errorMessageKey(code);
+  return code === 'INVALID_INPUT' || code === 'DUPLICATE' || code === 'OVERLAP' ? `errors.${code}` : errorMessageKey(code);
 }

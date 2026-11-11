@@ -67,7 +67,8 @@
     "CONFLICTS_WITH_BOOKINGS": "Unfinished bookings still use this resource",
     "UNKNOWN": "Something unexpected went wrong",
     "INVALID_INPUT": "Invalid input",
-    "DUPLICATE": "That value already exists"
+    "DUPLICATE": "That value already exists",
+    "OVERLAP": "This time overlaps an existing entry"
   },
   "rooms": {
     "title": "Rooms and beds",
@@ -120,5 +121,64 @@
     "categories": "Allowed room categories (none = any)",
     "anyCategory": "Any room category",
     "invalid": "Invalid input"
+  },
+  "staff": {
+    "title": "Staff accounts",
+    "add": "Add staff member",
+    "email": "Email",
+    "password": "Password (at least 8 characters)",
+    "role": "Role",
+    "displayName": "Display name",
+    "status": "Status",
+    "roles": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "receptionist": "Receptionist",
+      "therapist": "Therapist"
+    }
+  },
+  "therapists": {
+    "title": "Therapists and shifts",
+    "add": "Add therapist",
+    "edit": "Edit therapist",
+    "name": "Name",
+    "employment": "Employment type",
+    "employee": "Employee",
+    "freelance": "Freelance",
+    "linkedStaff": "Linked staff account",
+    "services": "Services performed",
+    "filterType": "Employment type",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "thisWeek": "This week",
+    "copyWeek": "Copy shifts from previous week",
+    "addShift": "Add shift",
+    "editShift": "Edit shift",
+    "deleteShift": "Delete shift",
+    "shiftStart": "Shift start",
+    "shiftEnd": "Shift end",
+    "therapist": "Therapist",
+    "addTimeOff": "Add leave/break",
+    "timeOffKind": "Kind",
+    "timeOffNote": "Note",
+    "deleteTimeOff": "Delete leave/break",
+    "timeOffStart": "Start",
+    "timeOffEnd": "End",
+    "kind": {
+      "break": "Break",
+      "leave": "Leave",
+      "absence": "Absence"
+    },
+    "copied": "Copied",
+    "linkNone": "Not linked",
+    "weekdays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ]
   }
 }

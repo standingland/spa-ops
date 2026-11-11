@@ -40,3 +40,9 @@ export function parseRange(range: string): { start: string; end: string } {
   };
   return { start: iso(a), end: iso(b) };
 }
+
+/** The Monday (YYYY-MM-DD) of the Bangkok week containing the given day. */
+export function mondayOf(day: string): string {
+  const dow = new Date(`${day}T12:00:00+07:00`).getUTCDay(); // 12:00 Bangkok is 05:00Z, same UTC weekday
+  return addDays(day, -((dow + 6) % 7));
+}
