@@ -303,5 +303,16 @@
     "notes": "Room notes",
     "timeline": "Room timeline",
     "none": "—"
+  },
+  "exceptions": {
+    "forceHint": "Unfinished bookings overlap this. Record it anyway and queue those bookings for reassignment?",
+    "forceConfirm": "Record anyway and queue the affected bookings",
+    "forced": "Recorded: {count} booking(s) queued for reassignment",
+    "reassignTitle": "Reassign the affected booking",
+    "reassignOption": "Use this option",
+    "noAlternatives": "No therapist and room are free at the original time",
+    "openCalendar": "Open the calendar to move it manually",
+    "resolve": "Resolved",
+    "close": "Close"
   }
 }

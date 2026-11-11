@@ -9,11 +9,12 @@ export type Names = { services: Record<string, string>; therapists: Record<strin
 export type OpenReport = { id: string; roomId: string; note: string };
 
 /** Everything that needs a person: ordered by the model (priority, then age). */
-export function AttentionList({ items, rows, names, reports, shared, onOpen, renderExtra }: {
+export function AttentionList({ items, rows, names, reports, shared, onOpen, onResolve }: {
   items: Attention[]; rows: BoardRow[]; names: Names; reports: OpenReport[]; shared: boolean;
-  onOpen?: (item: Attention) => void; renderExtra?: (item: Attention) => React.ReactNode;
+  onOpen?: (item: Attention) => void; onResolve?: (reportId: string) => void;
 }) {
   const t = useTranslations('today');
+  const te = useTranslations();
   if (items.length === 0) return <p className="text-sm text-stone-dark">{t('nothing')}</p>;
   return (
     <ul className="flex flex-col gap-2">
@@ -33,8 +34,12 @@ export function AttentionList({ items, rows, names, reports, shared, onOpen, ren
               {room && <span className="tnum">{room}</span>}
               <span className="tnum text-stone-dark">{formatTime(a.since)}</span>
             </div>
-            {roomReports.map((rep) => <div key={rep.id} className="mt-1 text-stone-dark">{rep.note}</div>)}
-            {renderExtra?.(a)}
+            {roomReports.map((rep) => (
+              <div key={rep.id} className="mt-1 flex items-center gap-3 text-stone-dark">
+                <span>{rep.note}</span>
+                {onResolve && <button data-testid="report-resolve" className="underline" onClick={(e) => { e.stopPropagation(); onResolve(rep.id); }}>{te('exceptions.resolve')}</button>}
+              </div>
+            ))}
           </li>
         );
       })}

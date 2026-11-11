@@ -22,6 +22,8 @@ export type TodayModel = {
   awaitingCleaning: RoomState[]; cancellations: BoardRow[];
   therapists: { therapistId: string; state: 'in_treatment' | 'on_break' | 'free' }[];
   attention: Attention[];
+  /** The bookings the attention items refer to (they may start on another day). */
+  attentionRows: BoardRow[];
 };
 
 const ms = (iso: string) => Date.parse(iso);
@@ -89,5 +91,6 @@ export function buildToday(input: {
       ...statusCounts,
     },
     arrivals, waiting, inTreatment, endingSoon, awaitingCleaning, cancellations, therapists, attention,
+    attentionRows: input.rows.filter((r) => attention.some((x) => x.bookingId === r.bookingId)),
   };
 }

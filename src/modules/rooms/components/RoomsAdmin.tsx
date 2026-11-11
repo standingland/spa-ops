@@ -7,6 +7,7 @@ import { uiErrorKey } from '@/lib/errors';
 import { formatTime, bangkokDay } from '@/lib/time';
 import { addPosition, addRoomBlock, removeRoomBlock, reorderRooms, saveRoom, setPositionActive, setRoomActive } from '../actions';
 import { saveCategory } from '@/modules/catalog/actions';
+import { forceRoomBlock } from '@/modules/operations/actions';
 
 export type RoomRow = {
   id: string; code: string; display_name: string; category_id: string; floor: string | null; zone: string | null;
@@ -38,12 +39,15 @@ export function RoomsAdmin({ rooms, categories, blocks }: { rooms: RoomRow[]; ca
     return x ? (locale === 'en' && x.name_en ? x.name_en : x.name_th) : '';
   };
 
-  async function run(p: Promise<{ ok: boolean; code?: string }>) {
+  async function runFull<R extends { ok: boolean; code?: string }>(p: Promise<R>): Promise<R> {
     setError(null);
     const r = await p;
     if (!r.ok) setError(te(uiErrorKey(r.code ?? 'UNKNOWN')));
     else start(() => router.refresh());
-    return r.ok;
+    return r;
+  }
+  async function run(p: Promise<{ ok: boolean; code?: string }>) {
+    return (await runFull(p)).ok;
   }
 
   const visible = useMemo(() => rooms.filter((r) =>
@@ -122,7 +126,7 @@ export function RoomsAdmin({ rooms, categories, blocks }: { rooms: RoomRow[]; ca
                     ) : <button data-testid="room-activate" onClick={() => run(setRoomActive(r.id, true))} className="underline">{c('activate')}</button>}
                   </span>
                 </div>
-                <PositionsAndBlocks room={r} blocks={blocks.filter((b) => b.room_id === r.id)} run={run} />
+                <PositionsAndBlocks room={r} blocks={blocks.filter((b) => b.room_id === r.id)} run={run} runFull={runFull} />
               </li>
             ))}
           </ul>
@@ -134,9 +138,16 @@ export function RoomsAdmin({ rooms, categories, blocks }: { rooms: RoomRow[]; ca
   );
 }
 
-function PositionsAndBlocks({ room, blocks, run }: { room: RoomRow; blocks: BlockRow[]; run: (p: Promise<{ ok: boolean; code?: string }>) => Promise<boolean> }) {
+type RunFull = <R extends { ok: boolean; code?: string }>(p: Promise<R>) => Promise<R>;
+
+function PositionsAndBlocks({ room, blocks, run, runFull }: {
+  room: RoomRow; blocks: BlockRow[]; run: (p: Promise<{ ok: boolean; code?: string }>) => Promise<boolean>; runFull: RunFull;
+}) {
   const t = useTranslations('rooms');
   const c = useTranslations('common');
+  const te = useTranslations();
+  const [force, setForce] = useState<Parameters<typeof forceRoomBlock>[0] | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [label, setLabel] = useState('');
   const [b, setB] = useState({ start: '', end: '', kind: 'maintenance' as BlockRow['kind'], note: '' });
   const positions = [...room.room_positions].sort((x, y) => x.label.localeCompare(y.label));
@@ -174,11 +185,28 @@ function PositionsAndBlocks({ room, blocks, run }: { room: RoomRow; blocks: Bloc
           </label>
           <label className="flex flex-col">{t('blockNote')}<input value={b.note} onChange={(e) => setB({ ...b, note: e.target.value })} className={field} /></label>
           <button className="underline" data-testid="block-add"
-            onClick={() => run(addRoomBlock({
-              roomId: room.id, kind: b.kind, note: b.note,
-              start: b.start ? new Date(`${b.start}:00+07:00`).toISOString() : '', end: b.end ? new Date(`${b.end}:00+07:00`).toISOString() : '',
-            }))}>{t('addBlock')}</button>
+            onClick={async () => {
+              setNotice(null);
+              const input = {
+                roomId: room.id, kind: b.kind, note: b.note,
+                start: b.start ? new Date(`${b.start}:00+07:00`).toISOString() : '', end: b.end ? new Date(`${b.end}:00+07:00`).toISOString() : '',
+              };
+              const r = await runFull(addRoomBlock(input));
+              if (!r.ok && r.code === 'CONFLICTS_WITH_BOOKINGS') setForce(input);
+              else setForce(null);
+            }}>{t('addBlock')}</button>
         </div>
+        {force && (
+          <div className="flex flex-wrap items-center gap-3 rounded border border-clay p-2">
+            <span>{te('exceptions.forceHint')}</span>
+            <button data-testid="force-confirm" className="rounded bg-clay px-3 py-1.5 text-white"
+              onClick={async () => {
+                const r = await runFull(forceRoomBlock(force));
+                if (r.ok) { setNotice(te('exceptions.forced', { count: r.affected.length })); setForce(null); }
+              }}>{te('exceptions.forceConfirm')}</button>
+          </div>
+        )}
+        {notice && <p role="status" className="rounded border border-sage px-2 py-1">{notice}</p>}
       </div>
     </details>
   );

@@ -6,6 +6,8 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { uiErrorKey } from '@/lib/errors';
 import { addDays, bangkokDay, formatTime } from '@/lib/time';
 import { copyWeekShifts, deleteShift, deleteTimeOff, saveShift, saveTherapist, saveTimeOff, setTherapistActive } from '../actions';
+import { recordAbsence } from '@/modules/operations/actions';
+import type { AbsenceInput } from '@/modules/operations/schema';
 
 export type TherapistRow = {
   id: string; display_name: string; employment_type: 'employee' | 'freelance'; active: boolean; staff_user_id: string | null;
@@ -30,6 +32,8 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [force, setForce] = useState<AbsenceInput | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [type, setType] = useState('');
   const [panel, setPanel] = useState<null | { kind: 'therapist'; row: TherapistRow | null } | { kind: 'shift'; row: ShiftRow | null } | { kind: 'timeoff'; row: TimeOffRow | null }>(null);
@@ -39,12 +43,15 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
   const dayLabel = (d: string, i: number) => `${weekdays[i]} ${d.slice(8)}/${d.slice(5, 7)}`;
   const svcName = (s: ServiceOpt) => (locale === 'en' && s.name_en ? s.name_en : s.name_th);
 
-  async function run(p: Promise<{ ok: boolean; code?: string }>) {
+  async function runFull<R extends { ok: boolean; code?: string }>(p: Promise<R>): Promise<R> {
     setError(null);
     const r = await p;
     if (!r.ok) setError(te(uiErrorKey(r.code ?? 'UNKNOWN')));
     else start(() => router.refresh());
-    return r.ok;
+    return r;
+  }
+  async function run(p: Promise<{ ok: boolean; code?: string }>) {
+    return (await runFull(p)).ok;
   }
 
   const visible = useMemo(() => therapists.filter((x) =>
@@ -89,9 +96,26 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
       )}
       {panel?.kind === 'timeoff' && (
         <TimeOffForm key={panel.row?.id ?? 'new'} row={panel.row} therapists={therapists} defaultDay={monday}
-          onCancel={() => setPanel(null)} onSave={async (i) => { if (await run(saveTimeOff(i))) setPanel(null); }}
+          onCancel={() => { setPanel(null); setForce(null); }}
+          onSave={async (i) => {
+            setNotice(null);
+            const r = await runFull(saveTimeOff(i));
+            if (r.ok) { setPanel(null); setForce(null); return; }
+            if (r.code === 'CONFLICTS_WITH_BOOKINGS' && !i.id) setForce({ therapistId: i.therapistId, start: i.start, end: i.end, kind: i.kind, note: i.note });
+          }}
           onDelete={panel.row ? async () => { if (await run(deleteTimeOff(panel.row!.id))) setPanel(null); } : undefined} />
       )}
+      {panel?.kind === 'timeoff' && force && (
+        <div className="flex flex-wrap items-center gap-3 rounded border border-clay bg-white p-3 text-sm">
+          <span>{te('exceptions.forceHint')}</span>
+          <button data-testid="force-confirm" className="rounded bg-clay px-3 py-1.5 text-white"
+            onClick={async () => {
+              const r = await runFull(recordAbsence(force));
+              if (r.ok) { setNotice(te('exceptions.forced', { count: r.affected.length })); setForce(null); setPanel(null); }
+            }}>{te('exceptions.forceConfirm')}</button>
+        </div>
+      )}
+      {notice && <p role="status" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
 
       {visible.length === 0 && <p className="text-stone-dark">{c('empty')}</p>}
       <div className="overflow-x-auto">

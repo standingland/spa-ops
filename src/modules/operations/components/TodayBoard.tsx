@@ -6,10 +6,11 @@ import { useRouter } from '@/i18n/navigation';
 import { uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
 import type { BoardRow } from '@/modules/booking/actions';
-import { markRoomReady } from '../actions';
+import { markRoomReady, resolveRoomReport } from '../actions';
 import type { RoomStatus, TodayModel } from '../today';
 import { AttentionList, type Names, type OpenReport } from './AttentionList';
 import { BookingActions } from './BookingActions';
+import { ReassignDialog } from './ReassignDialog';
 import { ReportForm } from './ReportForm';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
@@ -46,6 +47,7 @@ export function TodayBoard({ model, role, names, reports }: { model: TodayModel;
   const [shared, setShared] = useShared();
   const [error, setError] = useState<string | null>(null);
   const [reportRoom, setReportRoom] = useState<string | null>(null);
+  const [reassign, setReassign] = useState<string | null>(null);
   const all = [...model.arrivals, ...model.waiting, ...model.inTreatment];
 
   const who = (r: BoardRow) => (shared ? names.services[r.serviceId] : r.customerDisplayName);
@@ -89,7 +91,17 @@ export function TodayBoard({ model, role, names, reports }: { model: TodayModel;
       </section>
 
       {section(t('attention'), (
-        <AttentionList items={model.attention} rows={all} names={names} reports={reports} shared={shared} />
+        <>
+          <AttentionList items={model.attention} rows={[...all, ...model.attentionRows]} names={names} reports={reports} shared={shared}
+            onOpen={role === 'therapist' ? undefined : (a) => a.bookingId && setReassign(a.bookingId)}
+            onResolve={role === 'therapist' ? undefined : async (id) => {
+              setError(null);
+              const r = await resolveRoomReport(id);
+              if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+              router.refresh();
+            }} />
+          {reassign && <ReassignDialog bookingId={reassign} names={names} onClose={() => setReassign(null)} />}
+        </>
       ))}
 
       {section(t('arrivals'), model.arrivals.length === 0 ? empty : (
