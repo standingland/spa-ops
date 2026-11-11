@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatAmount, formatTHB } from '@/lib/money';
 import { formatTime } from '@/lib/time';
 import { useLiveRefresh } from '@/lib/realtime';
@@ -44,7 +45,7 @@ export function Reconciliation({ day, summary, entries, closing }: {
       : action.kind === 'void' ? await voidPayment({ id, reason })
       : await refundPayment({ paymentId: id, amount, reason, idempotencyKey: action.key });
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     setAction(null);
     router.refresh();
   }
@@ -53,7 +54,7 @@ export function Reconciliation({ day, summary, entries, closing }: {
     setBusy(true); setError(null);
     const r = await closeCashDay({ day, counted, note });
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
 
@@ -66,7 +67,7 @@ export function Reconciliation({ day, summary, entries, closing }: {
             onChange={(e) => e.target.value && router.push(`/payments?day=${e.target.value}`)} />
         </label>
       </div>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg">{t('byMethod')}</h2>

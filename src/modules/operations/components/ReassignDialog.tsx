@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { bangkokDay, formatTime } from '@/lib/time';
 import { moveBooking, type BoardRow } from '@/modules/booking/actions';
 import type { Candidate } from '@/modules/booking/allocation';
@@ -25,7 +26,7 @@ export function ReassignDialog({ bookingId, names, onClose }: { bookingId: strin
       const r = await suggestReassign(bookingId);
       if (!live) return;
       if (r.ok) setData({ booking: r.booking, candidates: r.candidates });
-      else setError(te(uiErrorKey(r.code)));
+      else setError(errorText(te(uiErrorKey(r.code)), r));
     })();
     return () => { live = false; };
   }, [bookingId, te]);
@@ -37,7 +38,7 @@ export function ReassignDialog({ bookingId, names, onClose }: { bookingId: strin
       bookingId, start: data.booking.startsAt, therapistId: c.therapistId, positionId: c.positionId, expectedVersion: data.booking.version,
     });
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     onClose();
     router.refresh();
   }
@@ -49,7 +50,7 @@ export function ReassignDialog({ bookingId, names, onClose }: { bookingId: strin
         <button className="ml-auto text-sm underline" onClick={onClose}>{t('close')}</button>
       </div>
       {data && <p className="tnum text-sm">{data.booking.customerDisplayName} · {bangkokDay(data.booking.startsAt)} {formatTime(data.booking.startsAt)}–{formatTime(data.booking.endsAt)}</p>}
-      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       {data && data.candidates.length === 0 && (
         <p className="text-sm">{t('noAlternatives')}{' '}
           <Link className="underline" href={`/calendar?day=${bangkokDay(data.booking.startsAt)}`}>{t('openCalendar')}</Link></p>

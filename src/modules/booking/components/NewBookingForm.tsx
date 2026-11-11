@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { bangkokDay, formatTime } from '@/lib/time';
 import { CustomerPicker } from '@/modules/customers/components/CustomerPicker';
 import type { CustomerHit } from '@/modules/customers/actions';
@@ -70,7 +71,7 @@ export function NewBookingForm({ therapists, rooms, services, view, onClose }: {
     });
     inFlight.current = false;
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     onClose();
     router.push(`/calendar?day=${bangkokDay(r.start)}&view=${view}`);
     router.refresh();
@@ -138,7 +139,7 @@ export function NewBookingForm({ therapists, rooms, services, view, onClose }: {
         <label className="flex flex-col text-sm">{t('note')}<input value={note} onChange={(e) => setNote(e.target.value)} className={field} /></label>
       </div>
 
-      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       <div>
         <button type="button" disabled={busy} onClick={confirm} data-testid="confirm-booking"
           className="rounded bg-charcoal px-4 py-2 text-sm text-ivory disabled:opacity-60">{busy ? t('saving') : t('confirm')}</button>

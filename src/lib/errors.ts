@@ -24,3 +24,12 @@ export function codeFromError(err: { message?: string; code?: string } | null | 
 export function uiErrorKey(code: string): string {
   return code === 'INVALID_INPUT' || code === 'DUPLICATE' || code === 'OVERLAP' ? `errors.${code}` : errorMessageKey(code);
 }
+
+/** Separates the translated message from a reference code inside one string (see ErrorText). */
+export const REF_MARK = '\u2063';
+
+/** The message to show for a failed action: the translated text plus its reference code when the failure has one. */
+export function errorText(message: string, result: object): string {
+  const ref = (result as { ref?: unknown }).ref;
+  return typeof ref === 'string' ? `${message}${REF_MARK}${ref}` : message;
+}

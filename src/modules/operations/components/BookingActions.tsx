@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { setBookingStatus, type BoardRow } from '@/modules/booking/actions';
 import type { BookingStatus } from '@/modules/booking/schema';
 
@@ -27,7 +27,7 @@ export function BookingActions({ row, role, onError }: { row: BoardRow; role: Ro
     setBusy(true); onError(null);
     const r = await setBookingStatus({ bookingId: row.bookingId, to, expectedVersion: row.version });
     setBusy(false);
-    if (!r.ok) { onError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { onError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
 

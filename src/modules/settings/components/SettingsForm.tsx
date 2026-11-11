@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { saveSetting } from '../actions';
 import { SETTING_GROUPS, SETTING_KEYS, SETTING_META, settingId, type SettingKey, type Settings } from '../schema';
 
@@ -21,7 +22,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
     setNotice(null); setError(null);
     const r = await saveSetting(key, value);
     if (!r.ok) {
-      setError(te(uiErrorKey(r.code)));
+      setError(errorText(te(uiErrorKey(r.code)), r));
       setDraft((d) => (typeof saved[key] === 'number' ? { ...d, [key]: String(saved[key]) } : d));
       return;
     }
@@ -32,7 +33,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <h1 className="text-2xl">{t('title')}</h1>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       {notice && <p role="status" data-testid="setting-saved" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
       {SETTING_GROUPS.map((g) => (
         <fieldset key={g} className="flex flex-col gap-3 rounded border border-stone bg-white p-4">

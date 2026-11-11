@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useSyncExternalStore } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
 import { useLiveRefresh } from '@/lib/realtime';
 import type { BoardRow } from '@/modules/booking/actions';
@@ -72,7 +73,7 @@ export function TodayBoard({ model, role, names, reports, pending = [], methods 
   async function ready(roomId: string) {
     setError(null);
     const r = await markRoomReady(roomId);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
 
@@ -91,7 +92,7 @@ export function TodayBoard({ model, role, names, reports, pending = [], methods 
           className="ml-auto rounded border border-charcoal px-3 py-1.5 text-sm">{shared ? t('sharedOn') : t('sharedOff')}</button>
       </div>
 
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
 
       <section aria-label={t('roomStatus')} className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
         <Stat label={t('reservations')} value={model.counts.reservations} id="reservations" />
@@ -107,7 +108,7 @@ export function TodayBoard({ model, role, names, reports, pending = [], methods 
             onResolve={role === 'therapist' ? undefined : async (id) => {
               setError(null);
               const r = await resolveRoomReport(id);
-              if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+              if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
               router.refresh();
             }} />
           {reassign && <ReassignDialog bookingId={reassign} names={names} onClose={() => setReassign(null)} />}

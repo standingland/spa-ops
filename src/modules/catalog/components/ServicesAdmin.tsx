@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatTHB } from '@/lib/money';
 import { saveService, setServiceActive } from '../actions';
 
@@ -32,7 +33,7 @@ export function ServicesAdmin({ services, categories }: { services: ServiceRow[]
   async function run(p: Promise<{ ok: boolean; code?: string }>) {
     setError(null);
     const r = await p;
-    if (!r.ok) setError(te(uiErrorKey(r.code ?? 'UNKNOWN')));
+    if (!r.ok) setError(errorText(te(uiErrorKey(r.code ?? 'UNKNOWN')), r));
     else start(() => router.refresh());
     return r.ok;
   }
@@ -43,7 +44,7 @@ export function ServicesAdmin({ services, categories }: { services: ServiceRow[]
         <h1 className="text-2xl">{t('title')}</h1>
         <button onClick={() => setEditing('new')} data-testid="service-add" className="ml-auto rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{t('add')}</button>
       </div>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       {editing && (
         <ServiceForm key={editing === 'new' ? 'new' : editing.id} service={editing === 'new' ? null : editing} categories={categories} catName={catName}
           onCancel={() => setEditing(null)} onSave={async (i) => { if (await run(saveService(i))) setEditing(null); }} />

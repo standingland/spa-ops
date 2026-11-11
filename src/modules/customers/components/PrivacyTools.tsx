@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { anonymiseCustomer } from '../actions';
 
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
@@ -24,7 +25,7 @@ export function PrivacyTools({ customerId, displayName, isOwner, anonymised }: {
     setBusy(true); setError(null);
     const r = await anonymiseCustomer({ id: customerId, reason, confirmText });
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     setOpen(false);
     router.refresh();
   }
@@ -47,7 +48,7 @@ export function PrivacyTools({ customerId, displayName, isOwner, anonymised }: {
             <input data-testid="anonymise-reason" value={reason} onChange={(e) => setReason(e.target.value)} className={field} /></label>
           <label className="flex flex-col text-sm">{t('typeName', { name: displayName })}
             <input data-testid="anonymise-confirm-text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} className={field} autoComplete="off" /></label>
-          {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay">{error}</p>}
+          {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
           <div className="flex gap-3">
             <button type="submit" disabled={busy} data-testid="anonymise-submit" className="rounded bg-clay px-3 py-1.5 text-sm text-white">{t('anonymiseNow')}</button>
             <button type="button" onClick={() => setOpen(false)} className="text-sm underline">{te('common.cancel')}</button>

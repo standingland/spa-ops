@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useLocale, useTranslations } from 'next-intl';
 import { formatAmount } from '@/lib/money';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { recordPayment } from '../actions';
 import type { PaymentMethod } from '../schema';
 
@@ -30,7 +31,7 @@ export function PaymentDialog({ bookingId, dueSatang, methods, onClose, onDone }
     setBusy(true); setError(null);
     const r = await recordPayment({ bookingId, methodId, amount, reference, note, idempotencyKey: key });
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     onDone();
   }
 
@@ -52,7 +53,7 @@ export function PaymentDialog({ bookingId, dueSatang, methods, onClose, onDone }
       </label>
       {method?.needsVerification && <p className="text-xs text-stone-dark sm:col-span-4">{t('needsVerificationHint')}</p>}
       <p className="text-xs text-stone-dark sm:col-span-4">{t('noCardNumbers')}</p>
-      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay sm:col-span-4">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay sm:col-span-4"><ErrorText text={error} /></p>}
       <div className="flex gap-3 sm:col-span-4">
         <button type="submit" disabled={busy} data-testid="pay-submit" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{t('submit')}</button>
         <button type="button" onClick={onClose} className="text-sm underline">{te('common.cancel')}</button>

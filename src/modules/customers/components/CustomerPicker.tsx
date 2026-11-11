@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { createCustomer, searchCustomers, type CustomerHit } from '../actions';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { Link } from '@/i18n/navigation';
+import { ErrorText } from '@/components/ErrorText';
 
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 
@@ -56,11 +57,11 @@ export function CustomerPicker({ selected, onSelect }: { selected: CustomerHit |
               onClick={async () => {
                 setError(null); setExistingId(null);
                 const r = await createCustomer({ displayName: name, phone });
-                if (r.ok) { onSelect(r.customer); setName(''); setPhone(''); } else { setError(te(uiErrorKey(r.code))); setExistingId(r.existingId ?? null); }
+                if (r.ok) { onSelect(r.customer); setName(''); setPhone(''); } else { setError(errorText(te(uiErrorKey(r.code)), r)); setExistingId(r.existingId ?? null); }
               }}>{t('saveCustomer')}</button>
             {error && (
               <p role="alert" className="w-full text-sm text-clay">
-                {error}
+                <ErrorText text={error} />
                 {existingId && <> <Link href={`/customers/${existingId}`} data-testid="duplicate-link" className="underline">{te('customers.openExisting')}</Link></>}
               </p>
             )}

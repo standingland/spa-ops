@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { savePaymentMethod, setPaymentMethodActive, type MethodRow } from '../actions';
 
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
@@ -23,28 +24,28 @@ export function MethodsAdmin({ methods }: { methods: MethodRow[] }) {
     e.preventDefault();
     setError(null);
     const r = await savePaymentMethod({ code, nameTh, needsVerification: needs });
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     setCode(''); setNameTh('');
     router.refresh();
   }
   async function toggle(m: MethodRow) {
     setError(null);
     const r = await setPaymentMethodActive(m.id, !m.active);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
   async function rename(m: MethodRow, name: string) {
     if (!name.trim() || name === m.nameTh) return;
     setError(null);
     const r = await savePaymentMethod({ id: m.id, code: m.code, nameTh: name, nameEn: m.nameEn ?? undefined, needsVerification: m.needsVerification });
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
 
   return (
     <section className="flex flex-col gap-3" aria-label={t('methods')}>
       <h2 className="text-lg">{t('methods')}</h2>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       <ul className="flex flex-col gap-2">
         {methods.map((m) => (
           <li key={m.id} data-testid="method-row" data-code={m.code} className="flex flex-wrap items-center gap-3 rounded border border-stone bg-white p-3 text-sm">

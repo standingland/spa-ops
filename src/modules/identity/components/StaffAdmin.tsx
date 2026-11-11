@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { createStaff, setStaffActive, setStaffRole, type StaffListRow } from '../actions';
 import { ROLES } from '../schema';
 
@@ -22,7 +23,7 @@ export function StaffAdmin({ staff, me }: { staff: StaffListRow[]; me: string })
   async function run(p: Promise<{ ok: boolean; code?: string }>) {
     setError(null);
     const r = await p;
-    if (!r.ok) setError(te(uiErrorKey(r.code ?? 'UNKNOWN')));
+    if (!r.ok) setError(errorText(te(uiErrorKey(r.code ?? 'UNKNOWN')), r));
     else start(() => router.refresh());
     return r.ok;
   }
@@ -33,7 +34,7 @@ export function StaffAdmin({ staff, me }: { staff: StaffListRow[]; me: string })
         <h1 className="text-2xl">{t('title')}</h1>
         <button onClick={() => setAdding(true)} data-testid="staff-add" className="ml-auto rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{t('add')}</button>
       </div>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       {adding && (
         <form className="grid gap-3 rounded border border-stone bg-white p-4 sm:grid-cols-2" aria-label={t('add')}
           onSubmit={async (e) => {

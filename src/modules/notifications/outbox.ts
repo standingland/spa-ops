@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { log } from '@/lib/log';
 import type { OutboxPort, OutboxRow, Sender } from './dispatch';
 
 /** The only notifications file that uses the service-key client. */
@@ -25,6 +26,6 @@ export function supabaseOutbox(): OutboxPort {
 /** Stand-in for a real provider: one structured log line, recipient masked to its last two characters. */
 export const logSender: Sender = {
   async send(m) {
-    console.log(JSON.stringify({ event: 'notification.send', channel: m.channel, to: '***' + m.to.slice(-2), length: m.text.length }));
+    log('info', 'notification.send', { channel: m.channel, length: m.text.length });
   },
 };

@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatTime, bangkokDay } from '@/lib/time';
 import { addPosition, addRoomBlock, removeRoomBlock, reorderRooms, saveRoom, setPositionActive, setRoomActive } from '../actions';
 import { saveCategory } from '@/modules/catalog/actions';
@@ -42,7 +43,7 @@ export function RoomsAdmin({ rooms, categories, blocks }: { rooms: RoomRow[]; ca
   async function runFull<R extends { ok: boolean; code?: string }>(p: Promise<R>): Promise<R> {
     setError(null);
     const r = await p;
-    if (!r.ok) setError(te(uiErrorKey(r.code ?? 'UNKNOWN')));
+    if (!r.ok) setError(errorText(te(uiErrorKey(r.code ?? 'UNKNOWN')), r));
     else start(() => router.refresh());
     return r;
   }
@@ -84,7 +85,7 @@ export function RoomsAdmin({ rooms, categories, blocks }: { rooms: RoomRow[]; ca
         <button onClick={() => setEditing('new')} data-testid="room-add" className="ml-auto rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{t('add')}</button>
       </div>
 
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
 
       {editing && (
         <RoomForm

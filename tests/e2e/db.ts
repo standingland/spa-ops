@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import pg from 'pg';
 import { addDays, bangkokDay, bangkokInstant } from '../../src/lib/time';
 
 try { process.loadEnvFile('.env.local'); } catch { /* env may already be set */ }
@@ -226,4 +227,11 @@ export async function cancelAsReception(bookingId: string) {
   const { data: row } = await admin.from('bookings').select('version').eq('id', bookingId).single();
   const { error } = await client.rpc('set_booking_status', { p_booking_id: bookingId, p_to: 'cancelled', p_expected_version: row!.version });
   if (error) throw new Error(error.message);
+}
+
+/** Runs SQL on the local database (direct connection), for tests that need to break or inspect something. */
+export async function sql(text: string, params: unknown[] = []) {
+  const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' });
+  await client.connect();
+  try { return await client.query(text, params); } finally { await client.end(); }
 }

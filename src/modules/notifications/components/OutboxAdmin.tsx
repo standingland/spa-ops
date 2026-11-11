@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { bangkokDay, formatTime } from '@/lib/time';
 import { retryNotification, type OutboxView } from '../actions';
 
@@ -21,7 +22,7 @@ export function OutboxAdmin({ rows }: { rows: OutboxView[] }) {
   async function retry(id: string) {
     setError(null);
     const r = await retryNotification(id);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     start(() => router.refresh());
   }
 
@@ -35,7 +36,7 @@ export function OutboxAdmin({ rows }: { rows: OutboxView[] }) {
         </select>
       </div>
       <p className="text-sm text-stone-dark">{t('discreet')}</p>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       {visible.length === 0 && <p className="text-stone-dark">{te('common.empty')}</p>}
       <ul className="flex flex-col gap-2">
         {visible.map((r) => (

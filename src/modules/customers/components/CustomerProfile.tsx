@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { bangkokDay, formatTime } from '@/lib/time';
 import { addPrivateNote, saveCustomer } from '../actions';
 import type { CustomerProfile as Profile } from '../schema';
@@ -37,7 +38,7 @@ export function CustomerProfile({ customer: c, role, names }: { customer: Profil
     setBusy(true); setError(null); setNotice(null);
     const r = await saveCustomer({ id: c.id, ...f, preferredTherapistId: f.preferredTherapistId || null });
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     setNotice(t('saved'));
     router.refresh();
   }
@@ -45,7 +46,7 @@ export function CustomerProfile({ customer: c, role, names }: { customer: Profil
     e.preventDefault();
     setError(null);
     const r = await addPrivateNote({ customerId: c.id, body: note });
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     setNote('');
     router.refresh();
   }
@@ -61,7 +62,7 @@ export function CustomerProfile({ customer: c, role, names }: { customer: Profil
         {gone && <span className="rounded bg-ivory px-2 py-0.5 text-xs" data-testid="anonymised-badge">{t('removed')}</span>}
         <Link href="/customers" className="ml-auto text-sm underline">← {t('title')}</Link>
       </div>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       {notice && <p role="status" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label={t('summary')}>

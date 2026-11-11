@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { addDays, bangkokDay, formatTime } from '@/lib/time';
 import { copyWeekShifts, deleteShift, deleteTimeOff, saveShift, saveTherapist, saveTimeOff, setTherapistActive } from '../actions';
 import { recordAbsence } from '@/modules/operations/actions';
@@ -46,7 +47,7 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
   async function runFull<R extends { ok: boolean; code?: string }>(p: Promise<R>): Promise<R> {
     setError(null);
     const r = await p;
-    if (!r.ok) setError(te(uiErrorKey(r.code ?? 'UNKNOWN')));
+    if (!r.ok) setError(errorText(te(uiErrorKey(r.code ?? 'UNKNOWN')), r));
     else start(() => router.refresh());
     return r;
   }
@@ -82,7 +83,7 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
           onClick={() => run(copyWeekShifts(addDays(monday, -7), monday))}>{t('copyWeek')}</button>
       </div>
 
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
 
       {panel?.kind === 'therapist' && (
         <TherapistForm key={panel.row?.id ?? 'new'} row={panel.row} services={services} staff={staff} svcName={svcName}

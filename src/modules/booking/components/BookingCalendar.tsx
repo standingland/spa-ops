@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { useLiveRefresh } from '@/lib/realtime';
 import { addDays, bangkokDay, formatTime } from '@/lib/time';
 import { DndContext, PointerSensor, pointerWithin, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
@@ -90,7 +91,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
     const r = await moveBooking(pending.input);
     setDropBusy(false);
     setPending(null);
-    if (!r.ok) { setDropError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setDropError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
   const posCode = (positionId: string) => rooms.find((x) => x.room_positions.some((p) => p.id === positionId))?.code ?? '';
@@ -118,7 +119,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
       {open && <BookingPanel key={open.bookingId + open.version} row={open} role={role} therapists={therapists} rooms={rooms}
         svcName={svcName(open.serviceId)} therapistName={therapistName(open.therapistId)} roomCode={roomOf(open.roomId)?.code ?? ''} onClose={() => setSelected(null)} />}
 
-      {dropError && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{dropError}</p>}
+      {dropError && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={dropError} /></p>}
       {pending && (
         <div data-testid="drop-bar" className="tnum flex flex-wrap items-center gap-3 rounded border border-charcoal bg-white p-3 text-sm">
           <span>{pending.row.customerDisplayName}: {formatTime(pending.row.startsAt)} → <strong>{formatTime(pending.input.start)}</strong></span>
@@ -218,7 +219,7 @@ function BookingPanel({ row, role, therapists, rooms, svcName, therapistName, ro
     setBusy(true); setError(null);
     const r = await p;
     setBusy(false);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return false; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return false; }
     startTransition(() => router.refresh());
     onClose();
     return true;
@@ -234,7 +235,7 @@ function BookingPanel({ row, role, therapists, rooms, svcName, therapistName, ro
       <p className="tnum text-sm">{svcName} · {formatTime(row.startsAt)}–{formatTime(row.endsAt)} · {therapistName} · {roomCode}</p>
       <TreatmentNote bookingId={row.bookingId} />
       {role !== 'therapist' && <PaymentSection bookingId={row.bookingId} version={row.version} />}
-      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
       <div className="flex flex-wrap gap-2 text-sm">
         {next.filter((s) => s !== 'cancelled').map((s) => (
           <button key={s} disabled={busy} data-testid={`status-${s}`} className="rounded border border-charcoal px-3 py-1"

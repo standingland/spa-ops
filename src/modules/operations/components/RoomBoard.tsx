@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { ErrorText } from '@/components/ErrorText';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { uiErrorKey } from '@/lib/errors';
+import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
 import { useLiveRefresh } from '@/lib/realtime';
 import { markRoomReady } from '../actions';
@@ -61,7 +62,7 @@ export function RoomBoard({ tiles, categories, therapists, initial, showNotes }:
   async function ready(roomId: string) {
     setError(null);
     const r = await markRoomReady(roomId);
-    if (!r.ok) { setError(te(uiErrorKey(r.code))); return; }
+    if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
     router.refresh();
   }
 
@@ -104,7 +105,7 @@ export function RoomBoard({ tiles, categories, therapists, initial, showNotes }:
         ))}
       </section>
 
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay">{error}</p>}
+      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
 
       {groups.map(([zone, list]) => (
         <section key={zone ?? '—'} aria-label={zone ?? t('noZone')}>
