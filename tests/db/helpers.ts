@@ -114,6 +114,19 @@ export async function resetDb(): Promise<Base> {
         `insert into services(name_th, name_en, duration_min, price_satang) values ('นวด 60','Massage 60',60,150000) returning id`)).rows[0].id;
       await c.query('insert into service_room_categories(service_id, room_category_id) values ($1,$2)', [b.svc60, b.cat.standard]);
     }
+    // therapists (Task 4)
+    if (await tableExists(c, 'therapists')) {
+      const th = async (name: string, staff: string | null, i: number) =>
+        (await c.query(
+          `insert into therapists(staff_user_id, display_name, employment_type, sort_order) values ($1,$2,'employee',$3) returning id`,
+          [staff, name, i])).rows[0].id;
+      b.t1 = await th('T1', b.users.therapist, 1);
+      b.t2 = await th('T2', null, 2);
+      for (const t of [b.t1, b.t2]) {
+        await c.query('insert into therapist_services(therapist_id, service_id) values ($1,$2)', [t, b.svc60]);
+        await c.query('insert into therapist_shifts(therapist_id, during) values ($1, tstzrange($2,$3))', [t, bkk('10:00'), bkk('22:00')]);
+      }
+    }
     // SEED-END
     return b;
   });
