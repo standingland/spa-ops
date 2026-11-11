@@ -14,11 +14,13 @@ export type BoardRow = {
   startsAt: string; endsAt: string; roomFreeAt: string;
   therapistId: string; roomId: string; positionId: string; partyId: string; serviceId: string;
   customerId: string | null; customerDisplayName: string;
+  checkedInAt: string | null; startedAt: string | null; completedAt: string | null; expectedEnd: string | null;
 };
 
 type BoardDb = {
   booking_id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in'; starts_at: string; ends_at: string; room_free_at: string;
   therapist_id: string; room_id: string; position_id: string; party_id: string; service_id: string; customer_id: string | null; customer_display_name: string;
+  checked_in_at: string | null; started_at: string | null; completed_at: string | null; expected_end: string | null;
 };
 type CandidateDb = { therapist_id: string; position_id: string; room_id: string; therapist_minutes_today: number; room_sort: number };
 
@@ -35,6 +37,7 @@ export async function getBoard(day: string): Promise<{ ok: true; rows: BoardRow[
     startsAt: r.starts_at, endsAt: r.ends_at, roomFreeAt: r.room_free_at,
     therapistId: r.therapist_id, roomId: r.room_id, positionId: r.position_id, partyId: r.party_id, serviceId: r.service_id,
     customerId: r.customer_id, customerDisplayName: r.customer_display_name,
+    checkedInAt: r.checked_in_at, startedAt: r.started_at, completedAt: r.completed_at, expectedEnd: r.expected_end,
   }));
   return { ok: true, rows };
 }

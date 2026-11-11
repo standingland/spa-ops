@@ -68,7 +68,8 @@
     "UNKNOWN": "Something unexpected went wrong",
     "INVALID_INPUT": "Invalid input",
     "DUPLICATE": "That value already exists",
-    "OVERLAP": "This time overlaps an existing entry"
+    "OVERLAP": "This time overlaps an existing entry",
+    "ROOM_NOT_READY": "The room is not ready yet (being cleaned or still occupied)"
   },
   "rooms": {
     "title": "Rooms and beds",
