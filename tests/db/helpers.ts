@@ -154,4 +154,43 @@ export async function book(
   return r.rows[0];
 }
 
+export const soon = (minutes: number): string => new Date(Date.now() + minutes * 60000).toISOString();
+
+/** t1 and t2 each get a shift [now - 2h, now + 10h). */
+export async function shiftNow(b: Base): Promise<void> {
+  await asAdmin(async (c) => {
+    for (const t of [b.t1, b.t2])
+      await c.query('insert into therapist_shifts(therapist_id, during) values ($1, tstzrange($2,$3))', [t, soon(-120), soon(600)]);
+  });
+}
+
+/** As receptionist, walks the booking confirmed -> ... -> to, reading the version at each step. */
+export async function runTo(b: Base, bookingId: string, to: 'checked_in' | 'in_treatment' | 'completed'): Promise<BookingRow> {
+  const order = ['confirmed', 'checked_in', 'in_treatment', 'completed'];
+  return asRole(b, 'receptionist', async (c) => {
+    let row = (await c.query('select * from bookings where id=$1', [bookingId])).rows[0];
+    for (let i = order.indexOf(row.status) + 1; i <= order.indexOf(to); i++) {
+      row = (await c.query('select * from set_booking_status($1,$2,$3)', [bookingId, order[i], row.version])).rows[0];
+    }
+    return row;
+  });
+}
+
+/** Runs as service_role (what the message sender uses); committed. */
+export async function asService<T>(fn: (c: PoolClient) => Promise<T>): Promise<T> {
+  const c = await pool.connect();
+  try {
+    await c.query('begin');
+    await c.query('set local role service_role');
+    const out = await fn(c);
+    await c.query('commit');
+    return out;
+  } catch (e) {
+    await c.query('rollback').catch(() => {});
+    throw e;
+  } finally {
+    c.release();
+  }
+}
+
 export { randomUUID };
