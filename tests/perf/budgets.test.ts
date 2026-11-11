@@ -32,13 +32,13 @@ budget('room_status_board', 250, () => asReception((c) => c.query(`select * from
 budget('pending_payments', 300, () => asReception((c) => c.query(`select * from pending_payments()`)));
 budget('stranded_bookings', 300, () => asReception((c) => c.query(`select * from stranded_bookings()`)));
 budget('booking_day_counts month', 300, () => asReception((c) => c.query(`select * from booking_day_counts($1::date,$2::date)`, [ids.today, ids.addDays(ids.today, 30)])));
-budget('customer search by phone', 150, () => asReception((c) => c.query(`select id, display_name, phone from customers where phone ilike $1 limit 8`, ['%0800012%'])));
+budget('customer search by phone', 150, () => asReception((c) => c.query(`select id, display_name, phone from customers where phone ilike $1 limit 8`, ['%0900012%'])));
 budget('customer search by name prefix', 150, () => asReception((c) => c.query(`select id, display_name, phone from customers where display_name ilike $1 or full_name ilike $1 limit 8`, ['%Perf C12%'])));
 budget('customer_summary', 150, () => asReception((c) => c.query(`select * from customer_summary($1)`, [ids.customer])));
 
 // create_booking and cancel: 36 distinct rooms (and their therapists) on one far day, so nothing conflicts.
 const created: { id: string }[] = [];
-const slotDay = () => ids.addDays(ids.today, 24);
+const slotDay = () => ids.addDays(ids.today, 28);
 budget('create_booking', 250, async (i) => {
   const k = 3 + i;                                    // warm-up runs use i = -1..-3 → indexes 0..2
   const r = await asUser(ids.reception, (c) => c.query(`select * from create_booking($1,$2,$3,$4,$5,'advance',gen_random_uuid()::text,null,null)`,

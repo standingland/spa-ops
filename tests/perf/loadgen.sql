@@ -45,7 +45,7 @@ from therapists t cross join generate_series(-365, 30) off where t.display_name 
 
 -- customers
 insert into customers(display_name, phone)
-select 'Perf C' || n, '08' || lpad(n::text, 8, '0') from generate_series(1, 5000) n;
+select 'Perf C' || n, '09' || lpad(n::text, 8, '0') from generate_series(1, 5000) n;
 
 -- bookings: four fixed slots a day per room, room n always served by therapist n, so nothing can overlap
 create temp table perf_rooms as
