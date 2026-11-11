@@ -4,9 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import { requireRole, type Role } from '@/modules/identity/session';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
 
-const NAV: { href: '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff'; key: string; roles: Role[] }[] = [
+const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff'; key: string; roles: Role[] }[] = [
+  { href: '/today', key: 'today', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
+  { href: '/rooms', key: 'rooms', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
   { href: '/calendar', key: 'calendar', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
-  { href: '/admin/rooms', key: 'rooms', roles: ['owner', 'manager'] },
+  { href: '/admin/rooms', key: 'adminRooms', roles: ['owner', 'manager'] },
   { href: '/admin/services', key: 'services', roles: ['owner', 'manager'] },
   { href: '/admin/therapists', key: 'therapists', roles: ['owner', 'manager'] },
   { href: '/admin/staff', key: 'staff', roles: ['owner'] },

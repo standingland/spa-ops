@@ -9,7 +9,9 @@
     "therapists": "นักบำบัด",
     "staff": "พนักงาน",
     "signOut": "ออกจากระบบ",
-    "language": "ภาษา"
+    "language": "ภาษา",
+    "today": "วันนี้",
+    "adminRooms": "จัดการห้อง"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -235,7 +237,48 @@
       "cancelled": "ยกเลิกการจอง",
       "confirmed": "ยืนยัน",
       "move": "ย้ายเวลา/ห้อง",
-      "confirmCancel": "ยืนยันการยกเลิก"
+      "confirmCancel": "ยืนยันการยกเลิก",
+      "ready": "ห้องพร้อมแล้ว"
     }
+  },
+  "today": {
+    "title": "วันนี้",
+    "reservations": "การจองวันนี้",
+    "cancelled": "ยกเลิก",
+    "noShow": "ไม่มา",
+    "roomStatus": "สถานะห้อง",
+    "arrivals": "ลูกค้ากำลังมา",
+    "waiting": "รอรับบริการ (เช็คอินแล้ว)",
+    "inTreatment": "กำลังรับบริการ",
+    "awaitingCleaning": "รอทำความสะอาด",
+    "cancellations": "ยกเลิก / ไม่มา",
+    "therapistsOnShift": "นักบำบัดที่อยู่ในกะ",
+    "attention": "ต้องดูแล",
+    "nothing": "ไม่มีรายการ",
+    "endingSoon": "ใกล้เสร็จ",
+    "expectedEnd": "คาดว่าเสร็จ",
+    "due": "ครบกำหนด",
+    "sharedScreen": "โหมดจอรวม (ซ่อนชื่อลูกค้า)",
+    "sharedOn": "จอรวม: เปิด",
+    "sharedOff": "จอรวม: ปิด",
+    "ready": "ห้องพร้อมแล้ว",
+    "report": "แจ้งปัญหา",
+    "reportNote": "รายละเอียดปัญหา",
+    "send": "ส่ง",
+    "therapistState": {
+      "in_treatment": "กำลังให้บริการ",
+      "on_break": "พัก/ลา",
+      "free": "ว่าง"
+    },
+    "kind": {
+      "needs_reassignment": "ต้องย้ายการจอง",
+      "overrunning": "เกินเวลา",
+      "room_not_ready": "ห้องยังไม่พร้อมสำหรับลูกค้าถัดไป",
+      "late_arrival": "ลูกค้ามาสาย",
+      "turnover_overdue": "ทำความสะอาดเกินเวลา",
+      "room_report": "ปัญหาที่แจ้งไว้"
+    },
+    "live": "สด",
+    "offline": "ออฟไลน์"
   }
 }

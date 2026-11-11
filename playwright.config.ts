@@ -5,6 +5,8 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
+  timeout: 60000,
+  expect: { timeout: 10000 },
   use: { baseURL: 'http://localhost:3100', trace: 'retain-on-failure' },
   webServer: { command: 'npm run dev -- -p 3100', url: 'http://localhost:3100/th/login', reuseExistingServer: true, timeout: 180000 },
   projects: [

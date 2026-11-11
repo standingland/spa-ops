@@ -9,7 +9,9 @@
     "therapists": "Therapists",
     "staff": "Staff",
     "signOut": "Sign out",
-    "language": "Language"
+    "language": "Language",
+    "today": "Today",
+    "adminRooms": "Manage rooms"
   },
   "login": {
     "title": "Sign in",
@@ -235,7 +237,48 @@
       "cancelled": "Cancel booking",
       "confirmed": "Confirm",
       "move": "Move time/room",
-      "confirmCancel": "Confirm cancellation"
+      "confirmCancel": "Confirm cancellation",
+      "ready": "Room is ready"
     }
+  },
+  "today": {
+    "title": "Today",
+    "reservations": "Reservations today",
+    "cancelled": "Cancelled",
+    "noShow": "No-show",
+    "roomStatus": "Room status",
+    "arrivals": "Arriving",
+    "waiting": "Waiting (checked in)",
+    "inTreatment": "In treatment",
+    "awaitingCleaning": "Awaiting cleaning",
+    "cancellations": "Cancelled / no-show",
+    "therapistsOnShift": "Therapists on shift",
+    "attention": "Needs attention",
+    "nothing": "Nothing here",
+    "endingSoon": "Ending soon",
+    "expectedEnd": "Expected end",
+    "due": "Due",
+    "sharedScreen": "Shared screen (hide customer names)",
+    "sharedOn": "Shared screen: on",
+    "sharedOff": "Shared screen: off",
+    "ready": "Room is ready",
+    "report": "Report an issue",
+    "reportNote": "What is wrong",
+    "send": "Send",
+    "therapistState": {
+      "in_treatment": "In treatment",
+      "on_break": "On break/leave",
+      "free": "Free"
+    },
+    "kind": {
+      "needs_reassignment": "Needs reassignment",
+      "overrunning": "Overrunning",
+      "room_not_ready": "Room not ready for the next customer",
+      "late_arrival": "Late arrival",
+      "turnover_overdue": "Cleaning overdue",
+      "room_report": "Reported issue"
+    },
+    "live": "Live",
+    "offline": "Offline"
   }
 }

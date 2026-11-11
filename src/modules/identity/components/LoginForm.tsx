@@ -21,7 +21,7 @@ export function LoginForm() {
     });
     setBusy(false);
     if (err) { setError(true); return; }
-    router.replace('/calendar');
+    router.replace('/today');
     router.refresh();
   }
 

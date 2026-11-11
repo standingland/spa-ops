@@ -27,7 +27,7 @@ test('an owner creates a receptionist who can then sign in', async ({ page, brow
   await p2.getByTestId('login-email').fill('new@spa.test');
   await p2.getByTestId('login-password').fill('local-dev-only');
   await p2.getByTestId('login-submit').click();
-  await expect(p2).toHaveURL(/\/th\/calendar/);
+  await expect(p2).toHaveURL(/\/th\/today/);
   await ctx.close();
 });
 

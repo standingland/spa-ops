@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { addDays, bangkokDay, bangkokInstant } from '../../src/lib/time';
 
 try { process.loadEnvFile('.env.local'); } catch { /* env may already be set */ }
 
@@ -14,6 +15,9 @@ const SEED_USER_IDS = ['1', '2', '3', '4'].map((n) => `00000000-0000-4000-8000-0
 
 /** Restores the seeded state: removes everything the tests created. */
 export async function resetTestData() {
+  await admin.from('notification_outbox').delete().neq('id', NIL);
+  await admin.from('room_turnovers').delete().neq('id', NIL);
+  await admin.from('room_reports').delete().neq('id', NIL);
   await admin.from('booking_events').delete().neq('id', 0);
   await admin.from('bookings').delete().neq('id', NIL);
   await admin.from('room_blocks').delete().neq('id', NIL);
@@ -66,13 +70,14 @@ export async function resetTestData() {
     await admin.from('therapists').delete().in('id', extraTh);
   }
   await admin.from('therapists').update({ active: true }).in('id', keep);
-  const horizon = Date.now() + 15 * 86400000;
-  const { data: shifts } = await admin.from('therapist_shifts').select('id,during');
-  const far = (shifts ?? []).filter((s) => {
-    const start = String(s.during).split(',')[0].replace(/[["]/g, '').replace(' ', 'T');
-    return new Date(start).getTime() > horizon;
-  }).map((s) => s.id);
-  if (far.length) await admin.from('therapist_shifts').delete().in('id', far);
+  // restore the seeded shifts: 10:00-22:00 Bangkok for the next 14 days, for every remaining therapist
+  await admin.from('therapist_shifts').delete().neq('id', NIL);
+  const today = bangkokDay(new Date());
+  const shiftRows = keep.flatMap((id) => Array.from({ length: 14 }, (_, n) => {
+    const d = addDays(today, n);
+    return { therapist_id: id, during: `[${bangkokInstant(d, '10:00')},${bangkokInstant(d, '22:00')})` };
+  }));
+  if (shiftRows.length) await admin.from('therapist_shifts').insert(shiftRows);
 }
 
 /** ISO instant for tomorrow (Bangkok) at HH:MM. */
@@ -110,4 +115,54 @@ export async function seedBooking(o: { roomCode?: string; at?: string; therapist
   });
   if (error) throw new Error(error.message);
   return { id: data.id as string, therapistName: th.display_name as string, roomCode, at };
+}
+
+/** Books a walk-in one minute from now (as reception) and gives that therapist a shift around now. */
+export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: string; customerName?: string; consent?: boolean } = {}) {
+  const client = createClient(URL, KEY, { auth: { persistSession: false } });
+  const { error: se } = await client.auth.signInWithPassword({ email: 'reception@spa.test', password: 'local-dev-only' });
+  if (se) throw se;
+  const { data: ths } = await admin.from('therapists').select('id,display_name,staff_user_id').eq('active', true).order('sort_order');
+  let th = ths![0];
+  if (o.therapistEmail) {
+    const { data: u } = await admin.auth.admin.listUsers({ perPage: 200 });
+    const id = u!.users.find((x) => x.email === o.therapistEmail)!.id;
+    th = ths!.find((t) => t.staff_user_id === id)!;
+  }
+  const from = new Date(Date.now() - 3600000).toISOString();
+  const to = new Date(Date.now() + 3 * 3600000).toISOString();
+  const { data: over } = await admin.from('therapist_shifts').select('id').eq('therapist_id', th.id).filter('during', 'ov', `[${from},${to})`);
+  if (over?.length) await admin.from('therapist_shifts').delete().in('id', over.map((x) => x.id));
+  await admin.from('therapist_shifts').insert({ therapist_id: th.id, during: `[${from},${to})` });
+
+  const roomCode = o.roomCode ?? 'R1';
+  const { data: room } = await admin.from('rooms').select('id').eq('code', roomCode).single();
+  const { data: pos } = await admin.from('room_positions').select('id').eq('room_id', room!.id).eq('label', '1').single();
+  const { data: svc } = await admin.from('services').select('id').eq('name_th', SEED_SERVICE_NAMES[0]).single();
+  const name = o.customerName ?? 'E2E Customer';
+  let { data: cust } = await admin.from('customers').select('id').eq('display_name', name).maybeSingle();
+  if (!cust) ({ data: cust } = await admin.from('customers').insert({ display_name: name }).select('id').single());
+  if (o.consent) await admin.from('customers').update({ comms_consent: true, phone: '0810000000' }).eq('id', cust!.id);
+  const at = new Date(Date.now() + 60000).toISOString();
+  const { data, error } = await client.rpc('create_booking', {
+    p_customer_id: cust!.id, p_service_id: svc!.id, p_therapist_id: th.id, p_position_id: pos!.id,
+    p_start: at, p_source: 'walk_in', p_idempotency_key: crypto.randomUUID(),
+  });
+  if (error) throw new Error(error.message);
+  return { id: data.id as string, therapistName: th.display_name as string, roomCode, at };
+}
+
+/** Moves a booking to a status as reception, using the public client. */
+export async function setStatusAsReception(bookingId: string, to: 'checked_in' | 'in_treatment' | 'completed') {
+  const client = createClient(URL, KEY, { auth: { persistSession: false } });
+  const { error: se } = await client.auth.signInWithPassword({ email: 'reception@spa.test', password: 'local-dev-only' });
+  if (se) throw se;
+  const order = ['confirmed', 'checked_in', 'in_treatment', 'completed'];
+  for (;;) {
+    const { data: row } = await admin.from('bookings').select('status,version').eq('id', bookingId).single();
+    const next = order[order.indexOf(row!.status) + 1];
+    if (!next || order.indexOf(row!.status) >= order.indexOf(to)) return;
+    const { error } = await client.rpc('set_booking_status', { p_booking_id: bookingId, p_to: next, p_expected_version: row!.version });
+    if (error) throw new Error(error.message);
+  }
 }

@@ -5,5 +5,5 @@ export async function signIn(page: Page, email: string, password = 'local-dev-on
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill(password);
   await page.getByTestId('login-submit').click();
-  await expect(page).toHaveURL(/\/th\/calendar/);
+  await expect(page).toHaveURL(/\/th\/today/);
 }
