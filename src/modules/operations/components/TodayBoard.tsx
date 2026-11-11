@@ -10,6 +10,7 @@ import { markRoomReady } from '../actions';
 import type { RoomStatus, TodayModel } from '../today';
 import { AttentionList, type Names, type OpenReport } from './AttentionList';
 import { BookingActions } from './BookingActions';
+import { ReportForm } from './ReportForm';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
 const STATUSES: RoomStatus[] = ['available', 'reserved', 'occupied', 'cleaning', 'out_of_service'];
@@ -155,26 +156,5 @@ function Stat({ label, value, id, dot }: { label: string; value: number; id: str
       <div className="flex items-center gap-2 text-xs text-stone-dark">{dot && <span className={`inline-block h-2.5 w-2.5 rounded-full ${dot}`} aria-hidden />}{label}</div>
       <div className="tnum text-2xl" data-testid={`count-${id}`}>{value}</div>
     </div>
-  );
-}
-
-function ReportForm({ roomId, room, onDone, onError }: { roomId: string; room: string; onDone: () => void; onError: (m: string | null) => void }) {
-  const t = useTranslations('today');
-  const te = useTranslations();
-  const router = useRouter();
-  const [note, setNote] = useState('');
-  return (
-    <form className="flex flex-wrap items-end gap-2 rounded border border-stone bg-white p-3 text-sm" aria-label={t('report')}
-      onSubmit={async (e) => {
-        e.preventDefault();
-        const { reportRoomIssue } = await import('../actions');
-        const r = await reportRoomIssue({ roomId, note });
-        if (!r.ok) { onError(te(uiErrorKey(r.code))); return; }
-        onDone(); router.refresh();
-      }}>
-      <label className="flex flex-col">{t('report')} · {room}<input required value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('reportNote')} className="rounded border border-stone-dark px-2 py-1" data-testid="report-note" /></label>
-      <button type="submit" className="rounded bg-charcoal px-3 py-1.5 text-ivory" data-testid="report-send">{t('send')}</button>
-      <button type="button" onClick={onDone} className="underline">×</button>
-    </form>
   );
 }

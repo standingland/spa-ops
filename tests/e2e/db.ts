@@ -166,3 +166,14 @@ export async function setStatusAsReception(bookingId: string, to: 'checked_in' |
     if (error) throw new Error(error.message);
   }
 }
+
+/** Adds n rooms (codes X01..), spread over the given zones, in the first room category. */
+export async function addRooms(n: number, o: { zones: string[] }) {
+  const { data: cat } = await admin.from('room_categories').select('id').order('sort_order').limit(1).single();
+  const rows = Array.from({ length: n }, (_, i) => {
+    const code = `X${String(i + 1).padStart(2, '0')}`;
+    return { code, display_name: `Room ${code}`, category_id: cat!.id, zone: o.zones[i % o.zones.length], sort_order: 100 + i };
+  });
+  const { error } = await admin.from('rooms').insert(rows);
+  if (error) throw new Error(error.message);
+}

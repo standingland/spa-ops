@@ -280,5 +280,28 @@
     },
     "live": "Live",
     "offline": "Offline"
+  },
+  "roomBoard": {
+    "title": "Rooms today",
+    "summary": "Summary",
+    "occupiedOf": "in use",
+    "compact": "Compact view",
+    "full": "Full view",
+    "search": "Search room code or name",
+    "allStatuses": "All statuses",
+    "allCategories": "All categories",
+    "allZones": "All zones",
+    "noZone": "No zone",
+    "customer": "Customer",
+    "therapist": "Therapist",
+    "expectedEnd": "Expected end",
+    "next": "Next booking",
+    "turnover": "Cleaning started",
+    "due": "Due",
+    "blocked": "Closed because",
+    "reports": "Reported issues",
+    "notes": "Room notes",
+    "timeline": "Room timeline",
+    "none": "—"
   }
 }
