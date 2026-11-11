@@ -11,7 +11,8 @@
     "signOut": "Sign out",
     "language": "Language",
     "today": "Today",
-    "adminRooms": "Manage rooms"
+    "adminRooms": "Manage rooms",
+    "notifications": "Customer messages"
   },
   "login": {
     "title": "Sign in",
@@ -338,5 +339,24 @@
       "Sat",
       "Sun"
     ]
+  },
+  "notifications": {
+    "title": "Customer messages",
+    "status": "Status",
+    "attempts": "Attempts",
+    "next": "Next attempt",
+    "retry": "Retry",
+    "discreet": "This page shows no phone number, email or customer name, and messages never mention the service, therapist or room.",
+    "statuses": {
+      "pending": "Pending",
+      "failed": "Failed (will retry)",
+      "dead": "Stopped",
+      "sent": "Sent"
+    },
+    "templates": {
+      "booking_confirmed": "Booking confirmed",
+      "booking_changed": "Booking changed",
+      "booking_cancelled": "Booking cancelled"
+    }
   }
 }
