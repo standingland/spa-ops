@@ -99,7 +99,6 @@ Playwright files: `auth` 6, `admin-rooms` 6, `admin-staff` 8, `booking` 14 (each
 
 **Left to Plans 2–4:** room turnover and derived room status, Today dashboard, check-in flow, drag-and-drop and week/month calendar, realtime, notification outbox (Plan 2); customer records UI, payments, reports and CSV export, policy settings, PDPA retention (Plan 3); load test, security validation, backup/rollback runbook, production configuration (Plan 4).
 
-**Known limitation (Task 8):** a same-day therapist absence must be handled by moving the affected bookings first, because the time-off guard refuses to overlap a live booking; Plan 2 adds an affected-bookings queue.
 
 ## How to run locally
 ```
@@ -111,3 +110,111 @@ npm run test:db               # database tests on a throwaway PostgreSQL
 npx playwright test           # browser tests (starts its own dev server on :3100)
 ```
 Re-run `npx supabase db reset` when the seeded shifts are more than a few days old; the browser tests book "tomorrow" inside those shifts.
+
+---
+
+# Plan 2 — Daily operations
+
+Migrations 0009–0012; screens `/today`, `/rooms`, week and month calendar, drag-and-drop, live updates, customer message outbox. No real message provider is connected (see "Not built").
+
+## Room status (derived, never stored)
+`room_status_board(p_now, p_reserved_lead_min)` returns one row per active room. The first rule that matches wins:
+
+| # | Status | Rule |
+|---|---|---|
+| 1 | `occupied` | a booking in the room is `in_treatment` (even if a block or the schedule says otherwise) |
+| 2 | `out_of_service` | a `maintenance` or `closed` block contains `p_now` |
+| 3 | `cleaning` | an open `room_turnovers` row, or a `cleaning` block contains `p_now` |
+| 4 | `reserved` | a booking is `checked_in`, or a `requested`/`confirmed` booking starts within the lead time (30 min) and has not ended |
+| 5 | `available` | otherwise |
+
+There is no writable status column. The only manual levers are: mark ready, add or remove a block, report an issue.
+
+## Start-of-treatment rules (`set_booking_status`)
+Checked in this order after the version, transition and role checks. Physical reality is enforced when a treatment starts; the schedule is never rewritten automatically.
+
+| Transition | Effect |
+|---|---|
+| `→ checked_in` | `checked_in_at = now()` |
+| `→ in_treatment` | locks therapist and room (lowest uuid first); `ROOM_NOT_READY` if the room has an open turnover or an `in_treatment` booking of a different party; `THERAPIST_BUSY` if the therapist has another `in_treatment` booking; `started_at = now()` |
+| `→ completed` | `completed_at = now()`; finishing early shortens `service_during` (and `room_during` to now + turnover); if no other booking in the room is `in_treatment`, opens a turnover due at now + the room's `turnover_min` |
+
+A couple (same `party_id`) share the room: the turnover opens only when the last partner completes.
+
+## Turnover lifecycle
+`completed` (last partner) → open `room_turnovers` row (room status `cleaning`) → `mark_room_ready(room)` by any active staff member (including therapists) → `ready_at`, `ready_by` set; the booking's `room_during` is trimmed so the room is offered again. `private.room_busy_now` makes `create_booking`/`move_booking` refuse a start within 5 minutes in a room that is being cleaned or still occupied (`ROOM_NOT_READY`), and `available_candidates` leaves such rooms out.
+
+## Exceptions
+`record_absence` and `force_room_block` (owner, manager) insert time off / a block even over live bookings and return the affected booking ids; `stranded_bookings()` lists them (`therapist_time_off` or `room_blocked`) until someone moves them. Direct inserts still raise `CONFLICTS_WITH_BOOKINGS`. Room issues: `report_room_issue` (any staff), `resolve_room_report` (owner, manager, receptionist).
+
+## Customer message outbox
+```mermaid
+stateDiagram-v2
+  [*] --> pending: booking event (consent + phone or email)
+  pending --> failed: claim, send fails (attempts < 5)
+  failed --> pending: (claimed again when next_attempt_at passes)
+  pending --> sent: claim, send ok
+  failed --> sent: claim, send ok
+  failed --> dead: attempts = 5
+  dead --> pending: retry_notification (owner, manager)
+```
+A claim sets `attempts + 1` and hides the row for 5 minutes (visibility timeout), so a crashed sender's message becomes claimable again. A sent message is never claimed or completed again.
+
+| Attempt that failed | Next attempt after |
+|---|---|
+| 1 | 1 minute |
+| 2 | 5 minutes |
+| 3 | 30 minutes |
+| 4 | 120 minutes |
+| 5 | none: status `dead` (manual retry) |
+
+Rows hold only `{booking_id, starts_at}`; the contact is looked up at send time. Texts never mention the service, therapist, room or business type. `POST /api/internal/dispatch` (Bearer `CRON_SECRET`) runs the dispatcher with a log-only sender.
+
+## Data model additions
+```mermaid
+erDiagram
+  bookings ||--o| room_turnovers : "completing opens"
+  rooms ||--o{ room_turnovers : cleaning
+  rooms ||--o{ room_reports : issues
+  bookings ||--o{ notification_outbox : messages
+  customers ||--o{ notification_outbox : recipient
+```
+
+## Permission matrix additions (database)
+
+| Object | owner | manager | receptionist | therapist | customer | anon |
+|---|---|---|---|---|---|---|
+| `room_turnovers`, `room_reports` select | rows | rows | rows | rows | 0 | 0 |
+| `mark_room_ready`, `report_room_issue` | ok | ok | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `resolve_room_report`, `stranded_bookings` | ok | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `record_absence`, `force_room_block` | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `room_status_board`, `booking_day_counts` | rows | rows | rows | own names only | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `notification_outbox` select / `retry_notification` | rows / ok | rows / ok | 0 / `NOT_AUTHORIZED` | 0 / `NOT_AUTHORIZED` | 0 | 0 |
+| `claim_notifications`, `complete_notification` | `42501` | `42501` | `42501` | `42501` | `42501` | `42501` (service role only) |
+
+## Acceptance evidence (spec section 18, completed by Plan 2)
+
+| Criterion | Proof |
+|---|---|
+| Employees can check customers in and update treatment progress | `tests/db/ops-turnover.test.ts` "each step stamps its time"; e2e `today.spec.ts` "a walk-in goes from arrival to a ready room on one screen", "a therapist runs their own treatment from a phone and cannot cancel" |
+| Treatment completion correctly updates the room turnover workflow | `ops-turnover.test.ts` "completing opens one turnover…", "a shared room is cleaned only after the last partner finishes", "a treatment cannot start in a room that is being cleaned…", "finishing early frees the therapist…"; `room-status.test.ts` "status follows the booking through the day" |
+| Room readiness updates the operational dashboard | `room-status.test.ts`; e2e `rooms.spec.ts` "a tile follows the room through occupied, cleaning and ready"; `live.spec.ts` "room tiles follow a status change made elsewhere" |
+| Scalable room dashboard | e2e `rooms.spec.ts` "forty more rooms stay searchable, filterable and grouped"; `rooms.test.ts` |
+| Exceptions are visible and recoverable | `exceptions.test.ts`; e2e `exceptions.spec.ts` (sick day, forced closure, room report) |
+| Screens update without reload; offline is shown | e2e `live.spec.ts` |
+| Calendar can be dragged, and shows week and month | e2e `drag.spec.ts`, `calendar-span.spec.ts`; unit `drop.test.ts`, `month.test.ts` |
+| Failed integrations are recoverable | `notifications.test.ts` (claim timeout, back-off, dead, retry); `dispatch.test.ts`; e2e `notifications.spec.ts` |
+
+## Still to do
+- **Plan 3:** customer records UI, payments and reconciliation, reports and CSV export, owner-editable policy settings (the `OPS_DEFAULTS` thresholds and the room-status lead time move there), PDPA retention and anonymisation.
+- **Plan 4:** load test with dozens of rooms, security validation, full end-to-end hardening, backup/rollback runbook, production configuration.
+- **Not built in Plan 2:** reminders before an appointment (only confirmed/changed/cancelled messages exist) and any real message provider (SMS, LINE, email). Connecting one costs money and needs the owner's approval; it only has to implement `Sender` in `src/modules/notifications/dispatch.ts`.
+
+## Final verification run (Plan 2, Task 12 Step 5)
+```
+npm run test:db          Test Files 16 passed (16) | Tests 201 passed (201)
+npx vitest run src       Test Files 11 passed (11) | Tests 29 passed (29)
+npx playwright test      79 passed, 3 skipped (9.4m)   [desktop 1440x900 + mobile 390x844; drag specs skip on mobile]
+npm run build            exit 0
+npm run lint             exit 0
+```

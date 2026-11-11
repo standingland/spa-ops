@@ -69,6 +69,9 @@ test('a room report reaches the desk and can be resolved', async ({ page }) => {
   await signIn(page, 'reception@spa.test');
   const item = page.getByTestId('attention-item').filter({ hasText: 'ก๊อกน้ำรั่ว' });
   await expect(item).toHaveAttribute('data-kind', 'room_report');
-  await item.getByTestId('report-resolve').click();
-  await expect(page.getByTestId('attention-item').filter({ hasText: 'ก๊อกน้ำรั่ว' })).toHaveCount(0);
+  // the 3 s test poll can re-render the list under a click, so retry the click until the item is gone
+  await expect(async () => {
+    if (await item.count()) await item.getByTestId('report-resolve').click({ timeout: 2000 });
+    await expect(page.getByTestId('attention-item').filter({ hasText: 'ก๊อกน้ำรั่ว' })).toHaveCount(0, { timeout: 3000 });
+  }).toPass({ timeout: 20000 });
 });
