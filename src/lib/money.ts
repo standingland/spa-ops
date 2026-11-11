@@ -6,6 +6,11 @@ export function parseTHB(input: string): number | null {
   return Number(baht) * 100 + Number(frac.padEnd(2, '0'));
 }
 
+/** Satang as an editable amount: formatAmount(150000) === '1,500.00' (parseTHB reads it back). */
+export function formatAmount(satang: number): string {
+  return formatTHB(Math.abs(satang)).replace('฿', '');
+}
+
 /** Money is stored as integer satang. formatTHB(150000) === '฿1,500.00'. */
 export function formatTHB(satang: number): string {
   const sign = satang < 0 ? '-' : '';

@@ -13,9 +13,11 @@ import { AttentionList, type Names, type OpenReport } from './AttentionList';
 import { BookingActions } from './BookingActions';
 import { ReassignDialog } from './ReassignDialog';
 import { ReportForm } from './ReportForm';
+import { PendingPayments } from '@/modules/payments/components/PendingPayments';
+import type { PaymentMethod, PendingPayment } from '@/modules/payments/schema';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
-const LIVE_TABLES = ['bookings', 'room_turnovers', 'room_blocks', 'room_reports', 'therapist_time_off'] as const;
+const LIVE_TABLES = ['bookings', 'room_turnovers', 'room_blocks', 'room_reports', 'therapist_time_off', 'payments'] as const;
 const STATUSES: RoomStatus[] = ['available', 'reserved', 'occupied', 'cleaning', 'out_of_service'];
 const STATUS_KEY: Record<RoomStatus, string> = { available: 'available', reserved: 'reserved', occupied: 'occupied', cleaning: 'cleaning', out_of_service: 'outOfService' };
 const STATUS_BG: Record<RoomStatus, string> = {
@@ -41,7 +43,10 @@ function useShared(): [boolean, (v: boolean) => void] {
   return [v, writeShared];
 }
 
-export function TodayBoard({ model, role, names, reports }: { model: TodayModel; role: Role; names: Names; reports: OpenReport[] }) {
+export function TodayBoard({ model, role, names, reports, pending = [], methods = [], canRecord = false }: {
+  model: TodayModel; role: Role; names: Names; reports: OpenReport[];
+  pending?: PendingPayment[]; methods?: PaymentMethod[]; canRecord?: boolean;
+}) {
   const t = useTranslations('today');
   const s = useTranslations('status');
   const te = useTranslations();
@@ -145,6 +150,8 @@ export function TodayBoard({ model, role, names, reports }: { model: TodayModel;
           </li>
         ))}</ul>
       ))}
+
+      {role !== 'therapist' && section(t('pendingPayments'), <PendingPayments rows={pending} methods={methods} canRecord={canRecord} shared={shared} />)}
 
       {reportRoom && <ReportForm roomId={reportRoom} room={names.rooms[reportRoom]} onDone={() => setReportRoom(null)} onError={setError} />}
 

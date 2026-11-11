@@ -13,10 +13,11 @@ import type { MoveBookingInput } from '../schema';
 import type { BookingStatus } from '../schema';
 import { NewBookingForm } from './NewBookingForm';
 import { SpanSwitch } from './SpanSwitch';
+import { PaymentSection } from '@/modules/payments/components/PaymentSection';
 import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
 
 const PX_PER_MIN = 1;
-const LIVE_TABLES = ['bookings', 'room_blocks', 'therapist_shifts', 'therapist_time_off'] as const;
+const LIVE_TABLES = ['bookings', 'room_blocks', 'therapist_shifts', 'therapist_time_off', 'payments'] as const;
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 const toIso = (v: string) => (v ? new Date(`${v}:00+07:00`).toISOString() : '');
 const localOf = (iso: string) => `${bangkokDay(iso)}T${formatTime(iso)}`;
@@ -230,6 +231,7 @@ function BookingPanel({ row, role, therapists, rooms, svcName, therapistName, ro
         <button className="ml-auto text-sm underline" onClick={onClose} data-testid="panel-close">{t('close')}</button>
       </div>
       <p className="tnum text-sm">{svcName} · {formatTime(row.startsAt)}–{formatTime(row.endsAt)} · {therapistName} · {roomCode}</p>
+      {role !== 'therapist' && <PaymentSection bookingId={row.bookingId} version={row.version} />}
       {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay">{error}</p>}
       <div className="flex flex-wrap gap-2 text-sm">
         {next.filter((s) => s !== 'cancelled').map((s) => (

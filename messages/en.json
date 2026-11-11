@@ -287,7 +287,8 @@
       "room_report": "Reported issue"
     },
     "live": "Live",
-    "offline": "Offline"
+    "offline": "Offline",
+    "pendingPayments": "Awaiting payment"
   },
   "roomBoard": {
     "title": "Rooms today",
@@ -393,6 +394,35 @@
       "payments_receptionist_can_record": "Reception may record payments",
       "reports_manager_can_view": "Managers may view reports",
       "retention_inactive_months": "List customers for review after no activity for"
+    }
+  },
+  "payments": {
+    "record": "Record a payment",
+    "amount": "Amount (baht)",
+    "method": "Method",
+    "reference": "Reference",
+    "note": "Note",
+    "needsVerificationHint": "This method stays unverified until a manager verifies it",
+    "noCardNumbers": "Never enter a credit or debit card number",
+    "submit": "Record",
+    "pay": "Take payment",
+    "adjust": "Adjust charge",
+    "discount": "Discount (baht)",
+    "fee": "Fee (baht)",
+    "reason": "Reason",
+    "adjustHint": "Leave a field empty to keep it as it is",
+    "nonePending": "Nothing is waiting for payment",
+    "refundOwed": "Refund owed",
+    "awaitingVerification": "Awaiting verification",
+    "charge": "Charge",
+    "paid": "Paid",
+    "status": {
+      "not_due": "Nothing due",
+      "unpaid": "Unpaid",
+      "partial": "Part paid",
+      "paid": "Paid",
+      "overpaid": "Overpaid",
+      "refunded": "Refunded"
     }
   }
 }

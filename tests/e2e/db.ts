@@ -8,6 +8,9 @@ const KEY = process.env.NEXT_PUBLIC_SUPABASE_KEY!;
 export const admin = createClient(URL, process.env.SUPABASE_SERVICE_KEY!, { auth: { persistSession: false } });
 
 const NIL = '00000000-0000-0000-0000-000000000000';
+/** The seeded price of the first service, and the price the money tests book it at (฿1,500.00). */
+const SEED_PRICE = 80000;
+export const TEST_PRICE = 150000;
 export const SEED_ROOM_CODES = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'];
 export const SEED_SERVICE_NAMES = ['นวดไทย 60 นาที', 'นวดไทย 90 นาที', 'นวดน้ำมัน 60 นาที', 'นวดน้ำมัน 90 นาที', 'นวดเท้า 45 นาที'];
 export const SEED_EMAILS = ['owner@spa.test', 'manager@spa.test', 'reception@spa.test', 'therapist@spa.test'];
@@ -52,6 +55,7 @@ export async function resetTestData() {
     await admin.from('services').delete().in('id', extraSvc);
   }
   await admin.from('services').update({ active: true }).in('name_th', SEED_SERVICE_NAMES);
+  await admin.from('services').update({ price_satang: SEED_PRICE }).eq('name_th', SEED_SERVICE_NAMES[0]);
 
   // categories created by tests
   const { data: cats } = await admin.from('room_categories').select('id,name_en');
@@ -114,6 +118,7 @@ export async function seedBooking(o: { roomCode?: string; at?: string; therapist
   const { data: room } = await admin.from('rooms').select('id').eq('code', roomCode).single();
   const { data: pos } = await admin.from('room_positions').select('id').eq('room_id', room!.id).eq('label', '1').single();
   const { data: svc } = await admin.from('services').select('id').eq('name_th', SEED_SERVICE_NAMES[0]).single();
+  await admin.from('services').update({ price_satang: TEST_PRICE }).eq('id', svc!.id);
   const name = o.customerName ?? 'E2E Customer';
   let { data: cust } = await admin.from('customers').select('id').eq('display_name', name).maybeSingle();
   if (!cust) ({ data: cust } = await admin.from('customers').insert({ display_name: name }).select('id').single());
@@ -150,6 +155,7 @@ export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: st
   const { data: room } = await admin.from('rooms').select('id').eq('code', roomCode).single();
   const { data: pos } = await admin.from('room_positions').select('id').eq('room_id', room!.id).eq('label', '1').single();
   const { data: svc } = await admin.from('services').select('id').eq('name_th', SEED_SERVICE_NAMES[0]).single();
+  await admin.from('services').update({ price_satang: TEST_PRICE }).eq('id', svc!.id);
   const name = o.customerName ?? 'E2E Customer';
   let { data: cust } = await admin.from('customers').select('id').eq('display_name', name).maybeSingle();
   if (!cust) ({ data: cust } = await admin.from('customers').insert({ display_name: name }).select('id').single());
@@ -186,5 +192,31 @@ export async function addRooms(n: number, o: { zones: string[] }) {
     return { code, display_name: `Room ${code}`, category_id: cat!.id, zone: o.zones[i % o.zones.length], sort_order: 100 + i };
   });
   const { error } = await admin.from('rooms').insert(rows);
+  if (error) throw new Error(error.message);
+}
+
+async function publicClient(email: string) {
+  const client = createClient(URL, KEY, { auth: { persistSession: false } });
+  const { error } = await client.auth.signInWithPassword({ email, password: 'local-dev-only' });
+  if (error) throw error;
+  return client;
+}
+
+/** Records a payment as reception through record_payment. */
+export async function payViaApi(bookingId: string, satang: number, method: 'cash' | 'bank_transfer' | 'promptpay' = 'cash', reference?: string) {
+  const client = await publicClient('reception@spa.test');
+  const { data: m } = await admin.from('payment_methods').select('id').eq('code', method).single();
+  const { data, error } = await client.rpc('record_payment', {
+    p_booking_id: bookingId, p_method_id: m!.id, p_amount_satang: satang, p_idempotency_key: crypto.randomUUID(),
+    ...(reference ? { p_reference: reference } : {}),
+  });
+  if (error) throw new Error(error.message);
+  return data as { id: string };
+}
+
+/** Voids a payment as manager. */
+export async function voidViaApi(paymentId: string, reason = 'บันทึกผิด') {
+  const client = await publicClient('manager@spa.test');
+  const { error } = await client.rpc('void_payment', { p_payment_id: paymentId, p_reason: reason });
   if (error) throw new Error(error.message);
 }
