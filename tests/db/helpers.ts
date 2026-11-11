@@ -127,6 +127,11 @@ export async function resetDb(): Promise<Base> {
         await c.query('insert into therapist_shifts(therapist_id, during) values ($1, tstzrange($2,$3))', [t, bkk('10:00'), bkk('22:00')]);
       }
     }
+    // customers (Task 5)
+    if (await tableExists(c, 'customers')) {
+      b.c1 = (await c.query(`insert into customers(user_id, display_name, full_name, phone) values ($1,'C1','Customer One','0800000001') returning id`, [b.users.customer])).rows[0].id;
+      b.c2 = (await c.query(`insert into customers(display_name, full_name, phone) values ('C2','Customer Two','0800000002') returning id`)).rows[0].id;
+    }
     // SEED-END
     return b;
   });
