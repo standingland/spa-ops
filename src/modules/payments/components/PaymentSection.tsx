@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { formatTHB } from '@/lib/money';
@@ -18,11 +18,12 @@ export function PaymentSection({ bookingId, version }: { bookingId: string; vers
   const [panel, setPanel] = useState<Panel | null>(null);
   const [paying, setPaying] = useState(false);
 
-  const load = useCallback(async () => {
-    const r = await getPaymentPanel(bookingId);
-    if (r.ok) setPanel(r);
-  }, [bookingId]);
-  useEffect(() => { void load(); }, [load]);
+  const [reload, setReload] = useState(0);
+  useEffect(() => {
+    let live = true;
+    void getPaymentPanel(bookingId).then((r) => { if (live && r.ok) setPanel(r); });
+    return () => { live = false; };
+  }, [bookingId, reload]);
 
   if (!panel || !panel.money) return null;
   const m = panel.money;
@@ -42,7 +43,7 @@ export function PaymentSection({ bookingId, version }: { bookingId: string; vers
       </div>
       {paying && (
         <PaymentDialog bookingId={bookingId} dueSatang={m.dueSatang} methods={panel.methods}
-          onClose={() => setPaying(false)} onDone={() => { setPaying(false); void load(); router.refresh(); }} />
+          onClose={() => setPaying(false)} onDone={() => { setPaying(false); setReload((n) => n + 1); router.refresh(); }} />
       )}
     </div>
   );

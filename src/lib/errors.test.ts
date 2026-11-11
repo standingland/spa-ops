@@ -11,7 +11,7 @@ test('known codes map to errors.<CODE>; unknown input maps to errors.UNKNOWN', (
 test('every new error code has Thai and English text', () => {
   for (const c of ['INVALID_SETTING', 'INVALID_AMOUNT', 'OVERPAYMENT', 'REFUND_EXCEEDS_PAYMENT', 'CARD_DATA_REFUSED', 'REASON_REQUIRED']) {
     expect(errorMessageKey(c)).toBe(`errors.${c}`);
-    expect((th.errors as any)[c] && (en.errors as any)[c]).toBeTruthy();
+    expect((th.errors as Record<string, string>)[c] && (en.errors as Record<string, string>)[c]).toBeTruthy();
   }
 });
 test('all 21 database codes plus UNKNOWN exist in both message files', () => {
