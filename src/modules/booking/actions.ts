@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { roleOrNull } from '@/modules/identity/session';
 import { fail, failFrom } from '@/lib/action';
-import { bangkokDayRange } from '@/lib/time';
+import { addDays, bangkokDayRange } from '@/lib/time';
+import { monthGrid } from './month';
 import { rankAllocations, type Candidate } from './allocation';
 import { CreateBookingInput, DayInput, MoveBookingInput, SetStatusInput, SuggestInput, type BookingStatus } from './schema';
 
@@ -32,14 +33,43 @@ export async function getBoard(day: string): Promise<{ ok: true; rows: BoardRow[
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('booking_board', { p_from: from, p_to: to });
   if (error) return failFrom(error);
-  const rows = ((data ?? []) as BoardDb[]).map((r): BoardRow => ({
+  return { ok: true, rows: ((data ?? []) as BoardDb[]).map(toRow) };
+}
+
+/** Seven Bangkok days starting at the given Monday. Any staff role; therapists get only their own rows. */
+export async function getWeek(monday: string): Promise<{ ok: true; rows: BoardRow[] } | { ok: false; code: string }> {
+  if (!(await roleOrNull())) return fail('NOT_AUTHORIZED');
+  if (!DayInput.safeParse(monday).success) return fail('INVALID_INPUT');
+  const from = bangkokDayRange(monday).from;
+  const to = bangkokDayRange(addDays(monday, 6)).to;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('booking_board', { p_from: from, p_to: to });
+  if (error) return failFrom(error);
+  return { ok: true, rows: ((data ?? []) as BoardDb[]).map(toRow) };
+}
+
+/** Per-day booking counts and booked minutes over the month grid (Monday-first weeks). */
+export async function getMonthCounts(month: string): Promise<{ ok: true; days: { day: string; bookings: number; bookedMinutes: number }[] } | { ok: false; code: string }> {
+  if (!(await roleOrNull())) return fail('NOT_AUTHORIZED');
+  if (!/^\d{4}-\d{2}$/.test(month)) return fail('INVALID_INPUT');
+  const grid = monthGrid(month);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('booking_day_counts', { p_from: grid[0][0], p_to: grid[grid.length - 1][6] });
+  if (error) return failFrom(error);
+  return {
+    ok: true,
+    days: ((data ?? []) as { day: string; bookings: number; booked_minutes: number }[]).map((d) => ({ day: d.day, bookings: d.bookings, bookedMinutes: d.booked_minutes })),
+  };
+}
+
+function toRow(r: BoardDb): BoardRow {
+  return {
     bookingId: r.booking_id, version: r.version, status: r.status, source: r.source,
     startsAt: r.starts_at, endsAt: r.ends_at, roomFreeAt: r.room_free_at,
     therapistId: r.therapist_id, roomId: r.room_id, positionId: r.position_id, partyId: r.party_id, serviceId: r.service_id,
     customerId: r.customer_id, customerDisplayName: r.customer_display_name,
     checkedInAt: r.checked_in_at, startedAt: r.started_at, completedAt: r.completed_at, expectedEnd: r.expected_end,
-  }));
-  return { ok: true, rows };
+  };
 }
 
 /** available_candidates, ranked with the customer's preferred therapist first. */

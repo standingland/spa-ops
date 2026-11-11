@@ -314,5 +314,29 @@
     "openCalendar": "Open the calendar to move it manually",
     "resolve": "Resolved",
     "close": "Close"
+  },
+  "span": {
+    "label": "Span",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "allTherapists": "All therapists",
+    "allRooms": "All rooms",
+    "bookings": "bookings",
+    "hours": "h",
+    "noBookings": "No bookings",
+    "weekdays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ]
   }
 }
