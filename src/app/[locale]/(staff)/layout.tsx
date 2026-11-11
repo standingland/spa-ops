@@ -5,10 +5,11 @@ import { requireRole, type Role } from '@/modules/identity/session';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
 import { LiveStatus } from '@/modules/identity/components/LiveStatus';
 
-const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff' | '/admin/notifications' | '/admin/settings' | '/payments'; key: string; roles: Role[] }[] = [
+const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff' | '/admin/notifications' | '/admin/settings' | '/payments' | '/customers'; key: string; roles: Role[] }[] = [
   { href: '/today', key: 'today', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
   { href: '/rooms', key: 'rooms', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
   { href: '/calendar', key: 'calendar', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
+  { href: '/customers', key: 'customers', roles: ['owner', 'manager', 'receptionist'] },
   { href: '/payments', key: 'payments', roles: ['owner', 'manager'] },
   { href: '/admin/rooms', key: 'adminRooms', roles: ['owner', 'manager'] },
   { href: '/admin/services', key: 'services', roles: ['owner', 'manager'] },

@@ -220,3 +220,11 @@ export async function voidViaApi(paymentId: string, reason = 'บันทึก
   const { error } = await client.rpc('void_payment', { p_payment_id: paymentId, p_reason: reason });
   if (error) throw new Error(error.message);
 }
+
+/** Cancels a confirmed booking as reception. */
+export async function cancelAsReception(bookingId: string) {
+  const client = await publicClient('reception@spa.test');
+  const { data: row } = await admin.from('bookings').select('version').eq('id', bookingId).single();
+  const { error } = await client.rpc('set_booking_status', { p_booking_id: bookingId, p_to: 'cancelled', p_expected_version: row!.version });
+  if (error) throw new Error(error.message);
+}

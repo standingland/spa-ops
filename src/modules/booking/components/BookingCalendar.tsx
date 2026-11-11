@@ -13,6 +13,7 @@ import type { MoveBookingInput } from '../schema';
 import type { BookingStatus } from '../schema';
 import { NewBookingForm } from './NewBookingForm';
 import { SpanSwitch } from './SpanSwitch';
+import { TreatmentNote } from '@/modules/customers/components/TreatmentNote';
 import { PaymentSection } from '@/modules/payments/components/PaymentSection';
 import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
 
@@ -231,6 +232,7 @@ function BookingPanel({ row, role, therapists, rooms, svcName, therapistName, ro
         <button className="ml-auto text-sm underline" onClick={onClose} data-testid="panel-close">{t('close')}</button>
       </div>
       <p className="tnum text-sm">{svcName} · {formatTime(row.startsAt)}–{formatTime(row.endsAt)} · {therapistName} · {roomCode}</p>
+      <TreatmentNote bookingId={row.bookingId} />
       {role !== 'therapist' && <PaymentSection bookingId={row.bookingId} version={row.version} />}
       {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay">{error}</p>}
       <div className="flex flex-wrap gap-2 text-sm">

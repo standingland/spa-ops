@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { createCustomer, searchCustomers, type CustomerHit } from '../actions';
 import { uiErrorKey } from '@/lib/errors';
+import { Link } from '@/i18n/navigation';
 
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 
@@ -15,6 +16,7 @@ export function CustomerPicker({ selected, onSelect }: { selected: CustomerHit |
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [existingId, setExistingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!q.trim()) return;
@@ -52,11 +54,16 @@ export function CustomerPicker({ selected, onSelect }: { selected: CustomerHit |
             <label className="flex flex-col text-sm">{t('customerPhone')}<input value={phone} onChange={(e) => setPhone(e.target.value)} className={field} data-testid="customer-new-phone" /></label>
             <button type="button" className="rounded border border-charcoal px-3 py-1 text-sm" data-testid="customer-new-save"
               onClick={async () => {
-                setError(null);
+                setError(null); setExistingId(null);
                 const r = await createCustomer({ displayName: name, phone });
-                if (r.ok) { onSelect(r.customer); setName(''); setPhone(''); } else setError(te(uiErrorKey(r.code)));
+                if (r.ok) { onSelect(r.customer); setName(''); setPhone(''); } else { setError(te(uiErrorKey(r.code))); setExistingId(r.existingId ?? null); }
               }}>{t('saveCustomer')}</button>
-            {error && <p role="alert" className="w-full text-sm text-clay">{error}</p>}
+            {error && (
+              <p role="alert" className="w-full text-sm text-clay">
+                {error}
+                {existingId && <> <Link href={`/customers/${existingId}`} data-testid="duplicate-link" className="underline">{te('customers.openExisting')}</Link></>}
+              </p>
+            )}
           </div>
         </>
       )}

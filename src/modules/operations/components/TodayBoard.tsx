@@ -13,6 +13,7 @@ import { AttentionList, type Names, type OpenReport } from './AttentionList';
 import { BookingActions } from './BookingActions';
 import { ReassignDialog } from './ReassignDialog';
 import { ReportForm } from './ReportForm';
+import { TreatmentNote } from '@/modules/customers/components/TreatmentNote';
 import { PendingPayments } from '@/modules/payments/components/PendingPayments';
 import type { PaymentMethod, PendingPayment } from '@/modules/payments/schema';
 
@@ -64,6 +65,7 @@ export function TodayBoard({ model, role, names, reports, pending = [], methods 
       <span className="tnum font-semibold">{formatTime(r.startsAt)}–{formatTime(r.endsAt)}</span>
       <span>{who(r)}</span>
       <span className="text-stone-dark">{names.therapists[r.therapistId]} · {names.rooms[r.roomId]}</span>
+      {!shared && <TreatmentNote bookingId={r.bookingId} />}
     </span>
   );
 
