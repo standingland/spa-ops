@@ -100,3 +100,14 @@ Playwright files: `auth` 6, `admin-rooms` 6, `admin-staff` 8, `booking` 14 (each
 **Left to Plans 2–4:** room turnover and derived room status, Today dashboard, check-in flow, drag-and-drop and week/month calendar, realtime, notification outbox (Plan 2); customer records UI, payments, reports and CSV export, policy settings, PDPA retention (Plan 3); load test, security validation, backup/rollback runbook, production configuration (Plan 4).
 
 **Known limitation (Task 8):** a same-day therapist absence must be handled by moving the affected bookings first, because the time-off guard refuses to overlap a live booking; Plan 2 adds an affected-bookings queue.
+
+## How to run locally
+```
+npx supabase start            # needs Docker Desktop; prints the local URL and keys
+# put them in .env.local (see .env.example)
+npx supabase db reset         # applies migrations + seed (shifts cover the 14 days from the reset date)
+npm run dev                   # http://localhost:3000/th/login   (owner@spa.test … password local-dev-only)
+npm run test:db               # database tests on a throwaway PostgreSQL
+npx playwright test           # browser tests (starts its own dev server on :3100)
+```
+Re-run `npx supabase db reset` when the seeded shifts are more than a few days old; the browser tests book "tomorrow" inside those shifts.
