@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { addDays, bangkokDay, bangkokInstant } from '../../src/lib/time';
 
 try { process.loadEnvFile('.env.local'); } catch { /* env may already be set */ }
@@ -102,9 +102,7 @@ export function tomorrowAt(hhmm: string): string {
 
 /** Signs in as reception with the public client and books through create_booking. */
 export async function seedBooking(o: { roomCode?: string; at?: string; therapistEmail?: string; otherTherapist?: boolean; customerName?: string } = {}) {
-  const client = createClient(URL, KEY, { auth: { persistSession: false } });
-  const { error: se } = await client.auth.signInWithPassword({ email: 'reception@spa.test', password: 'local-dev-only' });
-  if (se) throw se;
+  const client = await publicClient('reception@spa.test');
   const { data: ths } = await admin.from('therapists').select('id,display_name,staff_user_id').eq('active', true).order('sort_order');
   let th = ths![0];
   if (o.therapistEmail) {
@@ -133,9 +131,7 @@ export async function seedBooking(o: { roomCode?: string; at?: string; therapist
 
 /** Books a walk-in one minute from now (as reception) and gives that therapist a shift around now. */
 export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: string; otherTherapist?: boolean; customerName?: string; consent?: boolean; inMinutes?: number } = {}) {
-  const client = createClient(URL, KEY, { auth: { persistSession: false } });
-  const { error: se } = await client.auth.signInWithPassword({ email: 'reception@spa.test', password: 'local-dev-only' });
-  if (se) throw se;
+  const client = await publicClient('reception@spa.test');
   const { data: ths } = await admin.from('therapists').select('id,display_name,staff_user_id').eq('active', true).order('sort_order');
   let th = ths![0];
   if (o.therapistEmail) {
@@ -171,9 +167,7 @@ export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: st
 
 /** Moves a booking to a status as reception, using the public client. */
 export async function setStatusAsReception(bookingId: string, to: 'checked_in' | 'in_treatment' | 'completed') {
-  const client = createClient(URL, KEY, { auth: { persistSession: false } });
-  const { error: se } = await client.auth.signInWithPassword({ email: 'reception@spa.test', password: 'local-dev-only' });
-  if (se) throw se;
+  const client = await publicClient('reception@spa.test');
   const order = ['confirmed', 'checked_in', 'in_treatment', 'completed'];
   for (;;) {
     const { data: row } = await admin.from('bookings').select('status,version').eq('id', bookingId).single();
@@ -195,10 +189,15 @@ export async function addRooms(n: number, o: { zones: string[] }) {
   if (error) throw new Error(error.message);
 }
 
+/** One signed-in client per account for the whole run: the local auth server allows only 30 sign-ins per 5 minutes. */
+const clients = new Map<string, SupabaseClient>();
 async function publicClient(email: string) {
+  const cached = clients.get(email);
+  if (cached) return cached;
   const client = createClient(URL, KEY, { auth: { persistSession: false } });
   const { error } = await client.auth.signInWithPassword({ email, password: 'local-dev-only' });
   if (error) throw error;
+  clients.set(email, client);
   return client;
 }
 

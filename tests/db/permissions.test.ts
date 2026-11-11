@@ -10,7 +10,7 @@ type Stmt = { name: string; run: (c: PoolClient, b: Base, i: number) => Promise<
 const day2 = '2030-02-01';
 const STMTS: Stmt[] = [
   { name: 'select from rooms', run: (c) => c.query(`select 1 from rooms`), expect: ['rows', 'rows', 'rows', 'rows', 0, 0] },
-  { name: "update rooms set zone='x'", run: (c) => c.query(`update rooms set zone='x'`), expect: ['rows', 'rows', 0, 0, 0, 0] },
+  { name: "update rooms set zone='x'", run: (c) => c.query(`update rooms set zone='x'`), expect: ['rows', 'rows', 0, 0, 0, '42501'] },
   {
     name: 'insert into therapist_shifts',
     run: (c, b, i) => c.query(`insert into therapist_shifts(therapist_id, during) values ($1, tstzrange($2,$3))`,
@@ -39,7 +39,7 @@ const STMTS: Stmt[] = [
     expect: [2, 2, 2, 1, 'NOT_AUTHORIZED', 'NOT_AUTHORIZED'],
   },
   { name: 'select from audit_log', run: (c) => c.query(`select 1 from audit_log`), expect: ['rows', 'rows', 0, 0, 0, 0] },
-  { name: "update staff set role='owner'", run: (c) => c.query(`update staff set role='owner'`), expect: ['rows', 0, 0, 0, 0, 0] },
+  { name: "update staff set role='owner'", run: (c) => c.query(`update staff set role='owner'`), expect: ['rows', 0, 0, 0, 0, '42501'] },
 ];
 
 let b: Base;

@@ -225,4 +225,29 @@ export async function today(): Promise<string> {
   return asAdmin(async (c) => (await c.query(`select ((now() at time zone 'Asia/Bangkok')::date)::text d`)).rows[0].d);
 }
 
+/** An authenticated session whose user exists in auth.users but has no staff row and no customers row. */
+export async function asStranger<T>(fn: (c: PoolClient) => Promise<T>): Promise<T> {
+  const id = randomUUID();
+  await asAdmin((c) => c.query('insert into auth.users(id, email) values ($1,$2)', [id, id + '@stranger.test']));
+  const c = await pool.connect();
+  try {
+    await c.query('begin');
+    await c.query('set local role authenticated');
+    await c.query(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: id, role: 'authenticated' })]);
+    const out = await fn(c);
+    await c.query('commit');
+    return out;
+  } catch (e) {
+    await c.query('rollback').catch(() => {});
+    throw e;
+  } finally {
+    c.release();
+  }
+}
+
+/** Sets a seeded staff member inactive. */
+export async function deactivate(b: Base, role: Role): Promise<void> {
+  await asAdmin((c) => c.query('update staff set active=false where user_id=$1', [b.users[role]]));
+}
+
 export { randomUUID };

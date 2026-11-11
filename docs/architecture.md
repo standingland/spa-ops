@@ -206,7 +206,7 @@ erDiagram
 | Failed integrations are recoverable | `notifications.test.ts` (claim timeout, back-off, dead, retry); `dispatch.test.ts`; e2e `notifications.spec.ts` |
 
 ## Still to do
-- **Plan 3:** customer records UI, payments and reconciliation, reports and CSV export, owner-editable policy settings (the `OPS_DEFAULTS` thresholds and the room-status lead time move there), PDPA retention and anonymisation.
+- **Plan 3 (now built, see "Plan 3 — Business management" below):** customer records UI, payments and reconciliation, reports and CSV export, owner-editable policy settings (the `OPS_DEFAULTS` thresholds and the room-status lead time moved there), PDPA retention and anonymisation.
 - **Plan 4:** load test with dozens of rooms, security validation, full end-to-end hardening, backup/rollback runbook, production configuration.
 - **Not built in Plan 2:** reminders before an appointment (only confirmed/changed/cancelled messages exist) and any real message provider (SMS, LINE, email). Connecting one costs money and needs the owner's approval; it only has to implement `Sender` in `src/modules/notifications/dispatch.ts`.
 
@@ -218,3 +218,147 @@ npx playwright test      79 passed, 3 skipped (9.4m)   [desktop 1440x900 + mobil
 npm run build            exit 0
 npm run lint             exit 0
 ```
+
+---
+
+# Plan 3 — Business management
+
+Migrations 0013–0018; screens `/admin/settings`, `/payments`, `/customers`, `/customers/[id]`, `/reports`; payment dialog on Today and in the calendar panel; CSV and JSON downloads. No payment provider is integrated: the system **records** what happened at the desk, it never moves money (see "Not built").
+
+## Owner-editable settings (`app_settings`, migration 0013)
+The key list, defaults and limits live once, in `private.setting_spec()`. `set_setting` (owner only) refuses anything else with `INVALID_SETTING`; `get_settings` (any active staff) returns every key with its stored value or default. Changes are audited with the owner as actor.
+
+| Key | Default | Allowed | Used by |
+|---|---|---|---|
+| `ops.arrival_window_min` | 60 | integer 5–240 | Today: arrivals list |
+| `ops.late_arrival_min` | 10 | integer 1–120 | Today: late arrival flag |
+| `ops.ending_soon_min` | 10 | integer 1–60 | Today: ending soon flag |
+| `ops.room_prep_warn_min` | 15 | integer 1–120 | Today: overdue room flag |
+| `ops.reserved_lead_min` | 30 | integer 0–240 | `room_status_board` (a null argument means this setting) |
+| `policy.cancel_free_min` | 120 | integer 0–10080 | cancellation fee |
+| `policy.cancel_fee_percent` | 0 | integer 0–100 | cancellation fee |
+| `policy.no_show_fee_percent` | 0 | integer 0–100 | no-show fee |
+| `payments.receptionist_can_record` | true | boolean | `record_payment` |
+| `reports.manager_can_view` | true | boolean | every report function, the nav link, the CSV route |
+| `retention.inactive_months` | 24 | integer 6–120 | `retention_candidates` |
+
+## What a booking costs, and fees (migration 0014)
+Price and discount live on the booking. `private.booking_charge` is the one definition of the amount owed: the stored `fee_satang` once a booking is `cancelled` or `no_show`, otherwise `price - discount`.
+
+* On `→ cancelled`, if `now()` is later than `start - policy.cancel_free_min` minutes, the fee is `round((price - discount) × policy.cancel_fee_percent / 100)`; earlier cancellations are free.
+* On `→ no_show`, the fee is `round((price - discount) × policy.no_show_fee_percent / 100)`.
+* **The fee is stored once, when the status changes, and never recalculated.** Editing the policy later changes nothing already charged (`charges.test.ts` "a fee already charged does not change…").
+* `adjust_booking_charge` (owner, manager) sets a discount and / or overrides the fee, always with a reason, with a version check; it writes a `charge_adjusted` event.
+
+## Payment ledger (migration 0015)
+`payments` is **append-only**: no role has an insert, update or delete policy; rows change only through `SECURITY DEFINER` functions, and every change is audited.
+
+| Rule | Behaviour |
+|---|---|
+| Record | `record_payment` locks the booking row, returns the existing row for a repeated `idempotency_key` (a double tap is one payment), refuses `OVERPAYMENT` above the amount due, `INVALID_AMOUNT`, `RESOURCE_INACTIVE` (inactive method) |
+| Card data | `CARD_DATA_REFUSED` when the reference or note contains a 13–19 digit run (spaces and dashes allowed) that passes the Luhn check. Ordinary 16-digit references that fail Luhn are kept |
+| Verification | A method with `needs_verification` (bank transfer, PromptPay) is stored unverified; only `verify_payment` (owner, manager) verifies it. Cash is verified at once. Recording a transfer is never treated as proof of payment |
+| Void | `void_payment` (owner, manager) needs a reason and is refused if refunds still point at the payment; the row stays, marked voided |
+| Refund | `record_refund` (owner, manager) inserts a `refund` row pointing at the original payment; `REFUND_EXCEEDS_PAYMENT` when it would exceed the payment minus earlier refunds |
+| Who | owner and manager always; receptionist while `payments.receptionist_can_record` is true; therapists never see money |
+
+Status is derived by `booking_money` (voided rows ignored; `net = paid - refunded`; `due = charge - net`):
+
+| Status | Rule |
+|---|---|
+| `not_due` | charge 0 and nothing paid |
+| `refunded` | charge 0, something was paid, net 0 |
+| `overpaid` | net > charge (a refund is owed; shown in `pending_payments` as a negative due) |
+| `unpaid` | charge > 0, net 0 |
+| `partial` | 0 < net < charge |
+| `paid` | net = charge, charge > 0 |
+
+`payment_day_summary` and `close_cash_day` give the daily reconciliation: totals per method (recorded, verified, awaiting verification, refunded, voided), and a cash count against the expected cash of that Bangkok day. The screen warns when cash moved after the day was closed.
+
+## Customer records and privacy (migration 0016)
+`customers` gains `service_notes` (treatment preferences) and `anonymised_at`; the phone is stored in one normalised form (`^(0\d{8,9}|\+\d{6,15})$`), unique. Therapists have no access to the table: `booking_detail` gives them the booking note and the treatment notes for **their own bookings only**, never contact details.
+
+**Anonymisation** (`anonymise_customer`, owner only, typed name + reason, irreversible; refused while a live future booking exists):
+
+| Removed | Kept |
+|---|---|
+| display name (→ "Removed"), full name, phone, email, login link, preferred therapist, treatment notes, consent | bookings and their status, times, rooms, therapists, services |
+| private notes (the one deliberate hard delete in the system) | payments and refunds |
+| booking notes, and the `note` key inside booking events and booking audit rows | the audit trail of what happened, with the customer's personal values blanked |
+| old / new values of the customer's audit rows | one `ANONYMISE` audit row holding only the reason |
+| pending or failed messages (set to `dead`) | |
+
+`export_customer` (owner, manager) returns the profile, private notes, bookings and payments as JSON. `retention_candidates` (owner) only **lists** customers with no activity for `retention.inactive_months`; nothing is anonymised by itself.
+
+## Reports (migrations 0017 and 0018)
+All report functions are `SECURITY DEFINER`, restricted to the owner and to managers while `reports.manager_can_view` is true. A "day" is a Bangkok calendar day. Screens, CSV headers and these tables use the same words.
+
+| Metric | Definition |
+|---|---|
+| Booked revenue | For bookings whose service starts in the period: price − discount of **completed** bookings, plus `fee_satang` of **cancelled** and **no-show** bookings. A rescheduled booking is one booking, counted on the day it finally starts |
+| Collected revenue | Non-voided `payment` rows received in the period |
+| Refunded | Non-voided `refund` rows received in the period |
+| Net collected | Collected − refunded. Verification does not change these; money awaiting verification is shown separately in reconciliation |
+| Average transaction value | Booked revenue of completed bookings ÷ completed bookings (fees excluded) |
+| Cancellation rate / no-show rate | Cancelled (no-show) ÷ all bookings starting in the period |
+| Reschedules | `rescheduled` events on bookings starting in the period |
+| Customers / returning rate | Customers with a completed booking in the period; the share who had a completed booking before their first one in the period |
+| Revenue by service / by therapist | Completed bookings only; fees are not attributed; inactive services and therapists still appear when they have completed bookings in the period |
+| Open minutes | Minutes in the period covered by at least one therapist shift (union of all shifts) |
+| Room utilisation | Booked room minutes ÷ (open minutes − maintenance or closed block minutes on that room inside open time). Booked room minutes = service time of bookings not cancelled or no-show |
+| Therapist utilisation | Booked minutes ÷ (shift minutes − time-off minutes inside shifts) |
+| Turnover efficiency | For turnovers started in the period: average minutes from start to ready, and the share marked ready at or before the due time |
+| Peak periods | Bookings not cancelled or no-show, by ISO weekday (1 = Monday) and hour of the Bangkok start time |
+
+Report rows come from the rooms, therapists and services configured in the database: a new room appears in the next report, a retired room with bookings in the period stays. CSV files start with a UTF-8 byte-order mark (Thai text opens correctly in Excel), end lines with CRLF, and prefix a text cell that starts with `=`, `+`, `-`, `@`, tab or carriage return with an apostrophe so a name like `=1+1` cannot run as a formula.
+
+## Data model additions
+```mermaid
+erDiagram
+  bookings ||--o{ payments : "paid by"
+  payment_methods ||--o{ payments : method
+  payments ||--o{ payments : "refund_of"
+  cash_closings }o--|| payment_methods : "cash only"
+  customers ||--o{ customer_private_notes : notes
+  app_settings }o--|| staff : "updated_by"
+```
+New tables: `app_settings`, `payment_methods`, `payments`, `cash_closings`. `bookings` gains `fee_satang` and `charge_reason`; `customers` gains `service_notes` and `anonymised_at`.
+
+## Permission matrix additions (database)
+
+| Object | owner | manager | receptionist | therapist | customer | anon |
+|---|---|---|---|---|---|---|
+| `app_settings` select / `get_settings` | rows / ok | rows / ok | rows / ok | rows / ok | 0 / `NOT_AUTHORIZED` | 0 / `NOT_AUTHORIZED` |
+| `set_setting` | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `payments`, `cash_closings` select | rows | rows (cash_closings: rows) | payments: rows; cash_closings: 0 | 0 | 0 | 0 |
+| `record_payment` | ok | ok | ok while allowed | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `verify_payment`, `void_payment`, `record_refund`, `payment_day_summary`, `close_cash_day`, `adjust_booking_charge` | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `booking_money`, `pending_payments` | ok | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `customer_summary` | ok | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `booking_detail` | ok | ok | ok | own bookings only | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `export_customer` | ok | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| `anonymise_customer`, `retention_candidates` | ok | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+| every `report_*` function | ok | ok while allowed | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` | `NOT_AUTHORIZED` |
+
+Every cell is proved by `tests/db/permissions-money.test.ts` (25 statements × 6 actors = 150 cells); the behaviour behind them by `payments.test.ts`, `settings.test.ts`, `charges.test.ts`, `customer-privacy.test.ts`, `reports-money.test.ts` and `reports-ops.test.ts`. Two details: `cash_closings` is readable by owner and manager only, and a receptionist reads `payments` but not `cash_closings`.
+
+## Acceptance evidence (spec section 18, completed by Plan 3)
+
+| Criterion | Proof |
+|---|---|
+| Payments can be recorded and reconciled | `payments.test.ts` (cash, partial, transfer awaiting verification, idempotent key, void, refund, day summary and cash closing); e2e `payments.spec.ts`, `reconciliation.spec.ts` |
+| Daily revenue reports reflect actual recorded transactions | `reports-money.test.ts` ("booked revenue sits on the service day; collected and refunded on the day money moved", "summary: one definition per number"); e2e `reports.spec.ts` "daily revenue reflects what was actually recorded" (a voided payment lowers the figure) |
+| Users cannot access actions or information beyond their permissions (manager part) | `reports-money.test.ts` "reports are for the owner, and for managers only while allowed"; `payments.test.ts` "therapists see no money; reception can be switched off"; `customer-privacy.test.ts` "a therapist reads treatment notes for their own booking only"; e2e `reports.spec.ts` "managers lose reports…", `customers.spec.ts` "managers can add private notes but not anonymise…", `settings.spec.ts` "a manager cannot open settings" |
+| Cancellation and no-show policies | `charges.test.ts`; e2e `settings.spec.ts` |
+| Card data is not stored | `payments.test.ts` "card numbers are refused…"; e2e `payments.spec.ts` "typing a card number is refused in plain words" |
+| Customer data protection tools | `customer-privacy.test.ts` (export, anonymise, retention list); e2e `customers.spec.ts` |
+| Spreadsheet export is safe | `csv.test.ts`; e2e `reports.spec.ts` ("spreadsheet-safe CSV", "a service named like a formula…") |
+
+## Not built / limits
+* **PDPA compliance still needs a legal review before production.** This plan builds the tools (consent record with date, export, anonymisation, retention list); it does not decide what must be kept or deleted.
+* **No payment provider is integrated.** Payments are recorded by staff; transfers and PromptPay are marked unverified until a manager checks them against the bank. Connecting a provider costs money and needs the owner's approval.
+* **Audit-log retention is not limited yet:** the audit log keeps growing and is not pruned.
+* Receipts / tax invoices, discount rules beyond a manual amount, and tips are not built.
+
+## Still to do for Plan 4
+Load test with dozens of rooms, security validation (including the new payment and privacy functions), end-to-end hardening, backup and rollback runbook, production configuration, audit-log retention, and review of the report queries' performance on a year of data.

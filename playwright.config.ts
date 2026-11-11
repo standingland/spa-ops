@@ -4,6 +4,7 @@ process.env.CRON_SECRET ??= 'local-dev-only';
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: false,
   workers: 1,
   retries: 0,
