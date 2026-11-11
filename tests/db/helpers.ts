@@ -85,6 +85,14 @@ export async function resetDb(): Promise<Base> {
       couple: {} as Base['couple'],
     } as Base;
     // SEED-BEGIN (each migration task adds its section below)
+    // identity (Task 2)
+    for (const k of ['owner', 'manager', 'receptionist', 'therapist', 'customer'] as const) {
+      b.users[k] = randomUUID();
+      await c.query('insert into auth.users(id, email) values ($1,$2)', [b.users[k], k + '@spa.test']);
+    }
+    if (await tableExists(c, 'staff'))
+     for (const r of ['owner', 'manager', 'receptionist', 'therapist'] as const)
+      await c.query('insert into staff(user_id, role, display_name) values ($1,$2,$3)', [b.users[r], r, r]);
     // SEED-END
     return b;
   });
