@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:db": "bash scripts/testdb.sh && vitest run tests/db",
     "test": "vitest run",
-    "test:prod": "playwright test -c playwright.prod.config.ts",
+    "test:prod": "playwright test -c playwright.prod.config.ts headers",
     "test:perf": "bash scripts/testdb.sh && vitest run -c vitest.perf.config.ts",
     "test:scale": "node scripts/load-local.mjs && playwright test -c playwright.prod.config.ts scale",
     "backup": "node scripts/backup.mjs",

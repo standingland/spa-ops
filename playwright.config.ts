@@ -7,7 +7,7 @@ export default defineConfig({
   globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: false,
   workers: 1,
-  retries: 0,
+  retries: 1,
   timeout: 60000,
   expect: { timeout: 10000 },
   use: { baseURL: 'http://localhost:3100', trace: 'retain-on-failure' },

@@ -360,5 +360,52 @@ Every cell is proved by `tests/db/permissions-money.test.ts` (25 statements × 6
 * **Audit-log retention is not limited yet:** the audit log keeps growing and is not pruned.
 * Receipts / tax invoices, discount rules beyond a manual amount, and tips are not built.
 
-## Still to do for Plan 4
-Load test with dozens of rooms, security validation (including the new payment and privacy functions), end-to-end hardening, backup and rollback runbook, production configuration, audit-log retention, and review of the report queries' performance on a year of data.
+## Final verification run (Plan 3)
+Plan 3's own run was superseded by the Plan 4 final run below, which covers every Plan 3 test again. One Plan 3 browser run was not recorded; the numbers that count are in the Plan 4 section.
+
+---
+
+# Plan 4 — Quality, hardening and deployment readiness
+
+Migrations 0019–0021. No new screens except the retention switch in Settings; the work is tests, limits, documents and scripts.
+
+## What was added
+
+| Area | Where |
+|---|---|
+| Security hardening (revokes, staff read rule, customer account guard, `health_ping`) | `supabase/migrations/0019_hardening.sql`; `tests/db/security-catalog.test.ts`, `security-outsiders.test.ts` |
+| Production settings check | `src/lib/env.ts` (`parseEnv`, lists every problem, refuses to start) |
+| Content security policy with a per-request nonce, static security headers | `src/lib/csp.ts`, `src/proxy.ts`, `next.config.ts`; `tests/e2e-prod/headers.spec.ts` |
+| Structured, redacted logs; error reference codes | `src/lib/log.ts`, `src/lib/action.ts`, `src/lib/errors.ts`, `src/components/ErrorText.tsx`, `src/app/global-error.tsx` |
+| Health check | `GET /api/health` (calls `health_ping`) |
+| First owner and password handling | `src/modules/identity/bootstrap.ts`, `scripts/bootstrap-owner.mjs`, `/account` page |
+| Performance: year-sized data, p95 budgets, storm | `tests/perf/*`, `vitest.perf.config.ts`, migration `0020_performance.sql`, `scripts/load-local.mjs`, `tests/e2e-prod/scale.spec.ts` |
+| Retention maintenance (off by default) | migration `0021_maintenance.sql`, `/api/internal/maintenance`, Settings |
+| Backup and restore drill | `scripts/backup.mjs`, `scripts/restore-drill.mjs`, `docs/operations.md` |
+| Accessibility, translation completeness, whole-day journey | `tests/e2e/a11y.spec.ts`, `src/i18n/messages.test.ts`, `tests/e2e/journey.spec.ts` |
+| Setup guide, runbook, CI | `README.md`, `docs/deployment.md`, `.github/workflows/ci.yml`, `src/docs.test.ts` |
+
+## Defects found and fixed during hardening
+* Anonymous visitors had write privileges and could call private helper functions; a deactivated user could still read their own staff row; there was no guard on a customer's account link.
+* The proxy matcher had an unescaped dot, so the security policy and session refresh never ran; fixed and covered by the header tests.
+* Past bookings lost their room code once a room was deactivated (found by the whole-day journey); the calendar now keeps retired rooms.
+* Slow queries were fixed with indexes (`bookings_live_end_idx`, customer indexes) and materialised steps in `available_candidates`.
+* Colour contrast and keyboard focus on scrollable regions (accessibility checks).
+
+## Final verification run (Plan 4, Task 12)
+```
+npm run lint             exit 0
+npm run build            exit 0
+npx vitest run src       52 passed (52)
+npm run test:db          400 passed (400)
+npm run test:perf        28 passed (28)
+npx playwright test      162 passed, 3 flaky, 3 skipped (33.5m), exit 0   [retries: 1; see docs/acceptance.md]
+npm run test:prod        3 passed (3)
+npm run test:scale       3 passed (3)
+npm run test:restore     passed in 97 s, 24 tables compared
+npm audit                0 vulnerabilities
+```
+Before the retry was enabled, two earlier full runs failed on different tests and passed when run alone. The cause was not proven; the flaky tests are named in `docs/acceptance.md`.
+
+## Readiness documents
+`docs/acceptance.md` (criteria and evidence), `docs/security-report.md` (checks, measured performance, unresolved risks), `docs/deployment.md` (go-live runbook with owner decisions), `docs/operations.md` (backup, restore, rollback).
