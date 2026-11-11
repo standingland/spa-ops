@@ -1,0 +1,25 @@
+{
+  "app": { "name": "Spa Ops" },
+  "nav": { "calendar": "Calendar", "rooms": "Rooms", "services": "Services", "therapists": "Therapists", "staff": "Staff", "signOut": "Sign out", "language": "Language" },
+  "login": { "title": "Sign in", "email": "Email", "password": "Password", "submit": "Sign in", "failed": "Incorrect email or password" },
+  "forbidden": { "title": "Access denied", "body": "Your account is not allowed to open this page.", "back": "Back to the calendar" },
+  "common": { "save": "Save", "cancel": "Cancel", "confirm": "Confirm", "loading": "Loading…", "empty": "Nothing here yet", "failed": "Something went wrong", "active": "Active", "inactive": "Inactive", "all": "All", "search": "Search", "add": "Add", "edit": "Edit", "close": "Close", "deactivate": "Deactivate", "activate": "Activate", "deactivateConfirm": "Confirm deactivation?", "minutes": "min", "none": "None" },
+  "status": { "available": "Available", "reserved": "Reserved", "occupied": "Occupied", "cleaning": "Cleaning", "outOfService": "Out of service" },
+  "errors": {
+    "NOT_AUTHORIZED": "You are not allowed to do this",
+    "THERAPIST_BUSY": "The therapist is busy at this time",
+    "POSITION_TAKEN": "This bed is already taken at this time",
+    "ROOM_OTHER_PARTY": "Another party is using this room at this time",
+    "THERAPIST_OFF_SHIFT": "The therapist is not on shift at this time",
+    "THERAPIST_TIME_OFF": "The therapist is on leave or a break at this time",
+    "THERAPIST_NOT_QUALIFIED": "The therapist is not qualified for this service",
+    "ROOM_BLOCKED": "The room is blocked at this time",
+    "ROOM_INCOMPATIBLE": "This room does not support the selected service",
+    "RESOURCE_INACTIVE": "A selected resource has been deactivated",
+    "PAST_START": "The start time is in the past",
+    "INVALID_TRANSITION": "This status change is not allowed",
+    "STALE_VERSION": "This record was changed by someone else. Please refresh.",
+    "CONFLICTS_WITH_BOOKINGS": "Unfinished bookings still use this resource",
+    "UNKNOWN": "Something unexpected went wrong"
+  }
+}

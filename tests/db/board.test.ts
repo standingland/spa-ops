@@ -1,4 +1,5 @@
 import { test, expect, beforeEach } from 'vitest';
+import type { PoolClient } from 'pg';
 import { asRole, asAdmin, resetDb, bkk, book, type Base } from './helpers';
 
 let b: Base;
@@ -7,7 +8,7 @@ beforeEach(async () => { b = await resetDb(); });
 test('the board shows display names only, and therapists only their own rows', async () => {
   await asRole(b, 'receptionist', (c) => book(c, b));
   await asRole(b, 'receptionist', (c) => book(c, b, { therapist: b.t2, position: b.pos[1], customer: b.c2 }));
-  const q = (c: any) => c.query(`select * from booking_board($1,$2)`, [bkk('00:00'), bkk('00:00', '2030-01-16')]);
+  const q = (c: PoolClient) => c.query(`select * from booking_board($1,$2)`, [bkk('00:00'), bkk('00:00', '2030-01-16')]);
   const all = await asRole(b, 'receptionist', q);
   expect(all.rowCount).toBe(2);
   expect(Object.keys(all.rows[0])).not.toEqual(expect.arrayContaining(['phone', 'email', 'full_name', 'note']));
