@@ -72,7 +72,13 @@
     "INVALID_INPUT": "Invalid input",
     "DUPLICATE": "That value already exists",
     "OVERLAP": "This time overlaps an existing entry",
-    "ROOM_NOT_READY": "The room is not ready yet (being cleaned or still occupied)"
+    "ROOM_NOT_READY": "The room is not ready yet (being cleaned or still occupied)",
+    "INVALID_SETTING": "That value is outside the allowed range",
+    "INVALID_AMOUNT": "The amount is not valid",
+    "OVERPAYMENT": "The amount is more than what is due",
+    "REFUND_EXCEEDS_PAYMENT": "The refund is more than what was paid",
+    "CARD_DATA_REFUSED": "Card numbers must not be recorded. Remove the card number and try again",
+    "REASON_REQUIRED": "Please give a reason"
   },
   "rooms": {
     "title": "Rooms and beds",
