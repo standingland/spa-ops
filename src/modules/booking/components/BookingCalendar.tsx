@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { uiErrorKey } from '@/lib/errors';
+import { useLiveRefresh } from '@/lib/realtime';
 import { addDays, bangkokDay, formatTime } from '@/lib/time';
 import { moveBooking, setBookingStatus, type BoardRow } from '../actions';
 import type { BookingStatus } from '../schema';
@@ -11,6 +12,7 @@ import { NewBookingForm } from './NewBookingForm';
 import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
 
 const PX_PER_MIN = 1;
+const LIVE_TABLES = ['bookings', 'room_blocks', 'therapist_shifts', 'therapist_time_off'] as const;
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 const toIso = (v: string) => (v ? new Date(`${v}:00+07:00`).toISOString() : '');
 const localOf = (iso: string) => `${bangkokDay(iso)}T${formatTime(iso)}`;
@@ -33,6 +35,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const t = useTranslations('booking');
   const c = useTranslations('common');
   const locale = useLocale();
+  useLiveRefresh(LIVE_TABLES);
   const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const isDesk = role !== 'therapist';

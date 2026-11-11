@@ -3,6 +3,7 @@ import { Link, redirect } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireRole, type Role } from '@/modules/identity/session';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
+import { LiveStatus } from '@/modules/identity/components/LiveStatus';
 
 const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff'; key: string; roles: Role[] }[] = [
   { href: '/today', key: 'today', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
@@ -35,6 +36,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-4">
+          <LiveStatus />
           <LocaleSwitch />
           <form action={signOut}><button className="text-sm underline" data-testid="sign-out">{t('signOut')}</button></form>
         </div>

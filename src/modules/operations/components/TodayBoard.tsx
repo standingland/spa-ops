@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
+import { useLiveRefresh } from '@/lib/realtime';
 import type { BoardRow } from '@/modules/booking/actions';
 import { markRoomReady, resolveRoomReport } from '../actions';
 import type { RoomStatus, TodayModel } from '../today';
@@ -14,6 +15,7 @@ import { ReassignDialog } from './ReassignDialog';
 import { ReportForm } from './ReportForm';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
+const LIVE_TABLES = ['bookings', 'room_turnovers', 'room_blocks', 'room_reports', 'therapist_time_off'] as const;
 const STATUSES: RoomStatus[] = ['available', 'reserved', 'occupied', 'cleaning', 'out_of_service'];
 const STATUS_KEY: Record<RoomStatus, string> = { available: 'available', reserved: 'reserved', occupied: 'occupied', cleaning: 'cleaning', out_of_service: 'outOfService' };
 const STATUS_BG: Record<RoomStatus, string> = {
@@ -45,6 +47,7 @@ export function TodayBoard({ model, role, names, reports }: { model: TodayModel;
   const te = useTranslations();
   const router = useRouter();
   const [shared, setShared] = useShared();
+  useLiveRefresh(LIVE_TABLES);
   const [error, setError] = useState<string | null>(null);
   const [reportRoom, setReportRoom] = useState<string | null>(null);
   const [reassign, setReassign] = useState<string | null>(null);

@@ -5,11 +5,13 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
+import { useLiveRefresh } from '@/lib/realtime';
 import { markRoomReady } from '../actions';
 import { filterRooms, summarizeRooms, type RoomFilter, type RoomTile } from '../rooms';
 import type { RoomStatus } from '../today';
 import { ReportForm } from './ReportForm';
 
+const LIVE_TABLES = ['bookings', 'room_turnovers', 'room_blocks', 'room_reports', 'therapist_time_off'] as const;
 const STATUSES: RoomStatus[] = ['available', 'reserved', 'occupied', 'cleaning', 'out_of_service'];
 const STATUS_KEY: Record<RoomStatus, string> = { available: 'available', reserved: 'reserved', occupied: 'occupied', cleaning: 'cleaning', out_of_service: 'outOfService' };
 const STATUS_BG: Record<RoomStatus, string> = { available: 'bg-sage', reserved: 'bg-brass', occupied: 'bg-charcoal', cleaning: 'bg-clay', out_of_service: 'bg-stone-dark' };
@@ -29,6 +31,7 @@ export function RoomBoard({ tiles, categories, therapists, initial, showNotes }:
   const te = useTranslations();
   const router = useRouter();
   const [f, setF] = useState(initial);
+  useLiveRefresh(LIVE_TABLES);
   const [error, setError] = useState<string | null>(null);
   const [reporting, setReporting] = useState<string | null>(null);
 
