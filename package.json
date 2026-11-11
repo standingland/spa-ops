@@ -10,7 +10,8 @@
     "test:db": "bash scripts/testdb.sh && vitest run tests/db",
     "test": "vitest run",
     "test:prod": "playwright test -c playwright.prod.config.ts",
-    "test:perf": "bash scripts/testdb.sh && vitest run -c vitest.perf.config.ts"
+    "test:perf": "bash scripts/testdb.sh && vitest run -c vitest.perf.config.ts",
+    "test:scale": "node scripts/load-local.mjs && playwright test -c playwright.prod.config.ts scale"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

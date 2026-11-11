@@ -134,7 +134,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
 
       <div className="overflow-x-auto rounded border border-stone bg-white" data-testid="calendar-scroll">
         <div className="flex min-w-max">
-          <div className="sticky left-0 z-20 w-14 shrink-0 border-r border-stone bg-ivory" aria-hidden>
+          <div className="sticky left-0 z-20 w-14 shrink-0 border-r border-stone bg-ivory" aria-hidden data-testid="time-axis">
             <div className="h-10 border-b border-stone" />
             <div className="relative" style={{ height }}>
               {hours.map((h) => <div key={h} className="tnum absolute left-0 w-full pr-1 text-right text-xs text-stone-dark" style={{ top: (h - startHour) * 60 * PX_PER_MIN }}>{String(h).padStart(2, '0')}:00</div>)}
