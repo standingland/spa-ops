@@ -135,7 +135,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
 
       {rows.length === 0 && <p className="text-stone-dark" data-testid="calendar-empty">{t('noBookings')}</p>}
 
-      <div className="overflow-x-auto rounded border border-stone bg-white" data-testid="calendar-scroll">
+      <div tabIndex={0} className="overflow-x-auto rounded border border-stone bg-white" data-testid="calendar-scroll">
         <div className="flex min-w-max">
           <div className="sticky left-0 z-20 w-14 shrink-0 border-r border-stone bg-ivory" aria-hidden data-testid="time-axis">
             <div className="h-10 border-b border-stone" />

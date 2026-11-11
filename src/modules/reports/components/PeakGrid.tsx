@@ -7,7 +7,7 @@ export function PeakGrid({ cells, weekday }: { cells: PeakCell[]; weekday: (dow:
   const at = (dow: number, hour: number) => cells.find((c) => c.dow === dow && c.hour === hour)?.bookings ?? 0;
   if (hours.length === 0) return null;
   return (
-    <div className="overflow-x-auto">
+    <div tabIndex={0} className="overflow-x-auto">
       <table className="tnum border-collapse text-xs" data-testid="peak-grid">
         <thead><tr><th className="p-1" />{hours.map((h) => <th key={h} className="p-1 font-normal">{String(h).padStart(2, '0')}</th>)}</tr></thead>
         <tbody>

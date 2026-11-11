@@ -72,7 +72,7 @@ export function Reconciliation({ day, summary, entries, closing }: {
       <section className="flex flex-col gap-2">
         <h2 className="text-lg">{t('byMethod')}</h2>
         {summary.length === 0 ? <p className="text-sm text-stone-dark">{t('none')}</p> : (
-          <div className="overflow-x-auto">
+          <div tabIndex={0} className="overflow-x-auto">
             <table className="tnum w-full min-w-[40rem] border-collapse text-sm">
               <thead><tr className="border-b border-stone text-left">
                 <th className="py-1">{t('method')}</th><th>{t('recorded')}</th><th>{t('verified')}</th><th>{t('awaiting')}</th><th>{t('refunded')}</th><th>{t('voided')}</th>

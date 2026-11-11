@@ -119,7 +119,7 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
       {notice && <p role="status" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
 
       {visible.length === 0 && <p className="text-stone-dark">{c('empty')}</p>}
-      <div className="overflow-x-auto">
+      <div tabIndex={0} className="overflow-x-auto">
         <table className="w-full min-w-[56rem] border-collapse text-sm">
           <thead>
             <tr>

@@ -54,7 +54,7 @@ export function ReportsDashboard({ range, today, data }: { range: Range; today: 
     </section>
   );
   const table = (head: string[], rows: (string | number)[][], id: string) => (
-    <div className="overflow-x-auto">
+    <div tabIndex={0} className="overflow-x-auto">
       <table className="tnum w-full min-w-[28rem] border-collapse text-sm" data-testid={id}>
         <thead><tr className="border-b border-stone text-left">{head.map((h) => <th key={h} className="py-1 pr-3 font-medium">{h}</th>)}</tr></thead>
         <tbody>{rows.map((r, i) => <tr key={i} className="border-b border-stone/60">{r.map((c, j) => <td key={j} className="py-1 pr-3">{c}</td>)}</tr>)}</tbody>
