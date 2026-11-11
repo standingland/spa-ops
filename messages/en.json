@@ -12,7 +12,8 @@
     "language": "Language",
     "today": "Today",
     "adminRooms": "Manage rooms",
-    "notifications": "Customer messages"
+    "notifications": "Customer messages",
+    "settings": "Settings"
   },
   "login": {
     "title": "Sign in",
@@ -363,6 +364,35 @@
       "booking_confirmed": "Booking confirmed",
       "booking_changed": "Booking changed",
       "booking_cancelled": "Booking cancelled"
+    }
+  },
+  "settings": {
+    "title": "Operating settings",
+    "saved": "Saved: {name}",
+    "groups": {
+      "operations": "Daily operations",
+      "policy": "Cancellation and no-show",
+      "payments": "Payments",
+      "reports": "Reports",
+      "retention": "Data retention"
+    },
+    "units": {
+      "minutes": "minutes",
+      "percent": "percent",
+      "months": "months"
+    },
+    "fields": {
+      "ops_arrival_window_min": "Show arrivals this long before their start time",
+      "ops_late_arrival_min": "Count a customer as late after the start time by",
+      "ops_ending_soon_min": "Warn that a treatment is ending this long before it ends",
+      "ops_room_prep_warn_min": "Flag a room as overdue when preparation exceeds",
+      "ops_reserved_lead_min": "Show a room as reserved this long before the booking",
+      "policy_cancel_free_min": "Free cancellation up to this long before the start",
+      "policy_cancel_fee_percent": "Late cancellation fee (% of the discounted price)",
+      "policy_no_show_fee_percent": "No-show fee (% of the discounted price)",
+      "payments_receptionist_can_record": "Reception may record payments",
+      "reports_manager_can_view": "Managers may view reports",
+      "retention_inactive_months": "List customers for review after no activity for"
     }
   }
 }

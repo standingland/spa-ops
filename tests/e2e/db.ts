@@ -18,8 +18,17 @@ export async function resetTestData() {
   await admin.from('notification_outbox').delete().neq('id', NIL);
   await admin.from('room_turnovers').delete().neq('id', NIL);
   await admin.from('room_reports').delete().neq('id', NIL);
+  await admin.from('payments').delete().not('refund_of', 'is', null);   // refunds point at payments
+  await admin.from('payments').delete().neq('id', NIL);
+  await admin.from('cash_closings').delete().neq('day', '1900-01-01');
+  await admin.from('app_settings').delete().neq('key', '');
   await admin.from('booking_events').delete().neq('id', 0);
   await admin.from('bookings').delete().neq('id', NIL);
+  await admin.from('customer_private_notes').delete().neq('id', NIL);
+  await admin.from('customers').delete().neq('id', NIL);
+  // payment methods: only the three seeded ones, all active
+  await admin.from('payment_methods').delete().not('code', 'in', '(cash,bank_transfer,promptpay)');
+  await admin.from('payment_methods').update({ active: true }).in('code', ['cash', 'bank_transfer', 'promptpay']);
   await admin.from('room_blocks').delete().neq('id', NIL);
   await admin.from('therapist_time_off').delete().neq('id', NIL);
 
@@ -118,7 +127,7 @@ export async function seedBooking(o: { roomCode?: string; at?: string; therapist
 }
 
 /** Books a walk-in one minute from now (as reception) and gives that therapist a shift around now. */
-export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: string; customerName?: string; consent?: boolean } = {}) {
+export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: string; otherTherapist?: boolean; customerName?: string; consent?: boolean; inMinutes?: number } = {}) {
   const client = createClient(URL, KEY, { auth: { persistSession: false } });
   const { error: se } = await client.auth.signInWithPassword({ email: 'reception@spa.test', password: 'local-dev-only' });
   if (se) throw se;
@@ -128,6 +137,8 @@ export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: st
     const { data: u } = await admin.auth.admin.listUsers({ perPage: 200 });
     const id = u!.users.find((x) => x.email === o.therapistEmail)!.id;
     th = ths!.find((t) => t.staff_user_id === id)!;
+  } else if (o.otherTherapist) {
+    th = ths!.find((t) => t.staff_user_id === null)!;
   }
   const from = new Date(Date.now() - 3600000).toISOString();
   const to = new Date(Date.now() + 3 * 3600000).toISOString();
@@ -143,7 +154,7 @@ export async function seedBookingNow(o: { roomCode?: string; therapistEmail?: st
   let { data: cust } = await admin.from('customers').select('id').eq('display_name', name).maybeSingle();
   if (!cust) ({ data: cust } = await admin.from('customers').insert({ display_name: name }).select('id').single());
   if (o.consent) await admin.from('customers').update({ comms_consent: true, phone: '0810000000' }).eq('id', cust!.id);
-  const at = new Date(Date.now() + 60000).toISOString();
+  const at = new Date(Date.now() + (o.inMinutes ?? 1) * 60000).toISOString();
   const { data, error } = await client.rpc('create_booking', {
     p_customer_id: cust!.id, p_service_id: svc!.id, p_therapist_id: th.id, p_position_id: pos!.id,
     p_start: at, p_source: 'walk_in', p_idempotency_key: crypto.randomUUID(),

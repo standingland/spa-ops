@@ -11,7 +11,7 @@ export type RoomState = {
 };
 export type Span = { therapistId: string; start: string; end: string };
 export type OpsConfig = { arrivalWindowMin: number; lateArrivalMin: number; endingSoonMin: number; roomPrepWarnMin: number };
-/** Constants for now; Plan 3 moves them into an owner-editable settings table. */
+/** The defaults; the owner's stored settings (app_settings) replace them at run time. */
 export const OPS_DEFAULTS: OpsConfig = { arrivalWindowMin: 60, lateArrivalMin: 10, endingSoonMin: 10, roomPrepWarnMin: 15 };
 export type AttentionKind = 'needs_reassignment' | 'overrunning' | 'room_not_ready' | 'late_arrival' | 'turnover_overdue' | 'room_report';
 export type Attention = { kind: AttentionKind; bookingId?: string; roomId?: string; since: string };

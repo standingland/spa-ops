@@ -9,6 +9,7 @@ import { rankAllocations, type Candidate } from '@/modules/booking/allocation';
 import { buildToday, type RoomState, type Span, type TodayModel } from './today';
 import { addStrandedRows, toBoardRow, toRoomState, type BoardDb, type RoomDb } from './mapping';
 import { AbsenceInput, ForceBlockInput, ReportInput, RoomIdInput } from './schema';
+import { opsConfigFrom, type Settings } from '@/modules/settings/schema';
 
 /** Any staff role. */
 export async function getRoomStates(): Promise<{ ok: true; rooms: RoomState[] } | { ok: false; code: string }> {
@@ -29,14 +30,15 @@ export async function getToday(): Promise<{ ok: true; now: string; model: TodayM
   const instant = `[${now},${new Date(new Date(now).getTime() + 1000).toISOString()})`;
   const supabase = await createClient();
 
-  const [board, rooms, shifts, off, stranded] = await Promise.all([
+  const [board, rooms, shifts, off, stranded, cfg] = await Promise.all([
     supabase.rpc('booking_board', { p_from: from, p_to: range.to }),
     supabase.rpc('room_status_board', { p_now: now }),
     supabase.from('therapist_shifts').select('therapist_id, during').filter('during', 'ov', instant),
     supabase.from('therapist_time_off').select('therapist_id, during').filter('during', 'ov', instant),
     session.role === 'therapist' ? Promise.resolve({ data: [], error: null }) : supabase.rpc('stranded_bookings'),
+    supabase.rpc('get_settings'),
   ]);
-  for (const r of [board, rooms, shifts, off, stranded]) if (r.error) return failFrom(r.error);
+  for (const r of [board, rooms, shifts, off, stranded, cfg]) if (r.error) return failFrom(r.error);
 
   const rows = ((board.data ?? []) as BoardDb[]).map(toBoardRow);
   const strandedRows = (stranded.data ?? []) as { booking_id: string; reason: string }[];
@@ -51,6 +53,7 @@ export async function getToday(): Promise<{ ok: true; now: string; model: TodayM
     shifts: (shifts.data ?? []).map(span),
     timeOff: (off.data ?? []).map(span),
     stranded: strandedRows.map((s) => ({ bookingId: s.booking_id, reason: s.reason })),
+    cfg: opsConfigFrom(cfg.data as Settings),
   });
   return { ok: true, now, model };
 }

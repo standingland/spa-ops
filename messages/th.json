@@ -12,7 +12,8 @@
     "language": "ภาษา",
     "today": "วันนี้",
     "adminRooms": "จัดการห้อง",
-    "notifications": "ข้อความถึงลูกค้า"
+    "notifications": "ข้อความถึงลูกค้า",
+    "settings": "ตั้งค่า"
   },
   "login": {
     "title": "เข้าสู่ระบบ",
@@ -363,6 +364,35 @@
       "booking_confirmed": "ยืนยันนัดหมาย",
       "booking_changed": "เปลี่ยนนัดหมาย",
       "booking_cancelled": "ยกเลิกนัดหมาย"
+    }
+  },
+  "settings": {
+    "title": "ตั้งค่าการดำเนินงาน",
+    "saved": "บันทึกแล้ว: {name}",
+    "groups": {
+      "operations": "งานประจำวัน",
+      "policy": "ยกเลิกและไม่มาตามนัด",
+      "payments": "การชำระเงิน",
+      "reports": "รายงาน",
+      "retention": "การเก็บข้อมูล"
+    },
+    "units": {
+      "minutes": "นาที",
+      "percent": "เปอร์เซ็นต์",
+      "months": "เดือน"
+    },
+    "fields": {
+      "ops_arrival_window_min": "แสดงลูกค้าที่กำลังจะมาถึงล่วงหน้า",
+      "ops_late_arrival_min": "ถือว่ามาสายเมื่อเลยเวลานัด",
+      "ops_ending_soon_min": "เตือนว่าใกล้เสร็จก่อนจบ",
+      "ops_room_prep_warn_min": "เตือนห้องล่าช้าเมื่อเกินเวลาเตรียมห้อง",
+      "ops_reserved_lead_min": "ห้องแสดงสถานะ \"จองแล้ว\" ล่วงหน้าก่อนเวลานัด",
+      "policy_cancel_free_min": "ยกเลิกฟรีได้ก่อนเวลานัดอย่างน้อย",
+      "policy_cancel_fee_percent": "ค่าธรรมเนียมยกเลิกกะทันหัน (% ของราคาหลังส่วนลด)",
+      "policy_no_show_fee_percent": "ค่าธรรมเนียมไม่มาตามนัด (% ของราคาหลังส่วนลด)",
+      "payments_receptionist_can_record": "ให้พนักงานต้อนรับบันทึกการชำระเงินได้",
+      "reports_manager_can_view": "ให้ผู้จัดการดูรายงานได้",
+      "retention_inactive_months": "รายชื่อทบทวนข้อมูลเมื่อลูกค้าไม่มีกิจกรรมเกิน"
     }
   }
 }
