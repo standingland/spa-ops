@@ -16,7 +16,8 @@
     "settings": "Settings",
     "payments": "Payments",
     "customers": "Customers",
-    "reports": "Reports"
+    "reports": "Reports",
+    "account": "My account"
   },
   "login": {
     "title": "Sign in",
@@ -149,7 +150,10 @@
       "manager": "Manager",
       "receptionist": "Receptionist",
       "therapist": "Therapist"
-    }
+    },
+    "resetPassword": "Set new password",
+    "newPassword": "New password",
+    "confirmReset": "Confirm new password"
   },
   "therapists": {
     "title": "Therapists and shifts",
@@ -615,5 +619,14 @@
       "hour": "Hour",
       "bookings": "Bookings"
     }
+  },
+  "account": {
+    "title": "My account",
+    "changePassword": "Change password",
+    "current": "Current password",
+    "next": "New password",
+    "hint": "At least 10 characters, and different from the current one",
+    "change": "Change password",
+    "changed": "Password changed"
   }
 }

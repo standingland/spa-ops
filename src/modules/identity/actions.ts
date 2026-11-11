@@ -4,7 +4,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { done, fail, failFrom, type ActionResult } from '@/lib/action';
 import { roleOrNull, type Role } from './session';
-import { ROLES, StaffInput } from './schema';
+import { createClient as createPlainClient } from '@supabase/supabase-js';
+import { ChangePasswordInput, ROLES, SetPasswordInput, StaffInput } from './schema';
 
 const ownerOnly = () => roleOrNull('owner');
 
@@ -57,4 +58,31 @@ export async function setStaffActive(userId: string, active: boolean): Promise<A
 export async function setStaffRole(userId: string, role: Role): Promise<ActionResult> {
   if (!(ROLES as readonly string[]).includes(role)) return fail('INVALID_INPUT');
   return updateStaff(userId, { role });
+}
+
+/** Owner only: sets a new password for a staff member (the old one stops working at once). */
+export async function setStaffPassword(input: SetPasswordInput): Promise<ActionResult> {
+  if (!(await ownerOnly())) return fail('NOT_AUTHORIZED');
+  const p = SetPasswordInput.safeParse(input);
+  if (!p.success) return fail('INVALID_INPUT');
+  const { error } = await createAdminClient().auth.admin.updateUserById(p.data.userId, { password: p.data.password });
+  if (error) return fail(error.status === 404 ? 'NOT_AUTHORIZED' : 'UNKNOWN');
+  return done(p.data.userId);
+}
+
+/** Any signed-in staff member. The current password is checked by signing in with it. */
+export async function changeMyPassword(input: ChangePasswordInput): Promise<ActionResult> {
+  const me = await roleOrNull();
+  if (!me) return fail('NOT_AUTHORIZED');
+  const p = ChangePasswordInput.safeParse(input);
+  if (!p.success || p.data.next === p.data.current) return fail('INVALID_INPUT');
+  const supabase = await createClient();
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user?.email) return fail('NOT_AUTHORIZED');
+  const probe = createPlainClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
+  const check = await probe.auth.signInWithPassword({ email: u.user.email, password: p.data.current });
+  if (check.error) return fail('NOT_AUTHORIZED');
+  const { error } = await supabase.auth.updateUser({ password: p.data.next });
+  if (error) return fail('INVALID_INPUT');
+  return done(me.userId);
 }

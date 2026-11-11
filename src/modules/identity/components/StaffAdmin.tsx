@@ -7,6 +7,7 @@ import { useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { createStaff, setStaffActive, setStaffRole, type StaffListRow } from '../actions';
 import { ROLES } from '../schema';
+import { StaffPasswordReset } from './StaffPasswordReset';
 
 const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 
@@ -44,7 +45,7 @@ export function StaffAdmin({ staff, me }: { staff: StaffListRow[]; me: string })
             }
           }}>
           <label className="flex flex-col text-sm">{t('email')}<input type="email" required value={v.email} onChange={(e) => setV({ ...v, email: e.target.value })} className={field} data-testid="staff-email" /></label>
-          <label className="flex flex-col text-sm">{t('password')}<input type="password" required minLength={8} value={v.password} onChange={(e) => setV({ ...v, password: e.target.value })} className={field} data-testid="staff-password" /></label>
+          <label className="flex flex-col text-sm">{t('password')}<input type="password" required minLength={10} value={v.password} onChange={(e) => setV({ ...v, password: e.target.value })} className={field} data-testid="staff-password" /></label>
           <label className="flex flex-col text-sm">{t('role')}
             <select value={v.role} onChange={(e) => setV({ ...v, role: e.target.value })} className={field} data-testid="staff-role">
               {ROLES.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
@@ -68,6 +69,7 @@ export function StaffAdmin({ staff, me }: { staff: StaffListRow[]; me: string })
               {ROLES.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
             </select>
             <span className="rounded bg-ivory px-2 py-0.5 text-xs">{s.active ? c('active') : c('inactive')}</span>
+            <StaffPasswordReset userId={s.userId} onError={setError} onDone={() => start(() => router.refresh())} />
             {s.userId !== me && (
               <button className="ml-auto text-sm underline" data-testid="staff-toggle" onClick={() => run(setStaffActive(s.userId, !s.active))}>
                 {s.active ? c('deactivate') : c('activate')}
