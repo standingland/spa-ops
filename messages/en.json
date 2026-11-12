@@ -517,6 +517,7 @@
     "privateNotes": "Private notes (managers and owner only)",
     "newNote": "New note",
     "addNote": "Add note",
+    "dangerZone": "Danger zone",
     "privacy": "Personal data",
     "privacyHelp": "Export everything held about this customer, or remove their personal data on request. Have the process reviewed by a legal adviser before production use.",
     "export": "Export data (JSON)",

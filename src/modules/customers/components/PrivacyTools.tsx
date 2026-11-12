@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Field, Input } from '@/components/ui/field';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { anonymiseCustomer } from '../actions';
-
-const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 
 /** Export for owner and manager; irreversible anonymisation for the owner, behind a typed confirmation. */
 export function PrivacyTools({ customerId, displayName, isOwner, anonymised }: { customerId: string; displayName: string; isOwner: boolean; anonymised: boolean }) {
@@ -31,29 +33,40 @@ export function PrivacyTools({ customerId, displayName, isOwner, anonymised }: {
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded border border-stone bg-white p-4" aria-label={t('privacy')} data-testid="privacy-tools">
-      <h2 className="text-lg">{t('privacy')}</h2>
-      <p className="text-sm text-stone-dark">{t('privacyHelp')}</p>
-      <div className="flex flex-wrap gap-3 text-sm">
-        <a href={`/api/customers/${customerId}/export`} download data-testid="export-json" className="rounded border border-charcoal px-3 py-1.5">{t('export')}</a>
-        {isOwner && !anonymised && !open && (
-          <button data-testid="anonymise-open" onClick={() => setOpen(true)} className="rounded border border-clay px-3 py-1.5 text-clay">{t('anonymise')}</button>
-        )}
-      </div>
-      {open && (
-        <form onSubmit={submit} className="flex flex-col gap-3 rounded border border-clay p-3">
-          <p className="text-sm font-semibold text-clay">{t('anonymiseWarning')}</p>
-          <p className="text-sm">{t('anonymiseKeeps')}</p>
-          <label className="flex flex-col text-sm">{t('reason')}
-            <input data-testid="anonymise-reason" value={reason} onChange={(e) => setReason(e.target.value)} className={field} /></label>
-          <label className="flex flex-col text-sm">{t('typeName', { name: displayName })}
-            <input data-testid="anonymise-confirm-text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} className={field} autoComplete="off" /></label>
-          {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
-          <div className="flex gap-3">
-            <button type="submit" disabled={busy} data-testid="anonymise-submit" className="rounded bg-clay px-3 py-1.5 text-sm text-white">{t('anonymiseNow')}</button>
-            <button type="button" onClick={() => setOpen(false)} className="text-sm underline">{te('common.cancel')}</button>
-          </div>
-        </form>
+    <section className="flex min-w-0 flex-col gap-4" aria-label={t('privacy')} data-testid="privacy-tools">
+      <Card className="flex flex-col gap-3">
+        <h2 className="font-serif text-heading text-ink">{t('privacy')}</h2>
+        <p className="text-body text-ink-muted">{t('privacyHelp')}</p>
+        <div className="flex flex-wrap gap-3">
+          <a href={`/api/customers/${customerId}/export`} download data-testid="export-json" className={buttonVariants({ variant: 'secondary' })}>{t('export')}</a>
+        </div>
+      </Card>
+      {isOwner && !anonymised && (
+        <Card tone="danger" className="flex flex-col gap-3">
+          <h2 className="font-serif text-heading text-danger">{t('dangerZone')}</h2>
+          {!open && (
+            <div className="flex flex-wrap gap-3">
+              <Button type="button" variant="secondary" data-testid="anonymise-open" onClick={() => setOpen(true)} className="border-danger text-danger">{t('anonymise')}</Button>
+            </div>
+          )}
+          {open && (
+            <form onSubmit={submit} className="flex flex-col gap-3">
+              <p className="text-body font-semibold text-danger">{t('anonymiseWarning')}</p>
+              <p className="text-body text-ink">{t('anonymiseKeeps')}</p>
+              <Field label={t('reason')}>
+                <Input data-testid="anonymise-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
+              </Field>
+              <Field label={t('typeName', { name: displayName })}>
+                <Input data-testid="anonymise-confirm-text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} autoComplete="off" />
+              </Field>
+              {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
+              <div className="flex flex-wrap items-center gap-3">
+                <Button type="submit" variant="danger" disabled={busy} data-testid="anonymise-submit">{t('anonymiseNow')}</Button>
+                <Button type="button" variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" onClick={() => setOpen(false)}>{te('common.cancel')}</Button>
+              </div>
+            </form>
+          )}
+        </Card>
       )}
     </section>
   );

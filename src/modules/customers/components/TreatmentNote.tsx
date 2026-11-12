@@ -14,5 +14,5 @@ export function TreatmentNote({ bookingId }: { bookingId: string }) {
     return () => { live = false; };
   }, [bookingId]);
   if (!text) return null;
-  return <span data-testid="treatment-note" className="w-full text-sm italic text-stone-dark">{text}</span>;
+  return <span data-testid="treatment-note" className="w-full min-w-0 break-words text-caption italic text-ink-muted">{text}</span>;
 }
