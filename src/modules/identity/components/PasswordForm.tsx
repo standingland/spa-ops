@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Field, Input } from '@/components/ui/field';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { changeMyPassword } from '../actions';
-
-const field = 'rounded border border-stone-dark px-2 py-1.5 text-sm';
 
 export function PasswordForm() {
   const t = useTranslations('account');
@@ -28,16 +30,18 @@ export function PasswordForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex max-w-md flex-col gap-3 rounded border border-stone bg-white p-4" aria-label={t('changePassword')}>
-      <h2 className="text-lg">{t('changePassword')}</h2>
-      <label className="flex flex-col text-sm">{t('current')}
-        <input type="password" autoComplete="current-password" data-testid="pw-current" value={current} onChange={(e) => setCurrent(e.target.value)} className={field} /></label>
-      <label className="flex flex-col text-sm">{t('next')}
-        <input type="password" autoComplete="new-password" data-testid="pw-next" value={next} onChange={(e) => setNext(e.target.value)} className={field} /></label>
-      <p className="text-xs text-stone-dark">{t('hint')}</p>
-      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
-      {notice && <p role="status" data-testid="pw-changed" className="rounded border border-sage px-3 py-2 text-sm">{notice}</p>}
-      <div><button type="submit" disabled={busy} data-testid="pw-submit" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{t('change')}</button></div>
+    <Card className="max-w-md">
+    <form onSubmit={submit} className="flex flex-col gap-3" aria-label={t('changePassword')}>
+      <h2 className="font-serif text-heading text-ink">{t('changePassword')}</h2>
+      <Field label={t('current')}>
+        <Input type="password" autoComplete="current-password" data-testid="pw-current" value={current} onChange={(e) => setCurrent(e.target.value)} /></Field>
+      <Field label={t('next')}>
+        <Input type="password" autoComplete="new-password" data-testid="pw-next" value={next} onChange={(e) => setNext(e.target.value)} /></Field>
+      <p className="text-caption text-ink-muted">{t('hint')}</p>
+      {error && <Alert tone="error" className="break-words"><ErrorText text={error} /></Alert>}
+      {notice && <Alert data-testid="pw-changed" className="break-words">{notice}</Alert>}
+      <div><Button type="submit" disabled={busy} data-testid="pw-submit">{t('change')}</Button></div>
     </form>
+    </Card>
   );
 }

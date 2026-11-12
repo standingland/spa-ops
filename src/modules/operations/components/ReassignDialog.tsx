@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
@@ -44,26 +47,28 @@ export function ReassignDialog({ bookingId, names, onClose }: { bookingId: strin
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded border border-stone bg-white p-4" aria-label={t('reassignTitle')} data-testid="reassign-dialog">
+    <Card>
+    <section className="flex flex-col gap-3" aria-label={t('reassignTitle')} data-testid="reassign-dialog">
       <div className="flex items-center gap-3">
-        <h2 className="text-lg">{t('reassignTitle')}</h2>
-        <button className="ml-auto text-sm underline" onClick={onClose}>{t('close')}</button>
+        <h2 className="font-serif text-heading text-ink">{t('reassignTitle')}</h2>
+        <Button variant="link" className="ml-auto min-h-11 px-2 pointer-fine:min-h-0" onClick={onClose}>{t('close')}</Button>
       </div>
-      {data && <p className="tnum text-sm">{data.booking.customerDisplayName} · {bangkokDay(data.booking.startsAt)} {formatTime(data.booking.startsAt)}–{formatTime(data.booking.endsAt)}</p>}
-      {error && <p role="alert" className="rounded border border-clay px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
+      {data && <p className="tnum min-w-0 break-words text-body">{data.booking.customerDisplayName} · {bangkokDay(data.booking.startsAt)} {formatTime(data.booking.startsAt)}–{formatTime(data.booking.endsAt)}</p>}
+      {error && <Alert tone="error" className="break-words"><ErrorText text={error} /></Alert>}
       {data && data.candidates.length === 0 && (
-        <p className="text-sm">{t('noAlternatives')}{' '}
-          <Link className="underline" href={`/calendar?day=${bangkokDay(data.booking.startsAt)}`}>{t('openCalendar')}</Link></p>
+        <p className="text-body">{t('noAlternatives')}{' '}
+          <Link className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0" href={`/calendar?day=${bangkokDay(data.booking.startsAt)}`}>{t('openCalendar')}</Link></p>
       )}
       <ul className="flex flex-wrap gap-2">
         {data?.candidates.slice(0, 12).map((c) => (
-          <li key={c.therapistId + c.positionId}>
-            <button disabled={busy} data-testid="reassign-option" onClick={() => apply(c)} className="rounded border border-charcoal px-3 py-1.5 text-sm">
+          <li key={c.therapistId + c.positionId} className="min-w-0">
+            <Button variant="secondary" size="sm" disabled={busy} data-testid="reassign-option" onClick={() => apply(c)} className="max-w-full break-words">
               {names.therapists[c.therapistId]} · {names.rooms[c.roomId]}
-            </button>
+            </Button>
           </li>
         ))}
       </ul>
     </section>
+    </Card>
   );
 }
