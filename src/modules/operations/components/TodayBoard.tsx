@@ -91,11 +91,13 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   const rowBox = 'flex min-w-0 flex-wrap items-center gap-3 rounded-[var(--radius)] border border-line bg-surface p-3';
   const actions = (r: BoardRow) => (
     <span className="ml-auto flex flex-wrap items-center gap-2">
-      <Button size="sm" variant="secondary" data-testid="open-details" onClick={() => setDetailsId(r.bookingId)}>{b('openDetails')}</Button>
+      {!shared && <Button size="sm" variant="secondary" data-testid="open-details" onClick={() => setDetailsId(r.bookingId)}>{b('openDetails')}</Button>}
       <BookingActions row={r} role={role} onError={setError} />
     </span>
   );
-  const detailsRow = detailsId ? all.find((r) => r.bookingId === detailsId) : undefined;
+  // Customer names never show on a shared screen: turning it on closes any open panel (render-time reset, no stale id).
+  if (shared && detailsId) setDetailsId(null);
+  const detailsRow = detailsId && !shared ? all.find((r) => r.bookingId === detailsId) : undefined;
 
   return (
     <div className="flex min-w-0 flex-col gap-6">

@@ -24,8 +24,13 @@ test('(b) the shared screen removes the guest from every room row and arrival ro
   await setStatusAsReception(k.id, 'in_treatment');
   await page.reload();
   await expect(page.getByTestId('room-status-row').filter({ hasText: 'คุณลับห้อง' })).toHaveCount(1);
+  // A details panel opened before the shared screen is turned on must disappear with it.
+  await page.getByTestId('treatment-row').getByTestId('open-details').click();
+  await expect(page.getByTestId('booking-panel')).toBeVisible();
   await page.getByTestId('shared-toggle').click();
   await expect(page.getByTestId('shared-toggle')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('booking-panel')).toHaveCount(0);
+  await expect(page.getByTestId('open-details')).toHaveCount(0);
   await expect(page.getByTestId('room-status-row').filter({ hasText: 'คุณลับห้อง' })).toHaveCount(0);
   await expect(page.locator('[data-testid=arrival-row]').filter({ hasText: 'คุณลับห้อง' })).toHaveCount(0);
   await expect(page.getByText('คุณลับห้อง')).toHaveCount(0);
