@@ -45,6 +45,8 @@ Set these on the host. A production start **refuses to run** and lists every pro
 | `SUPABASE_SERVICE_KEY` | the project's **secret** service key — same page. Server only; never expose it; it must differ from the public key |
 | `CRON_SECRET` | a freshly generated random string of **32 or more characters** (for example `openssl rand -base64 48`). Not `local-dev-only` |
 | `NOTIFY_SENDER_NAME` | the business name shown in customer messages (default `Studio`) |
+| `BRAND_NAME` | optional; the name shown in the staff header (default `BANYAN`) |
+| `BRAND_TAGLINE` | optional; the tagline shown under the name (default `Men's Spa · Thailand`) |
 | `NEXT_PUBLIC_LIVE_POLL_MS` | optional; how often screens refresh as a fallback, in milliseconds (default 60000) |
 
 Used only on development machines, never set in production: `TEST_DATABASE_URL` (point the database tests at your own empty PostgreSQL instead of the throwaway one) and `E2E_DATABASE_URL` (direct SQL for the browser tests; defaults to the local Supabase database).
@@ -90,6 +92,6 @@ Run `npm run backup -- --linked` against the project, then restore it into a **s
 * **PDPA legal review** of the consent text, retention periods, anonymisation procedure and where the data is stored. The system provides the tools (consent record, export, anonymisation, a retention list); it does not decide what the law requires.
 * **Customer messages:** decide whether to connect a message provider (SMS, LINE or email; this costs money and needs the owner's approval) or leave messages off. Until then, messages are only logged. Only the confirmed / changed / cancelled messages exist; appointment reminders are not built.
 * Set the **cancellation and no-show policy** and the **retention months** in Settings.
-* Replace the header name "Spa Ops" and set `NOTIFY_SENDER_NAME` to the business name.
+* Set `BRAND_NAME` and `BRAND_TAGLINE` (the header name and tagline) and `NOTIFY_SENDER_NAME` (the business name in customer messages).
 * Decide who may see reports (the owner can switch them off for managers) and whether reception may record payments.
 * Remove or disable any development account that was ever created in this database.
