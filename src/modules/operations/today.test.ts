@@ -51,7 +51,7 @@ test('therapist states come from shifts, breaks and treatments', () => {
     shifts: [span('a', '2030-01-15T03:00:00Z', '2030-01-15T15:00:00Z'), span('b', '2030-01-15T03:00:00Z', '2030-01-15T15:00:00Z'), span('c', '2030-01-15T03:00:00Z', '2030-01-15T15:00:00Z'), span('d', '2030-01-15T08:00:00Z', '2030-01-15T15:00:00Z')],
     timeOff: [span('b', '2030-01-15T04:30:00Z', '2030-01-15T05:30:00Z')],
   });
-  expect(m.therapists).toEqual([{ therapistId: 'a', state: 'in_treatment' }, { therapistId: 'b', state: 'on_break' }, { therapistId: 'c', state: 'free' }]);
+  expect(m.therapists).toEqual([{ therapistId: 'a', state: 'in_treatment', roomId: expect.any(String) }, { therapistId: 'b', state: 'on_break', roomId: null }, { therapistId: 'c', state: 'free', roomId: null }]);
 });
 test('ROOM_NOT_READY is a known error with Thai and English text', () => {
   expect(errorMessageKey('ROOM_NOT_READY')).toBe('errors.ROOM_NOT_READY');
