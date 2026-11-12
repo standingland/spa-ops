@@ -3,16 +3,17 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { Button } from '@/components/ui/button';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { setBookingStatus, type BoardRow } from '@/modules/booking/actions';
 import type { BookingStatus } from '@/modules/booking/schema';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
 
-const DESK_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = {
+export const DESK_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = {
   requested: ['confirmed', 'cancelled'], confirmed: ['checked_in', 'no_show', 'cancelled'], checked_in: ['in_treatment', 'cancelled'], in_treatment: ['completed'],
 };
-const THERAPIST_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = { checked_in: ['in_treatment'], in_treatment: ['completed'] };
+export const THERAPIST_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = { checked_in: ['in_treatment'], in_treatment: ['completed'] };
 
 /** Only the actions the signed-in role may take; the database still enforces them. */
 export function BookingActions({ row, role, onError }: { row: BoardRow; role: Role; onError: (message: string | null) => void }) {
@@ -34,18 +35,15 @@ export function BookingActions({ row, role, onError }: { row: BoardRow; role: Ro
   return (
     <span className="flex flex-wrap gap-2 text-sm">
       {next.filter((s) => s !== 'cancelled').map((s) => (
-        <button key={s} disabled={busy} data-testid={`act-${s}`} onClick={() => go(s)}
-          className="rounded border border-charcoal px-3 py-1.5 disabled:opacity-60">{t(`actions.${s}`)}</button>
+        <Button key={s} size="sm" variant="secondary" disabled={busy} data-testid={`act-${s}`} onClick={() => go(s)}>{t(`actions.${s}`)}</Button>
       ))}
       {next.includes('cancelled') && !confirming && (
-        <button disabled={busy} data-testid="act-cancelled" onClick={() => setConfirming(true)}
-          className="rounded border border-clay px-3 py-1.5 text-clay">{t('actions.cancelled')}</button>
+        <Button size="sm" variant="secondary" className="border-danger text-danger" disabled={busy} data-testid="act-cancelled" onClick={() => setConfirming(true)}>{t('actions.cancelled')}</Button>
       )}
       {confirming && (
         <>
-          <button disabled={busy} data-testid="act-cancelled-confirm" onClick={() => { setConfirming(false); void go('cancelled'); }}
-            className="rounded bg-clay px-3 py-1.5 text-white">{t('actions.confirmCancel')}</button>
-          <button onClick={() => setConfirming(false)} className="underline">×</button>
+          <Button size="sm" variant="danger" disabled={busy} data-testid="act-cancelled-confirm" onClick={() => { setConfirming(false); void go('cancelled'); }}>{t('actions.confirmCancel')}</Button>
+          <Button size="sm" variant="secondary" aria-label={te('common.cancel')} onClick={() => setConfirming(false)}>×</Button>
         </>
       )}
     </span>

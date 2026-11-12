@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/field';
+import { PageHeader } from '@/components/ui/page-header';
 import { useTranslations } from 'next-intl';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { saveSetting } from '../actions';
 import { SETTING_GROUPS, SETTING_KEYS, SETTING_META, settingId, type SettingKey, type Settings } from '../schema';
-
-const field = 'w-28 rounded border border-stone-dark px-2 py-1 text-sm';
 
 export function SettingsForm({ initial }: { initial: Settings }) {
   const t = useTranslations('settings');
@@ -32,34 +34,36 @@ export function SettingsForm({ initial }: { initial: Settings }) {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <h1 className="text-2xl">{t('title')}</h1>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
-      {notice && <p role="status" data-testid="setting-saved" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
+      <PageHeader title={t('title')} />
+      {error && <Alert tone="error" className="break-words"><ErrorText text={error} /></Alert>}
+      {notice && <Alert data-testid="setting-saved" className="break-words">{notice}</Alert>}
       {SETTING_GROUPS.map((g) => (
-        <fieldset key={g} className="flex flex-col gap-3 rounded border border-stone bg-white p-4">
-          <legend className="px-1 font-serif text-lg">{t(`groups.${g}`)}</legend>
-          {g === 'retention' && <p className="text-sm text-clay" data-testid="prune-help">{t('pruneHelp')}</p>}
+        <Card key={g}>
+        <fieldset className="flex min-w-0 flex-col gap-3">
+          <legend className="px-1 font-serif text-heading text-ink">{t(`groups.${g}`)}</legend>
+          {g === 'retention' && <p className="text-caption text-danger" data-testid="prune-help">{t('pruneHelp')}</p>}
           {SETTING_KEYS.filter((k) => SETTING_META[k].group === g).map((k) => {
             const m = SETTING_META[k];
             return (
-              <div key={k} className="flex flex-wrap items-center gap-3 text-sm">
-                <label htmlFor={`s-${k}`} className="min-w-64 flex-1">{t(`fields.${settingId(k)}`)}</label>
+              <div key={k} className="flex flex-wrap items-center gap-3 text-body">
+                <label htmlFor={`s-${k}`} className="min-w-0 flex-1 basis-64 break-words">{t(`fields.${settingId(k)}`)}</label>
                 {m.kind === 'bool' ? (
                   <input id={`s-${k}`} type="checkbox" data-testid={`setting-${k}`} checked={saved[k] as boolean}
-                    onChange={(e) => commit(k, e.target.checked)} className="h-5 w-5" />
+                    onChange={(e) => commit(k, e.target.checked)} className="size-5 accent-primary" />
                 ) : (
                   <>
-                    <input id={`s-${k}`} type="number" inputMode="numeric" min={m.min} max={m.max} data-testid={`setting-${k}`}
-                      value={draft[k]} className={`${field} tnum`}
+                    <Input id={`s-${k}`} type="number" inputMode="numeric" min={m.min} max={m.max} data-testid={`setting-${k}`}
+                      value={draft[k]} className="tnum w-28"
                       onChange={(e) => setDraft((d) => ({ ...d, [k]: e.target.value }))}
                       onBlur={() => { if (draft[k] !== String(saved[k])) commit(k, Number(draft[k])); }} />
-                    <span className="w-48 text-xs text-stone-dark">{t(`units.${m.unit}`)} · {m.min}–{m.max}</span>
+                    <span className="w-48 min-w-0 text-caption text-ink-muted">{t(`units.${m.unit}`)} · {m.min}–{m.max}</span>
                   </>
                 )}
               </div>
             );
           })}
         </fieldset>
+        </Card>
       ))}
     </div>
   );

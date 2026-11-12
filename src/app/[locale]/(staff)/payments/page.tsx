@@ -1,3 +1,4 @@
+import { Alert } from '@/components/ui/alert';
 import { requireRole } from '@/modules/identity/session';
 import { bangkokDay } from '@/lib/time';
 import { getDayLedger, listAllPaymentMethods } from '@/modules/payments/actions';
@@ -9,7 +10,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const sp = await searchParams;
   const day = sp.day && /^\d{4}-\d{2}-\d{2}$/.test(sp.day) ? sp.day : bangkokDay(new Date());
   const ledger = await getDayLedger(day);
-  if (!ledger.ok) return <p role="alert" className="text-clay">{ledger.code}</p>;
+  if (!ledger.ok) return <Alert tone="error">{ledger.code}</Alert>;
   const methods = session.role === 'owner' ? await listAllPaymentMethods() : null;
   return (
     <div className="flex flex-col gap-10">

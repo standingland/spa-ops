@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 import { requireRole } from '@/modules/identity/session';
 import { PasswordForm } from '@/modules/identity/components/PasswordForm';
@@ -10,8 +11,8 @@ export default async function AccountPage() {
   const { data } = await (await createClient()).from('staff').select('display_name').eq('user_id', session.userId).maybeSingle();
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl">{t('title')}</h1>
-      <p className="text-sm" data-testid="account-summary">{data?.display_name} · {roles(session.role)}</p>
+      <PageHeader title={t('title')} />
+      <p className="min-w-0 break-words text-body" data-testid="account-summary">{data?.display_name} · {roles(session.role)}</p>
       <PasswordForm />
     </div>
   );

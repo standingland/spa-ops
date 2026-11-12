@@ -3,13 +3,16 @@ import { Noto_Serif_Thai, IBM_Plex_Sans_Thai } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { getBrand } from '@/lib/brand';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 const serif = Noto_Serif_Thai({ variable: '--font-noto-serif', subsets: ['thai', 'latin'], weight: ['500', '600'] });
 const plex = IBM_Plex_Sans_Thai({ variable: '--font-plex', subsets: ['thai', 'latin'], weight: ['400', '500', '600'] });
 
-export const metadata: Metadata = { title: 'Spa Ops' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getBrand(process.env).name };
+}
 
 export default async function LocaleLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;

@@ -57,3 +57,8 @@ test('ROOM_NOT_READY is a known error with Thai and English text', () => {
   expect(errorMessageKey('ROOM_NOT_READY')).toBe('errors.ROOM_NOT_READY');
   expect(th.errors.ROOM_NOT_READY && en.errors.ROOM_NOT_READY).toBeTruthy();
 });
+
+test('the model carries the rooms it was built from (no extra read)', () => {
+  const rooms = [room({ roomId: 'a', status: 'occupied' }), room({ roomId: 'b' })];
+  expect(run({ rooms }).rooms).toEqual(rooms);
+});

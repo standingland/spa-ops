@@ -123,3 +123,53 @@ test('a newly added room becomes a calendar column', async ({ page }) => {
   await page.goto('/th/calendar?view=rooms');
   await expect(page.getByTestId('calendar-column')).toHaveCount(7);
 });
+
+test.describe('booking details panel', () => {
+  const NOTE = 'บันทึกลับ-SECRET-7731';
+
+  test('a desk role sees the panel with the booking history', async ({ page }) => {
+    const a = await seedBooking({ at: tomorrowAt('11:00'), customerName: 'คุณประวัติ' });
+    await signIn(page, 'reception@spa.test');
+    await page.goto(`/th/calendar?day=${dayOf(a.at)}`);
+    await cardFor(page, 'คุณประวัติ').click();
+    await expect(page.getByTestId('booking-panel')).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveAccessibleName('คุณประวัติ');
+    await expect(page.getByTestId('booking-history')).toBeVisible();
+    await expect(page.getByTestId('booking-history').locator('[data-kind=created]')).toHaveCount(1);
+  });
+
+  test('Escape closes the panel and returns focus to the booking card', async ({ page }) => {
+    const a = await seedBooking({ at: tomorrowAt('11:00'), customerName: 'คุณหลบ' });
+    await signIn(page, 'manager@spa.test');
+    await page.goto(`/th/calendar?day=${dayOf(a.at)}`);
+    const card = cardFor(page, 'คุณหลบ');
+    await card.click();
+    await expect(page.getByTestId('booking-panel')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('booking-panel')).toHaveCount(0);
+    await expect(card).toBeFocused();
+  });
+
+  test('a therapist opening their own booking sees no history', async ({ page }) => {
+    const mine = await seedBooking({ therapistEmail: 'therapist@spa.test', roomCode: 'R1', note: NOTE });
+    await signIn(page, 'therapist@spa.test');
+    await page.goto(`/th/calendar?day=${dayOf(mine.at)}`);
+    await page.getByTestId('booking-card').click();
+    await expect(page.getByTestId('booking-panel')).toBeVisible();
+    await expect(page.getByTestId('treatment-note')).toContainText(NOTE); // the panel has finished loading its data
+    await expect(page.getByTestId('booking-history')).toHaveCount(0);
+  });
+
+  test('the history never shows the booking note', async ({ page }) => {
+    const a = await seedBooking({ at: tomorrowAt('11:00'), customerName: 'คุณโน้ต', note: NOTE });
+    await signIn(page, 'manager@spa.test');
+    await page.goto(`/th/calendar?day=${dayOf(a.at)}`);
+    await cardFor(page, 'คุณโน้ต').click();
+    await page.getByTestId('status-checked_in').click(); // adds a status_changed event whose snapshots carry the note
+    await expect(cardFor(page, 'คุณโน้ต')).toHaveAttribute('data-status', 'checked_in');
+    await cardFor(page, 'คุณโน้ต').click();
+    await expect(page.getByTestId('booking-history').locator('li')).toHaveCount(2);
+    await expect(page.getByTestId('booking-history')).not.toContainText(NOTE);
+    await expect(page.getByTestId('booking-history')).not.toContainText('SECRET');
+  });
+});

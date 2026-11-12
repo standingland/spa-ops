@@ -2,6 +2,12 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Field, Input, Select } from '@/components/ui/field';
+import { PageHeader } from '@/components/ui/page-header';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
@@ -19,7 +25,6 @@ export type TimeOffRow = { id: string; therapist_id: string; start: string; end:
 export type ServiceOpt = { id: string; name_th: string; name_en: string | null };
 export type StaffOpt = { user_id: string; display_name: string };
 
-const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 const local = (iso: string) => `${bangkokDay(iso)}T${formatTime(iso)}`;
 const toIso = (v: string) => (v ? new Date(`${v}:00+07:00`).toISOString() : '');
 
@@ -60,30 +65,30 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
 
   return (
     <div className="flex flex-col gap-4" aria-busy={pending}>
+      <PageHeader title={t('title')}
+        actions={<>
+          <Button data-testid="therapist-add" onClick={() => setPanel({ kind: 'therapist', row: null })}>{t('add')}</Button>
+          <Button variant="secondary" data-testid="shift-add" onClick={() => setPanel({ kind: 'shift', row: null })}>{t('addShift')}</Button>
+          <Button variant="secondary" data-testid="timeoff-add" onClick={() => setPanel({ kind: 'timeoff', row: null })}>{t('addTimeOff')}</Button>
+        </>} />
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="mr-4 text-2xl">{t('title')}</h1>
-        <input aria-label={c('search')} placeholder={c('search')} value={q} onChange={(e) => setQ(e.target.value)} className={field} data-testid="therapist-search" />
-        <select aria-label={t('filterType')} value={type} onChange={(e) => setType(e.target.value)} className={field} data-testid="therapist-filter-type">
+        <Input aria-label={c('search')} placeholder={c('search')} value={q} onChange={(e) => setQ(e.target.value)} className="w-auto min-w-0 max-w-full" data-testid="therapist-search" />
+        <Select aria-label={t('filterType')} value={type} onChange={(e) => setType(e.target.value)} className="w-auto min-w-0 max-w-full" data-testid="therapist-filter-type">
           <option value="">{c('all')}</option>
           <option value="employee">{t('employee')}</option>
           <option value="freelance">{t('freelance')}</option>
-        </select>
-        <span className="ml-auto flex flex-wrap gap-2 text-sm">
-          <button className="rounded bg-charcoal px-3 py-1.5 text-ivory" data-testid="therapist-add" onClick={() => setPanel({ kind: 'therapist', row: null })}>{t('add')}</button>
-          <button className="rounded border border-charcoal px-3 py-1.5" data-testid="shift-add" onClick={() => setPanel({ kind: 'shift', row: null })}>{t('addShift')}</button>
-          <button className="rounded border border-charcoal px-3 py-1.5" data-testid="timeoff-add" onClick={() => setPanel({ kind: 'timeoff', row: null })}>{t('addTimeOff')}</button>
-        </span>
+        </Select>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 text-sm">
-        <Link href={`/admin/therapists?week=${addDays(monday, -7)}`} data-testid="week-prev" className="underline">← {t('previousWeek')}</Link>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <Link href={`/admin/therapists?week=${addDays(monday, -7)}`} data-testid="week-prev" className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0">← {t('previousWeek')}</Link>
         <span className="tnum font-semibold" data-testid="week-label">{monday} – {days[6]}</span>
-        <Link href={`/admin/therapists?week=${addDays(monday, 7)}`} data-testid="week-next" className="underline">{t('nextWeek')} →</Link>
-        <button className="underline" data-testid="copy-week"
-          onClick={() => run(copyWeekShifts(addDays(monday, -7), monday))}>{t('copyWeek')}</button>
+        <Link href={`/admin/therapists?week=${addDays(monday, 7)}`} data-testid="week-next" className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0">{t('nextWeek')} →</Link>
+        <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" data-testid="copy-week"
+          onClick={() => run(copyWeekShifts(addDays(monday, -7), monday))}>{t('copyWeek')}</Button>
       </div>
 
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
+      {error && <Alert tone="error" className="break-words"><ErrorText text={error} /></Alert>}
 
       {panel?.kind === 'therapist' && (
         <TherapistForm key={panel.row?.id ?? 'new'} row={panel.row} services={services} staff={staff} svcName={svcName}
@@ -107,43 +112,43 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
           onDelete={panel.row ? async () => { if (await run(deleteTimeOff(panel.row!.id))) setPanel(null); } : undefined} />
       )}
       {panel?.kind === 'timeoff' && force && (
-        <div className="flex flex-wrap items-center gap-3 rounded border border-clay bg-white p-3 text-sm">
-          <span>{te('exceptions.forceHint')}</span>
-          <button data-testid="force-confirm" className="rounded bg-clay px-3 py-1.5 text-white"
+        <Card tone="danger" className="flex flex-wrap items-center gap-3 p-3">
+          <span className="min-w-0 break-words">{te('exceptions.forceHint')}</span>
+          <Button variant="danger" size="sm" data-testid="force-confirm"
             onClick={async () => {
               const r = await runFull(recordAbsence(force));
               if (r.ok) { setNotice(te('exceptions.forced', { count: r.affected.length })); setForce(null); setPanel(null); }
-            }}>{te('exceptions.forceConfirm')}</button>
-        </div>
+            }}>{te('exceptions.forceConfirm')}</Button>
+        </Card>
       )}
-      {notice && <p role="status" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
+      {notice && <Alert className="break-words">{notice}</Alert>}
 
-      {visible.length === 0 && <p className="text-stone-dark">{c('empty')}</p>}
+      {visible.length === 0 && <EmptyState>{c('empty')}</EmptyState>}
       <div tabIndex={0} className="overflow-x-auto">
-        <table className="w-full min-w-[56rem] border-collapse text-sm">
+        <table className="w-full min-w-[56rem] border-collapse text-body">
           <thead>
             <tr>
-              <th className="sticky left-0 bg-ivory p-2 text-left">{t('therapist')}</th>
+              <th className="sticky left-0 bg-surface p-2 text-left">{t('therapist')}</th>
               {days.map((d, i) => <th key={d} className="tnum p-2 text-left font-medium">{dayLabel(d, i)}</th>)}
             </tr>
           </thead>
           <tbody>
             {visible.map((th) => (
-              <tr key={th.id} data-testid="therapist-row" data-therapist-id={th.id} data-active={String(th.active)} className={`border-t border-stone align-top ${th.active ? '' : 'opacity-60'}`}>
-                <th scope="row" className="sticky left-0 bg-ivory p-2 text-left font-medium">
-                  <button className="underline" data-testid="therapist-edit" onClick={() => setPanel({ kind: 'therapist', row: th })}>{th.display_name}</button>
-                  <div className="text-xs text-stone-dark">{t(th.employment_type)}{th.active ? '' : ` · ${c('inactive')}`}</div>
+              <tr key={th.id} data-testid="therapist-row" data-therapist-id={th.id} data-active={String(th.active)} className={`border-t border-line align-top ${th.active ? '' : 'opacity-60'}`}>
+                <th scope="row" className="sticky left-0 min-w-40 max-w-56 break-words bg-surface p-2 text-left font-medium">
+                  <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" data-testid="therapist-edit" onClick={() => setPanel({ kind: 'therapist', row: th })}>{th.display_name}</Button>
+                  <div className="text-caption text-ink-muted">{t(th.employment_type)}{th.active ? '' : ` · ${c('inactive')}`}</div>
                 </th>
                 {days.map((d) => (
                   <td key={d} className="p-1" data-day={d}>
                     {shifts.filter((s) => s.therapist_id === th.id && bangkokDay(s.start) === d).map((s) => (
                       <button key={s.id} data-testid="shift-block" data-day={d} data-start={s.start} data-end={s.end}
                         onClick={() => setPanel({ kind: 'shift', row: s })}
-                        className="tnum mb-1 block w-full rounded bg-sage px-2 py-1 text-left text-white">{formatTime(s.start)}–{formatTime(s.end)}</button>
+                        className="tnum mb-1 block min-h-11 w-full rounded-[var(--radius)] bg-primary px-2 py-1 text-left text-primary-foreground pointer-fine:min-h-0">{formatTime(s.start)}–{formatTime(s.end)}</button>
                     ))}
                     {timeOff.filter((o) => o.therapist_id === th.id && bangkokDay(o.start) === d).map((o) => (
                       <button key={o.id} data-testid="timeoff-block" data-day={d} onClick={() => setPanel({ kind: 'timeoff', row: o })}
-                        className="tnum mb-1 block w-full rounded bg-clay px-2 py-1 text-left text-white">{t(`kind.${o.kind}`)} {formatTime(o.start)}–{formatTime(o.end)}</button>
+                        className="tnum mb-1 block min-h-11 w-full rounded-[var(--radius)] bg-danger px-2 py-1 text-left text-white pointer-fine:min-h-0">{t(`kind.${o.kind}`)} {formatTime(o.start)}–{formatTime(o.end)}</button>
                     ))}
                   </td>
                 ))}
@@ -167,36 +172,38 @@ function TherapistForm({ row, services, staff, svcName, onSave, onCancel, onTogg
   const [link, setLink] = useState(row?.staff_user_id ?? '');
   const [svc, setSvc] = useState<string[]>(row?.therapist_services.map((x) => x.service_id) ?? services.map((s) => s.id));
   return (
-    <form className="grid gap-3 rounded border border-stone bg-white p-4 sm:grid-cols-2" aria-label={row ? t('edit') : t('add')}
+    <Card>
+    <form className="grid gap-3 sm:grid-cols-2" aria-label={row ? t('edit') : t('add')}
       onSubmit={(e) => { e.preventDefault(); onSave({ id: row?.id, displayName: name, employmentType: type, staffUserId: link || null, serviceIds: svc }); }}>
-      <label className="flex flex-col text-sm">{t('name')}<input required value={name} onChange={(e) => setName(e.target.value)} className={field} data-testid="therapist-name" /></label>
-      <label className="flex flex-col text-sm">{t('employment')}
-        <select value={type} onChange={(e) => setType(e.target.value as typeof type)} className={field} data-testid="therapist-type">
+      <Field label={t('name')}><Input required value={name} onChange={(e) => setName(e.target.value)} data-testid="therapist-name" /></Field>
+      <Field label={t('employment')}>
+        <Select value={type} onChange={(e) => setType(e.target.value as typeof type)} data-testid="therapist-type">
           <option value="employee">{t('employee')}</option><option value="freelance">{t('freelance')}</option>
-        </select>
-      </label>
-      <label className="flex flex-col text-sm">{t('linkedStaff')}
-        <select value={link} onChange={(e) => setLink(e.target.value)} className={field} data-testid="therapist-link">
+        </Select>
+      </Field>
+      <Field label={t('linkedStaff')}>
+        <Select value={link} onChange={(e) => setLink(e.target.value)} data-testid="therapist-link">
           <option value="">{t('linkNone')}</option>
           {staff.map((s) => <option key={s.user_id} value={s.user_id}>{s.display_name}</option>)}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <fieldset className="sm:col-span-2">
-        <legend className="text-sm">{t('services')}</legend>
-        <div className="mt-1 flex flex-wrap gap-4">
+        <legend className="text-caption text-ink-muted">{t('services')}</legend>
+        <div className="mt-1 flex flex-wrap gap-x-4">
           {services.map((s) => (
-            <label key={s.id} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={svc.includes(s.id)} onChange={(e) => setSvc(e.target.checked ? [...svc, s.id] : svc.filter((x) => x !== s.id))} />{svcName(s)}
+            <label key={s.id} className="flex min-h-11 items-center gap-2 text-body text-ink">
+              <input type="checkbox" className="size-5 accent-primary" checked={svc.includes(s.id)} onChange={(e) => setSvc(e.target.checked ? [...svc, s.id] : svc.filter((x) => x !== s.id))} /><span className="min-w-0 break-words">{svcName(s)}</span>
             </label>
           ))}
         </div>
       </fieldset>
-      <div className="flex gap-2 sm:col-span-2">
-        <button type="submit" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory" data-testid="therapist-save">{c('save')}</button>
-        {onToggle && <button type="button" className="text-sm underline" data-testid="therapist-toggle" onClick={onToggle}>{row?.active ? c('deactivate') : c('activate')}</button>}
-        <button type="button" onClick={onCancel} className="text-sm underline">{c('cancel')}</button>
+      <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
+        <Button type="submit" data-testid="therapist-save">{c('save')}</Button>
+        {onToggle && <Button type="button" variant="secondary" data-testid="therapist-toggle" onClick={onToggle}>{row?.active ? c('deactivate') : c('activate')}</Button>}
+        <Button type="button" variant="secondary" onClick={onCancel}>{c('cancel')}</Button>
       </div>
     </form>
+    </Card>
   );
 }
 
@@ -210,21 +217,23 @@ function ShiftForm({ row, therapists, defaultDay, onSave, onCancel, onDelete }: 
   const [start, setStart] = useState(row ? local(row.start) : `${defaultDay}T10:00`);
   const [end, setEnd] = useState(row ? local(row.end) : `${defaultDay}T22:00`);
   return (
-    <form className="grid gap-3 rounded border border-stone bg-white p-4 sm:grid-cols-3" aria-label={row ? t('editShift') : t('addShift')}
+    <Card>
+    <form className="grid gap-3 sm:grid-cols-3" aria-label={row ? t('editShift') : t('addShift')}
       onSubmit={(e) => { e.preventDefault(); onSave({ id: row?.id, therapistId: th, start: toIso(start), end: toIso(end) }); }}>
-      <label className="flex flex-col text-sm">{t('therapist')}
-        <select value={th} onChange={(e) => setTh(e.target.value)} className={field} data-testid="shift-therapist">
+      <Field label={t('therapist')}>
+        <Select value={th} onChange={(e) => setTh(e.target.value)} data-testid="shift-therapist">
           {therapists.map((x) => <option key={x.id} value={x.id}>{x.display_name}</option>)}
-        </select>
-      </label>
-      <label className="flex flex-col text-sm">{t('shiftStart')}<input type="datetime-local" required value={start} onChange={(e) => setStart(e.target.value)} className={field} data-testid="shift-start" /></label>
-      <label className="flex flex-col text-sm">{t('shiftEnd')}<input type="datetime-local" required value={end} onChange={(e) => setEnd(e.target.value)} className={field} data-testid="shift-end" /></label>
-      <div className="flex gap-2 sm:col-span-3">
-        <button type="submit" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory" data-testid="shift-save">{c('save')}</button>
-        {onDelete && <button type="button" className="text-sm underline" data-testid="shift-delete" onClick={onDelete}>{t('deleteShift')}</button>}
-        <button type="button" onClick={onCancel} className="text-sm underline">{c('cancel')}</button>
+        </Select>
+      </Field>
+      <Field label={t('shiftStart')}><Input type="datetime-local" required value={start} onChange={(e) => setStart(e.target.value)} data-testid="shift-start" /></Field>
+      <Field label={t('shiftEnd')}><Input type="datetime-local" required value={end} onChange={(e) => setEnd(e.target.value)} data-testid="shift-end" /></Field>
+      <div className="flex flex-wrap items-center gap-2 sm:col-span-3">
+        <Button type="submit" data-testid="shift-save">{c('save')}</Button>
+        {onDelete && <Button type="button" variant="secondary" data-testid="shift-delete" onClick={onDelete}>{t('deleteShift')}</Button>}
+        <Button type="button" variant="secondary" onClick={onCancel}>{c('cancel')}</Button>
       </div>
     </form>
+    </Card>
   );
 }
 
@@ -240,26 +249,28 @@ function TimeOffForm({ row, therapists, defaultDay, onSave, onCancel, onDelete }
   const [kind, setKind] = useState<TimeOffRow['kind']>(row?.kind ?? 'break');
   const [note, setNote] = useState(row?.note ?? '');
   return (
-    <form className="grid gap-3 rounded border border-stone bg-white p-4 sm:grid-cols-3" aria-label={t('addTimeOff')}
+    <Card>
+    <form className="grid gap-3 sm:grid-cols-3" aria-label={t('addTimeOff')}
       onSubmit={(e) => { e.preventDefault(); onSave({ id: row?.id, therapistId: th, start: toIso(start), end: toIso(end), kind, note }); }}>
-      <label className="flex flex-col text-sm">{t('therapist')}
-        <select value={th} onChange={(e) => setTh(e.target.value)} className={field} data-testid="timeoff-therapist">
+      <Field label={t('therapist')}>
+        <Select value={th} onChange={(e) => setTh(e.target.value)} data-testid="timeoff-therapist">
           {therapists.map((x) => <option key={x.id} value={x.id}>{x.display_name}</option>)}
-        </select>
-      </label>
-      <label className="flex flex-col text-sm">{t('timeOffStart')}<input type="datetime-local" required value={start} onChange={(e) => setStart(e.target.value)} className={field} data-testid="timeoff-start" /></label>
-      <label className="flex flex-col text-sm">{t('timeOffEnd')}<input type="datetime-local" required value={end} onChange={(e) => setEnd(e.target.value)} className={field} data-testid="timeoff-end" /></label>
-      <label className="flex flex-col text-sm">{t('timeOffKind')}
-        <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className={field} data-testid="timeoff-kind">
+        </Select>
+      </Field>
+      <Field label={t('timeOffStart')}><Input type="datetime-local" required value={start} onChange={(e) => setStart(e.target.value)} data-testid="timeoff-start" /></Field>
+      <Field label={t('timeOffEnd')}><Input type="datetime-local" required value={end} onChange={(e) => setEnd(e.target.value)} data-testid="timeoff-end" /></Field>
+      <Field label={t('timeOffKind')}>
+        <Select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} data-testid="timeoff-kind">
           {(['break', 'leave', 'absence'] as const).map((k) => <option key={k} value={k}>{t(`kind.${k}`)}</option>)}
-        </select>
-      </label>
-      <label className="flex flex-col text-sm sm:col-span-2">{t('timeOffNote')}<input value={note} onChange={(e) => setNote(e.target.value)} className={field} /></label>
-      <div className="flex gap-2 sm:col-span-3">
-        <button type="submit" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory" data-testid="timeoff-save">{c('save')}</button>
-        {onDelete && <button type="button" className="text-sm underline" data-testid="timeoff-delete" onClick={onDelete}>{t('deleteTimeOff')}</button>}
-        <button type="button" onClick={onCancel} className="text-sm underline">{c('cancel')}</button>
+        </Select>
+      </Field>
+      <div className="sm:col-span-2"><Field label={t('timeOffNote')}><Input value={note} onChange={(e) => setNote(e.target.value)} /></Field></div>
+      <div className="flex flex-wrap items-center gap-2 sm:col-span-3">
+        <Button type="submit" data-testid="timeoff-save">{c('save')}</Button>
+        {onDelete && <Button type="button" variant="secondary" data-testid="timeoff-delete" onClick={onDelete}>{t('deleteTimeOff')}</Button>}
+        <Button type="button" variant="secondary" onClick={onCancel}>{c('cancel')}</Button>
       </div>
     </form>
+    </Card>
   );
 }

@@ -2,6 +2,12 @@
 
 import { useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Badge, StatusChip } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Field, Input, Select, Textarea } from '@/components/ui/field';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
@@ -12,7 +18,6 @@ import { PrivacyTools } from './PrivacyTools';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
 export type ProfileNames = { services: Record<string, string>; therapists: Record<string, string>; rooms: Record<string, string> };
-const field = 'rounded border border-stone-dark px-2 py-1 text-sm disabled:bg-stone/30';
 
 export function CustomerProfile({ customer: c, role, names }: { customer: Profile; role: Role; names: ProfileNames }) {
   const t = useTranslations('customers');
@@ -52,83 +57,97 @@ export function CustomerProfile({ customer: c, role, names }: { customer: Profil
   }
 
   const stat = (id: string, label: string, v: string | number) => (
-    <div className="rounded border border-stone bg-white p-3"><div className="text-xs text-stone-dark">{label}</div><div className="tnum text-2xl" data-testid={`stat-${id}`}>{v}</div></div>
+    <Card className="p-3"><div className="text-caption text-ink-muted">{label}</div><div className="tnum text-title text-ink" data-testid={`stat-${id}`}>{v}</div></Card>
   );
+  const h2 = 'font-serif text-heading text-ink';
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl" data-testid="customer-name">{c.displayName}</h1>
-        {gone && <span className="rounded bg-ivory px-2 py-0.5 text-xs" data-testid="anonymised-badge">{t('removed')}</span>}
-        <Link href="/customers" className="ml-auto text-sm underline">← {t('title')}</Link>
-      </div>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
-      {notice && <p role="status" className="rounded border border-sage bg-white px-3 py-2 text-sm">{notice}</p>}
+    <div className="flex min-w-0 flex-col gap-6">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <h1 className="min-w-0 break-words font-serif text-title text-ink" data-testid="customer-name">{c.displayName}</h1>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {gone && <Badge data-testid="anonymised-badge">{t('removed')}</Badge>}
+          <Link href="/customers" className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0">← {t('title')}</Link>
+        </div>
+      </header>
+      {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
+      {notice && <Alert tone="info">{notice}</Alert>}
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label={t('summary')}>
         {stat('visits', t('visits'), c.summary.visits)}
         {stat('cancelled', t('cancelled'), c.summary.cancelled)}
         {stat('no-shows', t('noShows'), c.summary.noShows)}
         {stat('upcoming', t('upcoming'), c.summary.upcoming)}
-        <div className="rounded border border-stone bg-white p-3 text-sm sm:col-span-4">
+        <Card className="p-3 text-body text-ink-muted sm:col-span-4">
           <span className="tnum">{t('firstVisit')}: {c.summary.firstVisit ? bangkokDay(c.summary.firstVisit) : '—'}</span>{' · '}
           <span className="tnum">{t('lastVisit')}: {c.summary.lastVisit ? bangkokDay(c.summary.lastVisit) : '—'}</span>{' · '}
           <span className="tnum">{t('avgDays')}: {c.summary.avgDaysBetween ?? '—'}</span>{' · '}
           <span>{t('topService')}: {c.summary.topServiceId ? names.services[c.summary.topServiceId] : '—'}</span>
-        </div>
+        </Card>
       </section>
 
-      <form onSubmit={save} className="grid gap-3 rounded border border-stone bg-white p-4 sm:grid-cols-2" aria-label={t('details')}>
-        <label className="flex flex-col text-sm">{t('displayName')}<input data-testid="f-display-name" value={f.displayName} onChange={set('displayName')} disabled={gone} className={field} /></label>
-        <label className="flex flex-col text-sm">{t('fullName')}<input value={f.fullName} onChange={set('fullName')} disabled={gone} className={field} /></label>
-        <label className="flex flex-col text-sm">{t('phone')}<input data-testid="f-phone" value={f.phone} onChange={set('phone')} disabled={gone} className={field} inputMode="tel" /></label>
-        <label className="flex flex-col text-sm">{t('email')}<input value={f.email} onChange={set('email')} disabled={gone} className={field} type="email" /></label>
-        <label className="flex flex-col text-sm">{t('preferredTherapist')}
-          <select value={f.preferredTherapistId} onChange={set('preferredTherapistId')} disabled={gone} className={field}>
-            <option value="">—</option>
-            {Object.entries(names.therapists).map(([id, n]) => <option key={id} value={id}>{n}</option>)}
-          </select></label>
-        <label className="flex flex-col text-sm sm:col-span-2">{t('serviceNotes')}
-          <textarea data-testid="f-service-notes" value={f.serviceNotes} onChange={set('serviceNotes')} disabled={gone} rows={2} className={field} /></label>
-        <div className="flex flex-wrap items-center gap-3 text-sm sm:col-span-2">
-          <label className="flex items-center gap-2"><input type="checkbox" data-testid="consent" checked={f.commsConsent} onChange={set('commsConsent')} disabled={gone} className="h-5 w-5" />{t('consent')}</label>
-          <span className="text-xs text-stone-dark">{t('consentRecorded')}: <span className="tnum" data-testid="consent-recorded">{c.consentRecordedAt ? `${bangkokDay(c.consentRecordedAt)} ${formatTime(c.consentRecordedAt)}` : ''}</span></span>
-        </div>
-        {!gone && <div><button type="submit" disabled={busy} data-testid="save-customer" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{te('common.save')}</button></div>}
-      </form>
+      <Card>
+        <form onSubmit={save} className="grid gap-3 sm:grid-cols-2" aria-label={t('details')}>
+          <h2 className={`${h2} sm:col-span-2`}>{t('details')}</h2>
+          <Field label={t('displayName')}><Input data-testid="f-display-name" value={f.displayName} onChange={set('displayName')} disabled={gone} /></Field>
+          <Field label={t('fullName')}><Input value={f.fullName} onChange={set('fullName')} disabled={gone} /></Field>
+          <Field label={t('phone')}><Input data-testid="f-phone" value={f.phone} onChange={set('phone')} disabled={gone} inputMode="tel" /></Field>
+          <Field label={t('email')}><Input value={f.email} onChange={set('email')} disabled={gone} type="email" /></Field>
+          <Field label={t('preferredTherapist')}>
+            <Select value={f.preferredTherapistId} onChange={set('preferredTherapistId')} disabled={gone}>
+              <option value="">—</option>
+              {Object.entries(names.therapists).map(([id, n]) => <option key={id} value={id}>{n}</option>)}
+            </Select>
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label={t('serviceNotes')}>
+              <Textarea data-testid="f-service-notes" value={f.serviceNotes} onChange={set('serviceNotes')} disabled={gone} rows={2} />
+            </Field>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-body text-ink sm:col-span-2">
+            <label className="flex min-h-11 items-center gap-2"><input type="checkbox" data-testid="consent" checked={f.commsConsent} onChange={set('commsConsent')} disabled={gone} className="h-5 w-5" />{t('consent')}</label>
+            <span className="text-caption text-ink-muted">{t('consentRecorded')}: <span className="tnum" data-testid="consent-recorded">{c.consentRecordedAt ? `${bangkokDay(c.consentRecordedAt)} ${formatTime(c.consentRecordedAt)}` : ''}</span></span>
+          </div>
+          {!gone && <div><Button type="submit" disabled={busy} data-testid="save-customer">{te('common.save')}</Button></div>}
+        </form>
+      </Card>
 
-      <section className="flex flex-col gap-2" aria-label={t('history')}>
-        <h2 className="text-lg">{t('history')}</h2>
-        {c.history.length === 0 && <p className="text-sm text-stone-dark">{te('common.empty')}</p>}
-        <ul className="flex flex-col gap-2">
-          {c.history.map((h) => (
-            <li key={h.bookingId} data-testid="history-row" data-status={h.status} className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded border border-stone bg-white p-3 text-sm">
-              <span className="tnum font-semibold">{bangkokDay(h.startsAt)} {formatTime(h.startsAt)}</span>
-              <span>{names.services[h.serviceId]}</span>
-              <span className="text-stone-dark">{names.therapists[h.therapistId]} · {names.rooms[h.roomId]}</span>
-              <span className="rounded bg-ivory px-2 py-0.5 text-xs">{tb(`status.${h.status}`)}</span>
-              {h.money && <span data-testid="payment-status" data-status={h.money.paymentStatus} className="rounded bg-ivory px-2 py-0.5 text-xs">{tp(`status.${h.money.paymentStatus}`)}</span>}
-              {h.note && <span className="text-stone-dark">{h.note}</span>}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {isManager && (
-        <section className="flex flex-col gap-2" aria-label={t('privateNotes')}>
-          <h2 className="text-lg">{t('privateNotes')}</h2>
-          <ul className="flex flex-col gap-2">
-            {c.privateNotes.map((n) => (
-              <li key={n.id} data-testid="private-note" className="rounded border border-stone bg-white p-3 text-sm"><span className="tnum text-xs text-stone-dark">{bangkokDay(n.createdAt)}</span> {n.body}</li>
+      <Card className="flex flex-col gap-3">
+        <section className="flex flex-col gap-3" aria-label={t('history')}>
+          <h2 className={h2}>{t('history')}</h2>
+          {c.history.length === 0 && <EmptyState>{te('common.empty')}</EmptyState>}
+          <ul className="flex flex-col divide-y divide-line">
+            {c.history.map((h) => (
+              <li key={h.bookingId} data-testid="history-row" data-status={h.status} className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 py-3 text-body first:pt-0 last:pb-0">
+                <span className="tnum font-semibold text-ink">{bangkokDay(h.startsAt)} {formatTime(h.startsAt)}</span>
+                <span className="min-w-0 break-words">{names.services[h.serviceId]}</span>
+                <span className="min-w-0 break-words text-ink-muted">{names.therapists[h.therapistId]} · {names.rooms[h.roomId]}</span>
+                <StatusChip kind="booking" status={h.status} label={tb(`status.${h.status}`)} />
+                {h.money && <Badge data-testid="payment-status" data-status={h.money.paymentStatus}>{tp(`status.${h.money.paymentStatus}`)}</Badge>}
+                {h.note && <span className="min-w-0 break-words text-ink-muted">{h.note}</span>}
+              </li>
             ))}
           </ul>
-          {!gone && (
-            <form onSubmit={addNote} className="flex flex-wrap items-end gap-3">
-              <label className="flex flex-1 flex-col text-sm">{t('newNote')}<input data-testid="note-body" value={note} onChange={(e) => setNote(e.target.value)} className={field} /></label>
-              <button type="submit" data-testid="note-add" className="rounded border border-charcoal px-3 py-1.5 text-sm">{t('addNote')}</button>
-            </form>
-          )}
         </section>
+      </Card>
+
+      {isManager && (
+        <Card>
+          <section className="flex flex-col gap-3" aria-label={t('privateNotes')}>
+            <h2 className={h2}>{t('privateNotes')}</h2>
+            <ul className="flex flex-col gap-2">
+              {c.privateNotes.map((n) => (
+                <li key={n.id} data-testid="private-note" className="min-w-0 break-words rounded-[var(--radius)] border border-line bg-surface-muted p-3 text-body"><span className="tnum text-caption text-ink-muted">{bangkokDay(n.createdAt)}</span> {n.body}</li>
+              ))}
+            </ul>
+            {!gone && (
+              <form onSubmit={addNote} className="flex flex-wrap items-end gap-3">
+                <div className="min-w-0 flex-1"><Field label={t('newNote')}><Input data-testid="note-body" value={note} onChange={(e) => setNote(e.target.value)} /></Field></div>
+                <Button type="submit" variant="secondary" data-testid="note-add">{t('addNote')}</Button>
+              </form>
+            )}
+          </section>
+        </Card>
       )}
 
       {isManager && <PrivacyTools customerId={c.id} displayName={c.displayName} isOwner={role === 'owner'} anonymised={gone} />}

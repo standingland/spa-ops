@@ -14,6 +14,33 @@
   --status-occupied: var(--charcoal);
   --status-cleaning: var(--clay);
   --status-out-of-service: var(--stone-dark);
+
+  /* semantic tokens (hex literals so the contrast test can read them) */
+  --surface: #FFFFFF;
+  --surface-muted: #F6F2EA;
+  --ink: #23211E;
+  --ink-muted: #6B645A;
+  --line: #D9D2C5;
+  --line-strong: #6B645A;
+  --primary: #4F5D2F;
+  --primary-foreground: #F6F2EA;
+  --danger: #8A5340;
+  --focus: #23211E;
+  --radius: 0.5rem;
+
+  /* light status tints; ink text must stay >= 4.5:1 on each */
+  --tint-available: #E3EAD9;
+  --tint-reserved: #F0E6CE;
+  --tint-occupied: #D8D5D0;
+  --tint-cleaning: #F0DDD5;
+  --tint-out-of-service: #E4E1DB;
+  --tint-requested: #E8E3D8;
+  --tint-confirmed: #F0E6CE;
+  --tint-checked-in: #E3EAD9;
+  --tint-in-treatment: #D8D5D0;
+  --tint-completed: #E4E1DB;
+  --tint-cancelled: #EDEAE4;
+  --tint-no-show: #F0DDD5;
 }
 
 @theme inline {
@@ -24,6 +51,37 @@
   --color-sage: var(--sage);
   --color-brass: var(--brass);
   --color-clay: var(--clay);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+  --color-tint-available: var(--tint-available);
+  --color-tint-reserved: var(--tint-reserved);
+  --color-tint-occupied: var(--tint-occupied);
+  --color-tint-cleaning: var(--tint-cleaning);
+  --color-tint-out-of-service: var(--tint-out-of-service);
+  --color-tint-requested: var(--tint-requested);
+  --color-tint-confirmed: var(--tint-confirmed);
+  --color-tint-checked-in: var(--tint-checked-in);
+  --color-tint-in-treatment: var(--tint-in-treatment);
+  --color-tint-completed: var(--tint-completed);
+  --color-tint-cancelled: var(--tint-cancelled);
+  --color-tint-no-show: var(--tint-no-show);
+  --radius-md: var(--radius);
+  --text-title: 1.75rem;
+  --text-title--line-height: 2.25rem;
+  --text-heading: 1.25rem;
+  --text-heading--line-height: 1.75rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.25rem;
   --font-sans: var(--font-plex), system-ui, sans-serif;
   --font-serif: var(--font-noto-serif), serif;
 }
@@ -35,3 +93,5 @@ body {
 }
 h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
 .tnum { font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

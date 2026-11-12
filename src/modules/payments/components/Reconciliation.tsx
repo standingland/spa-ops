@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Field, Input } from '@/components/ui/field';
+import { PageHeader } from '@/components/ui/page-header';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
@@ -10,7 +17,6 @@ import { formatTime } from '@/lib/time';
 import { useLiveRefresh } from '@/lib/realtime';
 import { closeCashDay, refundPayment, verifyPayment, voidPayment, type Closing, type LedgerEntry, type LedgerSummaryRow } from '../actions';
 
-const field = 'rounded border border-stone-dark px-2 py-1 text-sm';
 type Action = { kind: 'verify' | 'void' | 'refund'; entry: LedgerEntry; key: string };
 const LIVE_TABLES = ['payments'] as const;
 
@@ -59,27 +65,26 @@ export function Reconciliation({ day, summary, entries, closing }: {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl">{t('title')}</h1>
-        <label className="flex items-center gap-2 text-sm">{t('day')}
-          <input type="date" value={day} data-testid="ledger-day" className={field}
+    <div className="flex min-w-0 flex-col gap-6">
+      <PageHeader title={t('title')} actions={
+        <Field label={t('day')}>
+          <Input type="date" value={day} data-testid="ledger-day"
             onChange={(e) => e.target.value && router.push(`/payments?day=${e.target.value}`)} />
-        </label>
-      </div>
-      {error && <p role="alert" className="rounded border border-clay bg-white px-3 py-2 text-sm text-clay"><ErrorText text={error} /></p>}
+        </Field>
+      } />
+      {error && <Alert tone="error" className="break-words"><ErrorText text={error} /></Alert>}
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-lg">{t('byMethod')}</h2>
-        {summary.length === 0 ? <p className="text-sm text-stone-dark">{t('none')}</p> : (
-          <div tabIndex={0} className="overflow-x-auto">
-            <table className="tnum w-full min-w-[40rem] border-collapse text-sm">
-              <thead><tr className="border-b border-stone text-left">
+      <section className="flex min-w-0 flex-col gap-2">
+        <h2 className="font-serif text-heading text-ink">{t('byMethod')}</h2>
+        {summary.length === 0 ? <EmptyState>{t('none')}</EmptyState> : (
+          <Card className="overflow-x-auto p-2" tabIndex={0}>
+            <table className="tnum w-full min-w-[40rem] border-collapse text-body text-ink">
+              <thead><tr className="border-b border-line text-left text-caption text-ink-muted">
                 <th className="py-1">{t('method')}</th><th>{t('recorded')}</th><th>{t('verified')}</th><th>{t('awaiting')}</th><th>{t('refunded')}</th><th>{t('voided')}</th>
               </tr></thead>
               <tbody>
                 {summary.map((s) => (
-                  <tr key={s.methodId} data-testid="ledger-method-row" data-code={s.code} className="border-b border-stone/60">
+                  <tr key={s.methodId} data-testid="ledger-method-row" data-code={s.code} className="border-b border-line">
                     <td className="py-1">{s.name}</td><td>{formatTHB(s.recordedSatang)}</td><td>{formatTHB(s.verifiedSatang)}</td>
                     <td>{formatTHB(s.unverifiedSatang)}</td><td>{formatTHB(s.refundedSatang)}</td><td>{formatTHB(s.voidedSatang)}</td>
                   </tr>
@@ -90,71 +95,78 @@ export function Reconciliation({ day, summary, entries, closing }: {
                 </tr>
               </tbody>
             </table>
-          </div>
+          </Card>
         )}
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-lg">{t('entries')}</h2>
-        {entries.length === 0 && <p className="text-sm text-stone-dark">{t('none')}</p>}
+      <section className="flex min-w-0 flex-col gap-2">
+        <h2 className="font-serif text-heading text-ink">{t('entries')}</h2>
+        {entries.length === 0 && <EmptyState>{t('none')}</EmptyState>}
         <ul className="flex flex-col gap-2">
           {entries.map((e) => (
-            <li key={e.id} data-testid="ledger-entry" data-state={state(e)} data-kind={e.kind}
-              className={`flex flex-col gap-2 rounded border border-stone bg-white p-3 text-sm ${e.voided ? 'opacity-60' : ''}`}>
+            <li key={e.id} data-testid="ledger-entry" data-state={state(e)} data-kind={e.kind} className="min-w-0">
+              <Card className={`flex flex-col gap-2 p-3 text-body text-ink ${e.voided ? 'opacity-60' : ''}`}>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="tnum">{formatTime(e.receivedAt)}</span>
-                <span>{e.customerDisplayName}</span>
-                <span className="rounded bg-ivory px-2 py-0.5 text-xs">{e.kind === 'refund' ? t('refund') : t('payment')} · {e.methodCode}</span>
+                <span className="min-w-0 break-words">{e.customerDisplayName}</span>
+                <Badge>{e.kind === 'refund' ? t('refund') : t('payment')} · {e.methodCode}</Badge>
                 <span className={`tnum font-semibold ${e.voided ? 'line-through' : ''}`}>{e.kind === 'refund' ? '-' : ''}{formatTHB(e.amountSatang)}</span>
-                {e.reference && <span className="text-stone-dark">{e.reference}</span>}
-                <span className="text-xs">{t(`state.${state(e)}`)}</span>
-                {e.voidReason && <span className="text-xs text-clay">{e.voidReason}</span>}
+                {e.reference && <span className="min-w-0 break-all text-ink-muted">{e.reference}</span>}
+                <span className="text-caption">{t(`state.${state(e)}`)}</span>
+                {e.voidReason && <span className="min-w-0 break-words text-caption text-danger">{e.voidReason}</span>}
                 {!e.voided && (
-                  <span className="ml-auto flex gap-2">
-                    {!e.verified && <button data-testid="entry-verify" onClick={() => open('verify', e)} className="rounded border border-charcoal px-3 py-1">{t('verify')}</button>}
-                    {e.kind === 'payment' && <button data-testid="entry-refund" onClick={() => open('refund', e)} className="rounded border border-charcoal px-3 py-1">{t('refund')}</button>}
-                    <button data-testid="entry-void" onClick={() => open('void', e)} className="rounded border border-clay px-3 py-1 text-clay">{t('void')}</button>
+                  <span className="ml-auto flex flex-wrap gap-2">
+                    {!e.verified && <Button variant="secondary" size="sm" data-testid="entry-verify" onClick={() => open('verify', e)}>{t('verify')}</Button>}
+                    {e.kind === 'payment' && <Button variant="secondary" size="sm" data-testid="entry-refund" onClick={() => open('refund', e)}>{t('refund')}</Button>}
+                    <Button variant="secondary" size="sm" className="border-danger text-danger" data-testid="entry-void" onClick={() => open('void', e)}>{t('void')}</Button>
                   </span>
                 )}
               </div>
               {action?.entry.id === e.id && (
-                <div className="flex flex-wrap items-end gap-3 border-t border-stone pt-2">
+                <div className="flex flex-wrap items-end gap-3 border-t border-line pt-2">
                   {action.kind === 'refund' && (
-                    <label className="flex flex-col text-xs">{t('refundAmount')}
-                      <input data-testid="refund-amount" value={amount} onChange={(x) => setAmount(x.target.value)} className={`${field} tnum`} /></label>
+                    <Field label={t('refundAmount')}>
+                      <Input data-testid="refund-amount" value={amount} onChange={(x) => setAmount(x.target.value)} className="tnum" />
+                    </Field>
                   )}
                   {action.kind !== 'verify' && (
-                    <label className="flex flex-col text-xs">{t('reason')}
-                      <input data-testid="reason" value={reason} onChange={(x) => setReason(x.target.value)} className={field} /></label>
+                    <Field label={t('reason')}>
+                      <Input data-testid="reason" value={reason} onChange={(x) => setReason(x.target.value)} />
+                    </Field>
                   )}
-                  <button data-testid="confirm" disabled={busy} onClick={confirm} className="rounded bg-charcoal px-3 py-1.5 text-ivory">{te('common.confirm')}</button>
-                  <button onClick={() => setAction(null)} className="underline">{te('common.cancel')}</button>
+                  <Button data-testid="confirm" disabled={busy} onClick={confirm}>{te('common.confirm')}</Button>
+                  <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" onClick={() => setAction(null)}>{te('common.cancel')}</Button>
                 </div>
               )}
+              </Card>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-lg">{t('cash')}</h2>
+      <section className="flex min-w-0 flex-col gap-2">
+        <h2 className="font-serif text-heading text-ink">{t('cash')}</h2>
+        <Card className="flex flex-col gap-3">
         <form onSubmit={close} className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col text-sm">{t('counted')}
-            <input data-testid="cash-counted" inputMode="decimal" value={counted} onChange={(e) => setCounted(e.target.value)} className={`${field} tnum`} /></label>
-          <label className="flex flex-col text-sm">{t('note')}
-            <input value={note} onChange={(e) => setNote(e.target.value)} className={field} /></label>
-          <button type="submit" disabled={busy} data-testid="cash-close" className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory">{t('closeDay')}</button>
+          <Field label={t('counted')}>
+            <Input data-testid="cash-counted" inputMode="decimal" value={counted} onChange={(e) => setCounted(e.target.value)} className="tnum" />
+          </Field>
+          <Field label={t('note')}>
+            <Input value={note} onChange={(e) => setNote(e.target.value)} />
+          </Field>
+          <Button type="submit" disabled={busy} data-testid="cash-close">{t('closeDay')}</Button>
         </form>
         {closing && (
-          <div className="tnum flex flex-wrap items-center gap-x-6 gap-y-1 text-sm" data-testid="cash-closing">
+          <div className="tnum flex flex-wrap items-center gap-x-6 gap-y-1 text-body text-ink" data-testid="cash-closing">
             <span>{t('expected')} {formatTHB(closing.expectedSatang)}</span>
             <span>{t('counted')} {formatTHB(closing.countedSatang)}</span>
             <span>{t('difference')} <strong data-testid="cash-difference">{formatTHB(closing.countedSatang - closing.expectedSatang)}</strong></span>
             {closing.expectedNowSatang !== closing.expectedSatang && (
-              <span data-testid="cash-changed" role="note" className="rounded bg-brass px-2 py-0.5 text-white">{t('cashChanged', { now: formatTHB(closing.expectedNowSatang) })}</span>
+              <span data-testid="cash-changed" role="note" className="rounded-full bg-tint-reserved px-2 py-0.5 text-caption text-ink">{t('cashChanged', { now: formatTHB(closing.expectedNowSatang) })}</span>
             )}
           </div>
         )}
+        </Card>
       </section>
     </div>
   );

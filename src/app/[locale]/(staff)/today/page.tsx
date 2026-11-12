@@ -16,7 +16,7 @@ export default async function TodayPage() {
     getOpenReports(),
     supabase.from('services').select('id, name_th, name_en'),
     supabase.from('therapists').select('id, display_name'),
-    supabase.from('rooms').select('id, code'),
+    supabase.from('rooms').select('id, code, zone'),
     desk ? getPendingPayments() : Promise.resolve(null),
     desk ? listPaymentMethods() : Promise.resolve(null),
     desk ? canRecordPayments(session.role) : Promise.resolve(false),
@@ -27,6 +27,7 @@ export default async function TodayPage() {
     therapists: Object.fromEntries((ths.data ?? []).map((x) => [x.id, x.display_name])),
     rooms: Object.fromEntries((rooms.data ?? []).map((r) => [r.id, r.code])),
   };
-  return <TodayBoard model={today.model} role={session.role} names={names} reports={reports.ok ? reports.reports : []}
+  const roomZones: Record<string, string | null> = Object.fromEntries((rooms.data ?? []).map((r) => [r.id, r.zone]));
+  return <TodayBoard model={today.model} role={session.role} names={names} roomZones={roomZones} reports={reports.ok ? reports.reports : []}
     pending={pending?.ok ? pending.rows : []} methods={methods?.ok ? methods.methods : []} canRecord={canRecord} />;
 }

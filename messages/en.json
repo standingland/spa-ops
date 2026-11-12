@@ -3,7 +3,6 @@
     "name": "Spa Ops"
   },
   "nav": {
-    "calendar": "Calendar",
     "rooms": "Rooms",
     "services": "Services",
     "therapists": "Therapists",
@@ -15,9 +14,19 @@
     "notifications": "Customer messages",
     "settings": "Settings",
     "payments": "Payments",
-    "customers": "Customers",
     "reports": "Reports",
-    "account": "My account"
+    "account": "My account",
+    "schedule": "Schedule",
+    "guests": "Guests",
+    "bookings": "Bookings",
+    "policies": "Policies",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "group": {
+      "operate": "Operate",
+      "business": "Business",
+      "setup": "Setup"
+    }
   },
   "login": {
     "title": "Sign in",
@@ -235,6 +244,16 @@
     "close": "Close",
     "loadFailed": "Could not load the calendar",
     "retry": "Try again",
+    "openDetails": "Details",
+    "fields": { "guest": "Guest", "date": "Date", "time": "Time", "treatment": "Treatment", "therapist": "Therapist", "room": "Room" },
+    "history": {
+      "title": "Activity",
+      "created": "Booking created",
+      "statusChanged": "{from} → {to}",
+      "statusSet": "Status: {to}",
+      "rescheduled": "Rescheduled",
+      "reassigned": "Therapist or room changed"
+    },
     "status": {
       "requested": "Requested",
       "confirmed": "Confirmed",
@@ -263,6 +282,7 @@
     "noShow": "No-show",
     "roomStatus": "Room status",
     "arrivals": "Arriving",
+    "upcomingArrivals": "Upcoming arrivals",
     "waiting": "Waiting (checked in)",
     "inTreatment": "In treatment",
     "awaitingCleaning": "Awaiting cleaning",
@@ -505,6 +525,7 @@
     "privateNotes": "Private notes (managers and owner only)",
     "newNote": "New note",
     "addNote": "Add note",
+    "dangerZone": "Danger zone",
     "privacy": "Personal data",
     "privacyHelp": "Export everything held about this customer, or remove their personal data on request. Have the process reviewed by a legal adviser before production use.",
     "export": "Export data (JSON)",
@@ -631,5 +652,15 @@
     "hint": "At least 10 characters, and different from the current one",
     "change": "Change password",
     "changed": "Password changed"
+  },
+  "adminHub": {
+    "subtitle": "Rooms, services, messages and house rules.",
+    "desc": {
+      "adminRooms": "Rooms, zones and categories",
+      "services": "Treatments, prices and durations",
+      "notifications": "Messages sent to guests",
+      "staff": "Staff accounts and roles",
+      "settings": "Cancellation and no-show fees, payments, reports and data retention"
+    }
   }
 }
