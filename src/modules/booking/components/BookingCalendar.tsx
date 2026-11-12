@@ -85,7 +85,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const posCode = (positionId: string) => rooms.find((x) => x.room_positions.some((p) => p.id === positionId))?.code ?? '';
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={`flex flex-col gap-3 ${open ? 'lg:pr-[29rem]' : ''}`}>
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="mr-2 text-2xl">{t('title')}</h1>
         <Link href={q(addDays(day, -1))} className="underline" data-testid="day-prev">← {t('previousDay')}</Link>

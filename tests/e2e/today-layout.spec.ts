@@ -27,8 +27,8 @@ test('(b) the shared screen removes the guest from every room row and arrival ro
   // A details panel opened before the shared screen is turned on must disappear with it.
   await page.getByTestId('treatment-row').getByTestId('open-details').click();
   await expect(page.getByTestId('booking-panel')).toBeVisible();
-  // The open panel covers the toggle (a full-screen sheet on a phone, a right-hand drawer on desktop), so a real
-  // pointer cannot reach it; dispatch the click straight to the button, which still runs React's onClick.
+  // Below lg the open panel is a full-screen sheet that covers the toggle (on desktop the page reserves room for the
+  // drawer), so a real pointer cannot reach it on the mobile project; dispatch the click straight to the button, which still runs React's onClick.
   await page.getByTestId('shared-toggle').dispatchEvent('click');
   await expect(page.getByTestId('shared-toggle')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('booking-panel')).toHaveCount(0);

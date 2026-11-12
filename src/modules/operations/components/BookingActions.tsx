@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { Button } from '@/components/ui/button';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { setBookingStatus, type BoardRow } from '@/modules/booking/actions';
 import type { BookingStatus } from '@/modules/booking/schema';
@@ -34,18 +35,15 @@ export function BookingActions({ row, role, onError }: { row: BoardRow; role: Ro
   return (
     <span className="flex flex-wrap gap-2 text-sm">
       {next.filter((s) => s !== 'cancelled').map((s) => (
-        <button key={s} disabled={busy} data-testid={`act-${s}`} onClick={() => go(s)}
-          className="rounded border border-charcoal px-3 py-1.5 disabled:opacity-60">{t(`actions.${s}`)}</button>
+        <Button key={s} size="sm" variant="secondary" disabled={busy} data-testid={`act-${s}`} onClick={() => go(s)}>{t(`actions.${s}`)}</Button>
       ))}
       {next.includes('cancelled') && !confirming && (
-        <button disabled={busy} data-testid="act-cancelled" onClick={() => setConfirming(true)}
-          className="rounded border border-clay px-3 py-1.5 text-clay">{t('actions.cancelled')}</button>
+        <Button size="sm" variant="secondary" className="border-danger text-danger" disabled={busy} data-testid="act-cancelled" onClick={() => setConfirming(true)}>{t('actions.cancelled')}</Button>
       )}
       {confirming && (
         <>
-          <button disabled={busy} data-testid="act-cancelled-confirm" onClick={() => { setConfirming(false); void go('cancelled'); }}
-            className="rounded bg-clay px-3 py-1.5 text-white">{t('actions.confirmCancel')}</button>
-          <button onClick={() => setConfirming(false)} className="underline">×</button>
+          <Button size="sm" variant="danger" disabled={busy} data-testid="act-cancelled-confirm" onClick={() => { setConfirming(false); void go('cancelled'); }}>{t('actions.confirmCancel')}</Button>
+          <Button size="sm" variant="secondary" aria-label={te('common.cancel')} onClick={() => setConfirming(false)}>×</Button>
         </>
       )}
     </span>

@@ -5,7 +5,7 @@ export type RoomAction = { kind: 'start' | 'finish'; row: BoardRow } | { kind: '
 
 /** The one thing a room row offers: Finish its treatment, Start the guest waiting for it, or Mark it ready. */
 export function roomAction(room: RoomState, model: TodayModel): RoomAction {
-  if (room.status === 'occupied' && room.currentBookingId) {
+  if (room.status === 'occupied') {
     const row = model.inTreatment.find((r) => r.bookingId === room.currentBookingId);
     return row ? { kind: 'finish', row } : null;
   }

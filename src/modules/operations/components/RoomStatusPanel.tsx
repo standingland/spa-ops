@@ -79,7 +79,7 @@ export function RoomStatusPanel({ model, names, roomZones, shared, role, onError
     <Card className="flex min-w-0 flex-col gap-3">
       <h2 className="font-serif text-heading text-ink">{t('roomStatus')}</h2>
       {model.rooms.length === 0 ? <EmptyState>{t('nothing')}</EmptyState> : (
-        <div tabIndex={0} className="flex max-h-[32rem] flex-col gap-4 overflow-y-auto pr-1">
+        <div tabIndex={0} role="group" aria-label={t('roomStatus')} className="flex max-h-[32rem] flex-col gap-4 overflow-y-auto pr-1">
           {zones.map((z) => (
             <div key={z || '__none'} className="flex flex-col gap-2">
               <h3 className="text-caption font-medium text-ink-muted">{z || tr('noZone')}</h3>

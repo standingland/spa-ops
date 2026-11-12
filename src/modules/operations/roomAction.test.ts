@@ -39,3 +39,8 @@ test('an out-of-service room has no action even with someone waiting', () => {
   const rm = room({ status: 'out_of_service', blockKind: 'maintenance' });
   expect(roomAction(rm, model([row({ bookingId: 'w', status: 'checked_in' })], [rm]))).toBeNull();
 });
+test('an occupied room with no current booking never offers Start', () => {
+  const w = row({ bookingId: 'w', status: 'checked_in', roomId: 'r' });
+  const rm = room({ status: 'occupied', currentBookingId: null });
+  expect(roomAction(rm, model([w], [rm]))).toBeNull();
+});

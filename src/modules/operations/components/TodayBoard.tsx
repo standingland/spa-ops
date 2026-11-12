@@ -100,7 +100,7 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   const detailsRow = detailsId && !shared ? all.find((r) => r.bookingId === detailsId) : undefined;
 
   return (
-    <div className="flex min-w-0 flex-col gap-6">
+    <div className={`flex min-w-0 flex-col gap-6 ${detailsRow ? 'lg:pr-[29rem]' : ''}`}>
       <PageHeader title={t('title')} subtitle={model.day}
         actions={<Button variant="secondary" size="sm" data-testid="shared-toggle" aria-pressed={shared} onClick={() => setShared(!shared)}>{shared ? t('sharedOn') : t('sharedOff')}</Button>} />
 

@@ -98,7 +98,7 @@ export function BookingDetails({ row, role, labels, moveOptions, onClose }: {
 
   return (
     <section ref={panel} tabIndex={-1} role="dialog" aria-labelledby={titleId} data-testid="booking-panel"
-      className="fixed inset-0 z-30 flex min-w-0 flex-col gap-4 overflow-y-auto bg-surface p-4 outline-none lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[28rem] lg:border-l lg:border-line lg:shadow-lg">
+      className="fixed inset-0 z-50 flex min-w-0 flex-col gap-4 overflow-y-auto bg-surface p-4 outline-none lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[28rem] lg:border-l lg:border-line lg:shadow-lg">
       <div className="flex items-start gap-3">
         <h2 id={titleId} className="min-w-0 flex-1 break-words font-serif text-heading text-ink">{row.customerDisplayName}</h2>
         <Button variant="secondary" size="sm" onClick={() => setOpen(false)} data-testid="panel-close">{t('close')}</Button>

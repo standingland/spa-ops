@@ -660,7 +660,7 @@
       "services": "Treatments, prices and durations",
       "notifications": "Messages sent to guests",
       "staff": "Staff accounts and roles",
-      "settings": "Opening hours, deposits and rules"
+      "settings": "Cancellation and no-show fees, payments, reports and data retention"
     }
   }
 }
