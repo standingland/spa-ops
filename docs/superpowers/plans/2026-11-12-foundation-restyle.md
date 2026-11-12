@@ -265,8 +265,13 @@ Failure modes the spec implies that no feature test would otherwise catch, most 
 
 ## Test exceptions
 
-None known. Add one here, with the reason, before editing any test file other than the new ones named above.
+None needed; no existing test file was edited except tests/e2e/a11y.spec.ts (added /th/admin), tests/e2e/booking.spec.ts and tests/e2e/db.ts (new history assertions; db.ts seeds an optional note), and the new specs shell.spec.ts and today-layout.spec.ts.
 
 ## Deviations
 
-None recorded yet. Task 1 Step 1 fills this in if the Next 16 guides differ from what this plan assumes.
+1. vitest `include` extended to `src/**/*.test.tsx` (Task 3).
+2. Tailwind 4's preflight hides `[hidden]` with `!important`, so the shell panel hides below lg with `max-lg:hidden`, not the `hidden` attribute (Task 6 fix).
+3. Today's room panel actions use their own test ids and `TodayModel.rooms` instead of an extra fetch (Task 8).
+4. The booking details panel and Today's `open-details` are hidden on the shared screen (Task 11 fix).
+5. `getBookingEvents` filters out the `charge_adjusted` kind server-side because `describeEvent` throws on unknown kinds (Task 11).
+6. today-layout.spec.ts was corrected after CI: dispatchEvent for the shared toggle and a second therapist for the second seeded booking.
