@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { formatTime } from '@/lib/time';
 import type { BoardRow } from '@/modules/booking/actions';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { Attention } from '../today';
 
 export type Names = { services: Record<string, string>; therapists: Record<string, string>; rooms: Record<string, string> };
@@ -15,7 +17,7 @@ export function AttentionList({ items, rows, names, reports, shared, onOpen, onR
 }) {
   const t = useTranslations('today');
   const te = useTranslations();
-  if (items.length === 0) return <p className="text-sm text-stone-dark">{t('nothing')}</p>;
+  if (items.length === 0) return <EmptyState>{t('nothing')}</EmptyState>;
   return (
     <ul className="flex flex-col gap-2">
       {items.map((a, i) => {
@@ -27,17 +29,17 @@ export function AttentionList({ items, rows, names, reports, shared, onOpen, onR
         return (
           <li key={`${a.kind}-${a.bookingId ?? a.roomId}-${i}`} data-testid="attention-item" data-kind={a.kind}
             onClick={clickable ? () => onOpen(a) : undefined}
-            className={`rounded border border-clay bg-white p-3 text-sm ${clickable ? 'cursor-pointer' : ''}`}>
-            <div className="flex flex-wrap items-center gap-3">
+            className={`min-w-0 rounded-[var(--radius)] border border-danger bg-surface p-3 text-caption text-ink ${clickable ? 'cursor-pointer' : ''}`}>
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 break-words">
               <strong>{t(`kind.${a.kind}`)}</strong>
-              {who && <span>{who}</span>}
+              {who && <span className="min-w-0 break-words">{who}</span>}
               {room && <span className="tnum">{room}</span>}
-              <span className="tnum text-stone-dark">{formatTime(a.since)}</span>
+              <span className="tnum text-ink-muted">{formatTime(a.since)}</span>
             </div>
             {roomReports.map((rep) => (
-              <div key={rep.id} className="mt-1 flex items-center gap-3 text-stone-dark">
-                <span>{rep.note}</span>
-                {onResolve && <button data-testid="report-resolve" className="underline" onClick={(e) => { e.stopPropagation(); onResolve(rep.id); }}>{te('exceptions.resolve')}</button>}
+              <div key={rep.id} className="mt-1 flex flex-wrap items-center gap-3 text-ink-muted">
+                <span className="min-w-0 break-words">{rep.note}</span>
+                {onResolve && <Button variant="link" size="sm" data-testid="report-resolve" onClick={(e) => { e.stopPropagation(); onResolve(rep.id); }}>{te('exceptions.resolve')}</Button>}
               </div>
             ))}
           </li>

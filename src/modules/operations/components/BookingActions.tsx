@@ -9,10 +9,10 @@ import type { BookingStatus } from '@/modules/booking/schema';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
 
-const DESK_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = {
+export const DESK_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = {
   requested: ['confirmed', 'cancelled'], confirmed: ['checked_in', 'no_show', 'cancelled'], checked_in: ['in_treatment', 'cancelled'], in_treatment: ['completed'],
 };
-const THERAPIST_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = { checked_in: ['in_treatment'], in_treatment: ['completed'] };
+export const THERAPIST_NEXT: Partial<Record<BookingStatus, BookingStatus[]>> = { checked_in: ['in_treatment'], in_treatment: ['completed'] };
 
 /** Only the actions the signed-in role may take; the database still enforces them. */
 export function BookingActions({ row, role, onError }: { row: BoardRow; role: Role; onError: (message: string | null) => void }) {

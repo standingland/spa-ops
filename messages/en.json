@@ -274,6 +274,7 @@
     "noShow": "No-show",
     "roomStatus": "Room status",
     "arrivals": "Arriving",
+    "upcomingArrivals": "Upcoming arrivals",
     "waiting": "Waiting (checked in)",
     "inTreatment": "In treatment",
     "awaitingCleaning": "Awaiting cleaning",
