@@ -14,3 +14,10 @@ grant usage on schema public to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+-- Minimal stand-in for Supabase Storage: just the two tables the bucket policies need. RLS is on, as in Supabase.
+create schema storage;
+create table storage.buckets (id text primary key, name text not null, public boolean not null default false);
+create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text, owner uuid default auth.uid());
+alter table storage.objects enable row level security;
+grant usage on schema storage to anon, authenticated, service_role;
+grant all on all tables in schema storage to anon, authenticated, service_role;
