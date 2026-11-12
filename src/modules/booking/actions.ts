@@ -1,10 +1,12 @@
 'use server';
 
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { roleOrNull } from '@/modules/identity/session';
 import { fail, failFrom } from '@/lib/action';
 import { addDays, bangkokDayRange } from '@/lib/time';
 import { monthGrid } from './month';
+import { describeEvent, type BookingEventView } from './events';
 import { rankAllocations, type Candidate } from './allocation';
 import { CreateBookingInput, DayInput, MoveBookingInput, SetStatusInput, SuggestInput, type BookingStatus } from './schema';
 
@@ -60,6 +62,21 @@ export async function getMonthCounts(month: string): Promise<{ ok: true; days: {
     ok: true,
     days: ((data ?? []) as { day: string; bookings: number; booked_minutes: number }[]).map((d) => ({ day: d.day, bookings: d.bookings, bookedMinutes: d.booked_minutes })),
   };
+}
+
+/**
+ * A booking's activity, oldest first. The database limits booking_events to desk roles, so a therapist gets an empty list.
+ * Rows are reduced to BookingEventView here: the raw before/after snapshots (which carry the booking note) never leave the server.
+ */
+export async function getBookingEvents(bookingId: string): Promise<{ ok: true; events: BookingEventView[] } | { ok: false; code: string }> {
+  if (!(await roleOrNull())) return fail('NOT_AUTHORIZED');
+  if (!z.uuid().safeParse(bookingId).success) return fail('INVALID_INPUT');
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('booking_events').select('at, kind, before, after').eq('booking_id', bookingId).order('at', { ascending: true }).order('id', { ascending: true });
+  if (error) return failFrom(error);
+  // charge_adjusted (money) is not part of the history view.
+  const rows = ((data ?? []) as { at: string; kind: string; before: unknown; after: unknown }[]).filter((r) => r.kind !== 'charge_adjusted');
+  return { ok: true, events: rows.map(describeEvent) };
 }
 
 function toRow(r: BoardDb): BoardRow {
