@@ -21,6 +21,7 @@ test('a therapist sees only Today, Schedule and Rooms, and no business or setup 
   await openMenuIfPhone(page);
   await expect(page.locator('[data-testid^="nav-"]:not([data-testid="nav-account"])')).toHaveCount(3);
   for (const id of ['today', 'schedule', 'rooms']) await expect(page.getByTestId(`nav-${id}`)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'งานประจำวัน', level: 2 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'ธุรกิจ', level: 2 })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'ตั้งค่า', level: 2 })).toHaveCount(0);
   await expect(page.getByTestId('nav-account')).toBeVisible();

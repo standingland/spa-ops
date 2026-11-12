@@ -25,7 +25,7 @@ export function ShellFrame({ brand, status, children }: { brand: ReactNode; stat
   usePanelBehavior(open, () => setOpen(false), button);
 
   return (
-    <aside className="z-20 border-b border-line bg-surface max-lg:sticky max-lg:top-0 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[232px] lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
+    <aside className="z-20 border-b border-line bg-surface sticky top-0 lg:flex lg:h-screen lg:w-[232px] lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between gap-3 px-4 py-3 lg:flex-col lg:items-start lg:py-5">
           <div className="min-w-0 flex-1 lg:w-full">{brand}</div>
           <div className="flex shrink-0 items-center gap-2">
@@ -46,8 +46,7 @@ export function ShellFrame({ brand, status, children }: { brand: ReactNode; stat
         </div>
         <div
           id={panelId}
-          hidden={!open}
-          className={cn('flex-col gap-4 overflow-y-auto px-3 pb-4 max-lg:max-h-[calc(100vh-4.5rem)] lg:flex lg:flex-1 lg:pb-5', open && 'flex')}
+          className={cn('flex-col gap-4 overflow-y-auto px-3 pb-4 max-lg:max-h-[calc(100dvh-4.5rem)] lg:flex lg:flex-1 lg:pb-5', open ? 'flex' : 'max-lg:hidden')}
         >
           {children}
         </div>
