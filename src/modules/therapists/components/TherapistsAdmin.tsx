@@ -12,12 +12,14 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { addDays, bangkokDay, formatTime } from '@/lib/time';
-import { copyWeekShifts, deleteShift, deleteTimeOff, saveShift, saveTherapist, saveTimeOff, setTherapistActive } from '../actions';
+import { copyWeekShifts, deleteShift, deleteTimeOff, removeTherapistPhoto, saveShift, saveTherapist, saveTimeOff, setTherapistActive, uploadTherapistPhoto } from '../actions';
+import { ImageDecodeError, resizeToJpeg } from '@/lib/resizeImage';
+import { Avatar } from '@/components/ui/avatar';
 import { recordAbsence } from '@/modules/operations/actions';
 import type { AbsenceInput } from '@/modules/operations/schema';
 
 export type TherapistRow = {
-  id: string; display_name: string; employment_type: 'employee' | 'freelance'; active: boolean; staff_user_id: string | null;
+  id: string; display_name: string; employment_type: 'employee' | 'freelance'; active: boolean; staff_user_id: string | null; photo_path: string | null;
   therapist_services: { service_id: string }[];
 };
 export type ShiftRow = { id: string; therapist_id: string; start: string; end: string };
@@ -28,8 +30,8 @@ export type StaffOpt = { user_id: string; display_name: string };
 const local = (iso: string) => `${bangkokDay(iso)}T${formatTime(iso)}`;
 const toIso = (v: string) => (v ? new Date(`${v}:00+07:00`).toISOString() : '');
 
-export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, monday }: {
-  therapists: TherapistRow[]; shifts: ShiftRow[]; timeOff: TimeOffRow[]; services: ServiceOpt[]; staff: StaffOpt[]; monday: string;
+export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, monday, photoUrls }: {
+  therapists: TherapistRow[]; shifts: ShiftRow[]; timeOff: TimeOffRow[]; services: ServiceOpt[]; staff: StaffOpt[]; monday: string; photoUrls: Record<string, string>;
 }) {
   const t = useTranslations('therapists');
   const c = useTranslations('common');
@@ -48,6 +50,20 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
   const weekdays = t.raw('weekdays') as string[];
   const dayLabel = (d: string, i: number) => `${weekdays[i]} ${d.slice(8)}/${d.slice(5, 7)}`;
   const svcName = (s: ServiceOpt) => (locale === 'en' && s.name_en ? s.name_en : s.name_th);
+
+  async function choosePhoto(th: TherapistRow, file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    let jpeg: Blob;
+    try { jpeg = await resizeToJpeg(file); } catch (e) {
+      if (e instanceof ImageDecodeError) { setError(t('photo.unreadable')); return; }
+      throw e;
+    }
+    const form = new FormData();
+    form.set('therapistId', th.id);
+    form.set('file', new File([jpeg], 'photo.jpg', { type: 'image/jpeg' }));
+    await run(uploadTherapistPhoto(form));
+  }
 
   async function runFull<R extends { ok: boolean; code?: string }>(p: Promise<R>): Promise<R> {
     setError(null);
@@ -136,8 +152,24 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
             {visible.map((th) => (
               <tr key={th.id} data-testid="therapist-row" data-therapist-id={th.id} data-active={String(th.active)} className={`border-t border-line align-top ${th.active ? '' : 'opacity-60'}`}>
                 <th scope="row" className="sticky left-0 min-w-40 max-w-56 break-words bg-surface p-2 text-left font-medium">
-                  <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" data-testid="therapist-edit" onClick={() => setPanel({ kind: 'therapist', row: th })}>{th.display_name}</Button>
-                  <div className="text-caption text-ink-muted">{t(th.employment_type)}{th.active ? '' : ` · ${c('inactive')}`}</div>
+                  <div className="flex items-start gap-2">
+                    <span data-testid={`therapist-photo-${th.id}`}><Avatar name={th.display_name} src={th.photo_path ? photoUrls[th.photo_path] : null} /></span>
+                    <div className="min-w-0">
+                      <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" data-testid="therapist-edit" onClick={() => setPanel({ kind: 'therapist', row: th })}>{th.display_name}</Button>
+                      <div className="text-caption text-ink-muted">{t(th.employment_type)}{th.active ? '' : ` · ${c('inactive')}`}</div>
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <label className="inline-flex min-h-11 cursor-pointer items-center text-caption text-primary underline focus-within:ring-2 focus-within:ring-focus pointer-fine:min-h-0">
+                          {th.photo_path ? t('photo.change') : t('photo.add')}
+                          <input type="file" accept="image/*" className="sr-only" data-testid={`therapist-photo-input-${th.id}`}
+                            onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void choosePhoto(th, f); }} />
+                        </label>
+                        {th.photo_path && (
+                          <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" data-testid={`therapist-photo-remove-${th.id}`}
+                            onClick={() => run(removeTherapistPhoto(th.id))}>{t('photo.remove')}</Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </th>
                 {days.map((d) => (
                   <td key={d} className="p-1" data-day={d}>
