@@ -246,6 +246,16 @@
     "close": "ปิด",
     "loadFailed": "โหลดตารางไม่สำเร็จ",
     "retry": "ลองอีกครั้ง",
+    "openDetails": "รายละเอียด",
+    "fields": { "guest": "ผู้ใช้บริการ", "date": "วันที่", "time": "เวลา", "treatment": "บริการ", "therapist": "พนักงานนวด", "room": "ห้อง" },
+    "history": {
+      "title": "ประวัติการดำเนินการ",
+      "created": "สร้างการจอง",
+      "statusChanged": "{from} → {to}",
+      "statusSet": "สถานะ: {to}",
+      "rescheduled": "เลื่อนเวลา",
+      "reassigned": "เปลี่ยนพนักงานหรือห้อง"
+    },
     "status": {
       "requested": "รอยืนยัน",
       "confirmed": "ยืนยันแล้ว",

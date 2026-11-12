@@ -246,6 +246,16 @@
     "close": "Close",
     "loadFailed": "Could not load the calendar",
     "retry": "Try again",
+    "openDetails": "Details",
+    "fields": { "guest": "Guest", "date": "Date", "time": "Time", "treatment": "Treatment", "therapist": "Therapist", "room": "Room" },
+    "history": {
+      "title": "Activity",
+      "created": "Booking created",
+      "statusChanged": "{from} → {to}",
+      "statusSet": "Status: {to}",
+      "rescheduled": "Rescheduled",
+      "reassigned": "Therapist or room changed"
+    },
     "status": {
       "requested": "Requested",
       "confirmed": "Confirmed",

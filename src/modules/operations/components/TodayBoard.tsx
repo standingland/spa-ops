@@ -15,6 +15,7 @@ import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
 import { useLiveRefresh } from '@/lib/realtime';
 import type { BoardRow } from '@/modules/booking/actions';
+import { BookingDetails } from '@/modules/booking/components/BookingDetails';
 import { markRoomReady, resolveRoomReport } from '../actions';
 import type { RoomStatus, TodayModel } from '../today';
 import { AttentionList, type Names, type OpenReport } from './AttentionList';
@@ -55,6 +56,7 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
 }) {
   const t = useTranslations('today');
   const s = useTranslations('status');
+  const b = useTranslations('booking');
   const te = useTranslations();
   const router = useRouter();
   const [shared, setShared] = useShared();
@@ -62,6 +64,7 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   const [error, setError] = useState<string | null>(null);
   const [reportRoom, setReportRoom] = useState<string | null>(null);
   const [reassign, setReassign] = useState<string | null>(null);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
   const all = [...model.arrivals, ...model.waiting, ...model.inTreatment];
 
   const who = (r: BoardRow) => (shared ? names.services[r.serviceId] : r.customerDisplayName);
@@ -86,7 +89,13 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   );
   const empty = <EmptyState>{t('nothing')}</EmptyState>;
   const rowBox = 'flex min-w-0 flex-wrap items-center gap-3 rounded-[var(--radius)] border border-line bg-surface p-3';
-  const actions = (r: BoardRow) => <span className="ml-auto"><BookingActions row={r} role={role} onError={setError} /></span>;
+  const actions = (r: BoardRow) => (
+    <span className="ml-auto flex flex-wrap items-center gap-2">
+      <Button size="sm" variant="secondary" data-testid="open-details" onClick={() => setDetailsId(r.bookingId)}>{b('openDetails')}</Button>
+      <BookingActions row={r} role={role} onError={setError} />
+    </span>
+  );
+  const detailsRow = detailsId ? all.find((r) => r.bookingId === detailsId) : undefined;
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -176,6 +185,11 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
           ))}</ul>
         ))}
       </div>
+
+      {detailsRow && (
+        <BookingDetails key={detailsRow.bookingId + detailsRow.version} row={detailsRow} role={role} onClose={() => setDetailsId(null)}
+          labels={{ service: names.services[detailsRow.serviceId], therapist: names.therapists[detailsRow.therapistId], room: names.rooms[detailsRow.roomId] }} />
+      )}
 
       {reportRoom && <ReportForm roomId={reportRoom} room={names.rooms[reportRoom]} onDone={() => setReportRoom(null)} onError={setError} />}
     </div>

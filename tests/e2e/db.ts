@@ -102,7 +102,7 @@ export function tomorrowAt(hhmm: string): string {
 }
 
 /** Signs in as reception with the public client and books through create_booking. */
-export async function seedBooking(o: { roomCode?: string; at?: string; therapistEmail?: string; otherTherapist?: boolean; customerName?: string } = {}) {
+export async function seedBooking(o: { roomCode?: string; at?: string; therapistEmail?: string; otherTherapist?: boolean; customerName?: string; note?: string } = {}) {
   const client = await publicClient('reception@spa.test');
   const { data: ths } = await admin.from('therapists').select('id,display_name,staff_user_id').eq('active', true).order('sort_order');
   let th = ths![0];
@@ -124,7 +124,7 @@ export async function seedBooking(o: { roomCode?: string; at?: string; therapist
   const at = o.at ?? tomorrowAt('11:00');
   const { data, error } = await client.rpc('create_booking', {
     p_customer_id: cust!.id, p_service_id: svc!.id, p_therapist_id: th.id, p_position_id: pos!.id,
-    p_start: at, p_source: 'advance', p_idempotency_key: crypto.randomUUID(),
+    p_start: at, p_source: 'advance', p_idempotency_key: crypto.randomUUID(), p_note: o.note,
   });
   if (error) throw new Error(error.message);
   return { id: data.id as string, therapistName: th.display_name as string, roomCode, at };
