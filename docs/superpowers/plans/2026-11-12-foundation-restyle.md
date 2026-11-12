@@ -265,7 +265,13 @@ Failure modes the spec implies that no feature test would otherwise catch, most 
 
 ## Test exceptions
 
-None needed; no existing test file was edited except tests/e2e/a11y.spec.ts (added /th/admin), tests/e2e/booking.spec.ts and tests/e2e/db.ts (new history assertions; db.ts seeds an optional note), and the new specs shell.spec.ts and today-layout.spec.ts.
+Three existing test files were edited, each purely additively; no existing assertion was removed or weakened.
+
+- tests/e2e/a11y.spec.ts: added `/th/admin` to the page list, because the Settings hub is a new route.
+- tests/e2e/booking.spec.ts: added assertions for the new booking details panel and its activity history.
+- tests/e2e/db.ts: `seedBooking` gained an optional `note` option, passed as `p_note`, so the history-privacy assertion can seed a distinctive note. Backwards compatible: when omitted, `p_note` is undefined and other specs are unaffected.
+
+Two new specs were added: tests/e2e/shell.spec.ts and tests/e2e/today-layout.spec.ts.
 
 ## Deviations
 
