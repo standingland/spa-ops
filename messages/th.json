@@ -3,7 +3,6 @@
     "name": "Spa Ops"
   },
   "nav": {
-    "calendar": "ตารางนัดหมาย",
     "rooms": "ห้องและเตียง",
     "services": "บริการ",
     "therapists": "นักบำบัด",
@@ -15,7 +14,6 @@
     "notifications": "ข้อความถึงลูกค้า",
     "settings": "ตั้งค่า",
     "payments": "การเงิน",
-    "customers": "ลูกค้า",
     "reports": "รายงาน",
     "account": "บัญชีของฉัน",
     "schedule": "ตารางงาน",
