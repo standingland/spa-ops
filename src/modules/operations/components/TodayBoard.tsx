@@ -154,7 +154,7 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
               <span className="tnum text-caption text-ink-muted">{t('due')} {r.turnoverDueAt ? formatTime(r.turnoverDueAt) : '—'}</span>
               <span className="ml-auto flex flex-wrap items-center gap-2">
                 <Button size="sm" variant="secondary" data-testid="act-ready" onClick={() => ready(r.roomId)}>{t('ready')}</Button>
-                <Button size="sm" variant="link" onClick={() => setReportRoom(r.roomId)}>{t('report')}</Button>
+                <Button size="sm" variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" onClick={() => setReportRoom(r.roomId)}>{t('report')}</Button>
               </span>
             </li>
           ))}</ul>

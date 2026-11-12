@@ -39,7 +39,7 @@ export function AttentionList({ items, rows, names, reports, shared, onOpen, onR
             {roomReports.map((rep) => (
               <div key={rep.id} className="mt-1 flex flex-wrap items-center gap-3 text-ink-muted">
                 <span className="min-w-0 break-words">{rep.note}</span>
-                {onResolve && <Button variant="link" size="sm" data-testid="report-resolve" onClick={(e) => { e.stopPropagation(); onResolve(rep.id); }}>{te('exceptions.resolve')}</Button>}
+                {onResolve && <Button variant="link" size="sm" className="min-h-11 px-2 pointer-fine:min-h-0" data-testid="report-resolve" onClick={(e) => { e.stopPropagation(); onResolve(rep.id); }}>{te('exceptions.resolve')}</Button>}
               </div>
             ))}
           </li>
