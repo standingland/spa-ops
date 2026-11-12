@@ -1,5 +1,6 @@
 import { forbidden } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
+import { Alert } from '@/components/ui/alert';
 import { requireRole } from '@/modules/identity/session';
 import { bangkokDay } from '@/lib/time';
 import { getReports } from '@/modules/reports/actions';
@@ -16,7 +17,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const r = await getReports(range);
   if (!r.ok) {
     if (r.code === 'NOT_AUTHORIZED') forbidden();
-    return <p role="alert" className="text-clay">{r.code}</p>;
+    return <Alert tone="error">{r.code}</Alert>;
   }
   return <ReportsDashboard range={range} today={today} data={r} />;
 }
