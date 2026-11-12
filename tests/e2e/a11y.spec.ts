@@ -12,6 +12,7 @@ const PAGES: { path: string; as: string | null }[] = [
   { path: '/th/reports', as: 'manager@spa.test' },
   { path: '/th/admin', as: 'owner@spa.test' },
   { path: '/th/admin/settings', as: 'owner@spa.test' },
+  { path: '/th/admin/therapists', as: 'owner@spa.test' },
 ];
 
 for (const p of PAGES) {
