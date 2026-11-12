@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/modules/identity/session';
 import { createClient } from '@/lib/supabase/server';
 import { addDays, bangkokDay, bangkokDayRange, mondayOf, parseRange } from '@/lib/time';
-import { getBoard } from '@/modules/booking/actions';
+import { getRowsNow } from '@/modules/operations/actions';
 import { photoUrls } from '@/modules/therapists/actions';
 import { therapistsNow } from '@/modules/operations/onShift';
 import { NowStrip, type NowPerson } from '@/modules/therapists/components/NowStrip';
@@ -28,7 +28,7 @@ export default async function TherapistsPage({ searchParams }: { searchParams: P
     supabase.from('therapist_shifts').select('therapist_id, during').filter('during', 'ov', nowRange),
     supabase.from('therapist_time_off').select('therapist_id, during').filter('during', 'ov', nowRange),
     supabase.from('rooms').select('id, code, display_name'),
-    getBoard(bangkokDay(now)),
+    getRowsNow(nowIso),
   ]);
   const t = await getTranslations('therapists');
   const spans = (rows: { therapist_id: string; during: unknown }[] | null) =>

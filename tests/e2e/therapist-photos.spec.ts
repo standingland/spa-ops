@@ -48,7 +48,7 @@ test('a file the browser cannot read shows the message and uploads nothing', asy
   await signIn(page, 'owner@spa.test');
   await page.goto('/th/admin/therapists');
   await page.getByTestId(`therapist-photo-input-${t.id}`).setInputFiles({ name: 'iphone.heic', mimeType: 'image/heic', buffer: Buffer.from('not an image') });
-  await expect(page.getByRole('alert')).toContainText(th.therapists.photo.unreadable);
+  await expect(page.getByRole('alert').filter({ hasText: th.therapists.photo.unreadable })).toBeVisible();
   const { data } = await admin.from('therapists').select('photo_path').eq('id', t.id).single();
   expect(data!.photo_path).toBeNull();
 });

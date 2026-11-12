@@ -3,9 +3,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { roleOrNull } from '@/modules/identity/session';
 import { done, fail, failFrom, type ActionResult } from '@/lib/action';
-import { bangkokDay, bangkokDayRange, parseRange } from '@/lib/time';
+import { parseRange } from '@/lib/time';
 import type { BoardRow } from '@/modules/booking/actions';
 import { rankAllocations, type Candidate } from '@/modules/booking/allocation';
+import { boardWindow } from './window';
 import { buildToday, type RoomState, type Span, type TodayModel } from './today';
 import { addStrandedRows, toBoardRow, toRoomState, type BoardDb, type RoomDb } from './mapping';
 import { AbsenceInput, ForceBlockInput, ReportInput, RoomIdInput } from './schema';
@@ -20,18 +21,27 @@ export async function getRoomStates(): Promise<{ ok: true; rooms: RoomState[] } 
   return { ok: true, rooms: ((data ?? []) as RoomDb[]).map(toRoomState) };
 }
 
+/** Bookings in the same window Today reads, for the Therapists page's "on shift now" strip. Any staff role. */
+export async function getRowsNow(now: string): Promise<{ ok: true; rows: BoardRow[] } | { ok: false; code: string }> {
+  if (!(await roleOrNull())) return fail('NOT_AUTHORIZED');
+  const { from, to } = boardWindow(now);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('booking_board', { p_from: from, p_to: to });
+  if (error) return failFrom(error);
+  return { ok: true, rows: ((data ?? []) as BoardDb[]).map(toBoardRow) };
+}
+
 /** Any staff role. `now` is the server's clock; the client never decides what "today" is. */
 export async function getToday(): Promise<{ ok: true; now: string; model: TodayModel } | { ok: false; code: string }> {
   const session = await roleOrNull();
   if (!session) return fail('NOT_AUTHORIZED');
   const now = new Date().toISOString();
-  const range = bangkokDayRange(bangkokDay(now));
-  const from = new Date(new Date(range.from).getTime() - 12 * 3600000).toISOString();
+  const { from, to } = boardWindow(now);
   const instant = `[${now},${new Date(new Date(now).getTime() + 1000).toISOString()})`;
   const supabase = await createClient();
 
   const [board, rooms, shifts, off, stranded, cfg] = await Promise.all([
-    supabase.rpc('booking_board', { p_from: from, p_to: range.to }),
+    supabase.rpc('booking_board', { p_from: from, p_to: to }),
     supabase.rpc('room_status_board', { p_now: now }),
     supabase.from('therapist_shifts').select('therapist_id, during').filter('during', 'ov', instant),
     supabase.from('therapist_time_off').select('therapist_id, during').filter('during', 'ov', instant),

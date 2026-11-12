@@ -28,7 +28,7 @@
 - A direct call with a 0-byte file, a 513 KB file, or `image/gif`: action returns `INVALID_INPUT`, nothing is written to Storage or `photo_path`. (Task 3)
 - Replacing a photo: the new upload has a new object name, `photo_path` changes, the old object is deleted, and a stale cached URL cannot show the old face. (Task 3)
 - Nobody on shift, or a therapist on shift with no bookings: the strip shows an empty state or "free", not a crash. (Task 2, Task 5)
-- Receptionist or therapist role listing, reading or writing the bucket or `photo_path`: denied. (Task 1)
+- Receptionist or therapist role listing, reading or writing the bucket, or writing `photo_path`: denied. They can still read the `photo_path` file name (an unguessable `<id>-<timestamp>.jpg`), never the photo. (Task 1)
 
 ---
 

@@ -48,3 +48,15 @@ test('the bucket is private', async () => {
   const r = await asAdmin((c) => c.query(`select public from storage.buckets where id='therapist-photos'`));
   expect(r.rows).toEqual([{ public: false }]);
 });
+test('receptionist and therapist can see the photo file name but never the photo itself', async () => {
+  await asAdmin(async (c) => {
+    await c.query(`update therapists set photo_path='seed.jpg' where id=$1`, [b.t1]);
+    await insertObject('seed.jpg')(c);
+  });
+  for (const r of ['receptionist', 'therapist'] as const) {
+    const path = await asRole(b, r, (c) => c.query(`select photo_path from therapists where id=$1`, [b.t1]));
+    expect(path.rows, r).toEqual([{ photo_path: 'seed.jpg' }]); // an unguessable name with a timestamp; not sensitive on its own
+    const file = await asRole(b, r, (c) => c.query(`select 1 from storage.objects where bucket_id='therapist-photos' and name='seed.jpg'`));
+    expect(file.rowCount, r).toBe(0);
+  }
+});
