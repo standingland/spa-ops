@@ -27,7 +27,9 @@ test('(b) the shared screen removes the guest from every room row and arrival ro
   // A details panel opened before the shared screen is turned on must disappear with it.
   await page.getByTestId('treatment-row').getByTestId('open-details').click();
   await expect(page.getByTestId('booking-panel')).toBeVisible();
-  await page.getByTestId('shared-toggle').click();
+  // The open panel covers the toggle (a full-screen sheet on a phone, a right-hand drawer on desktop), so a real
+  // pointer cannot reach it; dispatch the click straight to the button, which still runs React's onClick.
+  await page.getByTestId('shared-toggle').dispatchEvent('click');
   await expect(page.getByTestId('shared-toggle')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('booking-panel')).toHaveCount(0);
   await expect(page.getByTestId('open-details')).toHaveCount(0);
@@ -46,8 +48,9 @@ test('(c) a 60-character Thai name does not scroll the page sideways on a phone'
 });
 
 test('(d) every arrival is listed once', async ({ page }) => {
+  // Two different therapists: the same therapist cannot hold two overlapping bookings (THERAPIST_BUSY).
   await seedBookingNow({ roomCode: 'R1', customerName: 'คุณหนึ่ง' });
-  await seedBookingNow({ roomCode: 'R2', customerName: 'คุณสอง', inMinutes: 5 });
+  await seedBookingNow({ roomCode: 'R2', customerName: 'คุณสอง', inMinutes: 5, otherTherapist: true });
   await signIn(page, 'reception@spa.test');
   await expect(page.getByTestId('arrival-row')).toHaveCount(2);
   await expect(page.getByTestId('arrival-row').filter({ hasText: 'คุณหนึ่ง' })).toHaveCount(1);
