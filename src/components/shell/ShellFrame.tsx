@@ -1,0 +1,56 @@
+'use client';
+
+import { useId, useRef, useState, type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
+import { usePathname } from '@/i18n/navigation';
+import { usePanelBehavior } from '@/lib/usePanelBehavior';
+import { cn } from '@/lib/cn';
+import { Icon } from './Icon';
+
+/**
+ * One <aside>: a top block (brand, status, menu button below lg) and a panel that CSS always shows at lg+
+ * and that below lg is shown only while open. A single DOM, so test ids stay unique.
+ */
+export function ShellFrame({ brand, status, children }: { brand: ReactNode; status: ReactNode; children: ReactNode }) {
+  const t = useTranslations('nav');
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
+  const pathname = usePathname();
+
+  // Close after navigating. Setting state while the pathname changes is the render-time reset pattern.
+  const [seen, setSeen] = useState(pathname);
+  if (seen !== pathname) { setSeen(pathname); setOpen(false); }
+
+  usePanelBehavior(open, () => setOpen(false), button);
+
+  return (
+    <aside className="z-20 border-b border-line bg-surface max-lg:sticky max-lg:top-0 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[232px] lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:flex-col lg:items-start lg:py-5">
+          <div className="min-w-0 flex-1 lg:w-full">{brand}</div>
+          <div className="flex shrink-0 items-center gap-2">
+            {status}
+            <button
+              ref={button}
+              data-testid="menu-button"
+              type="button"
+              aria-expanded={open}
+              aria-controls={panelId}
+              aria-label={open ? t('closeMenu') : t('menu')}
+              onClick={() => setOpen((o) => !o)}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius)] border border-line-strong bg-surface text-ink lg:hidden"
+            >
+              <Icon name={open ? 'close' : 'menu'} />
+            </button>
+          </div>
+        </div>
+        <div
+          id={panelId}
+          hidden={!open}
+          className={cn('flex-col gap-4 overflow-y-auto px-3 pb-4 max-lg:max-h-[calc(100vh-4.5rem)] lg:flex lg:flex-1 lg:pb-5', open && 'flex')}
+        >
+          {children}
+        </div>
+    </aside>
+  );
+}

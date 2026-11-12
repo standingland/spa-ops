@@ -1,30 +1,21 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link, redirect } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { requireRole, type Role } from '@/modules/identity/session';
+import { getBrand } from '@/lib/brand';
+import { requireRole } from '@/modules/identity/session';
+import { visibleNav } from '@/modules/identity/nav';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
 import { LiveStatus } from '@/modules/identity/components/LiveStatus';
-
-const NAV: { href: '/today' | '/rooms' | '/calendar' | '/admin/rooms' | '/admin/services' | '/admin/therapists' | '/admin/staff' | '/admin/notifications' | '/admin/settings' | '/payments' | '/customers' | '/reports' | '/account'; key: string; roles: Role[] }[] = [
-  { href: '/today', key: 'today', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
-  { href: '/rooms', key: 'rooms', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
-  { href: '/calendar', key: 'calendar', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
-  { href: '/customers', key: 'customers', roles: ['owner', 'manager', 'receptionist'] },
-  { href: '/payments', key: 'payments', roles: ['owner', 'manager'] },
-  { href: '/reports', key: 'reports', roles: ['owner', 'manager'] },
-  { href: '/admin/rooms', key: 'adminRooms', roles: ['owner', 'manager'] },
-  { href: '/admin/services', key: 'services', roles: ['owner', 'manager'] },
-  { href: '/admin/therapists', key: 'therapists', roles: ['owner', 'manager'] },
-  { href: '/admin/notifications', key: 'notifications', roles: ['owner', 'manager'] },
-  { href: '/admin/staff', key: 'staff', roles: ['owner'] },
-  { href: '/admin/settings', key: 'settings', roles: ['owner'] },
-  { href: '/account', key: 'account', roles: ['owner', 'manager', 'receptionist', 'therapist'] },
-];
+import { ShellFrame } from '@/components/shell/ShellFrame';
+import { NavList } from '@/components/shell/NavList';
+import { Wordmark } from '@/components/shell/Wordmark';
+import { Button } from '@/components/ui/button';
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await requireRole();
   const t = await getTranslations('nav');
   const locale = await getLocale();
+  const brand = getBrand(process.env);
   // The owner can switch reports off for managers; hide the link then (the database refuses either way).
   let managerReports = true;
   if (session.role === 'manager') {
@@ -38,22 +29,31 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     redirect({ href: '/login', locale });
   }
 
+  const groups = visibleNav(session.role, { managerReports }).map((g) => ({
+    id: g.id,
+    label: t(`group.${g.id}`),
+    items: g.items.map((i) => ({ id: i.id, href: i.href, label: t(i.id), icon: i.icon })),
+  }));
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-stone bg-white px-4 py-3">
-        <span className="font-serif text-lg">Spa Ops</span>
-        <nav className="flex flex-wrap gap-4 text-sm">
-          {NAV.filter((n) => n.roles.includes(session.role) && (n.href !== '/reports' || managerReports)).map((n) => (
-            <Link key={n.href} href={n.href} className="hover:underline">{t(n.key)}</Link>
-          ))}
-        </nav>
-        <div className="ml-auto flex items-center gap-4">
-          <LiveStatus />
+    <div className="min-h-screen lg:flex">
+      <ShellFrame brand={<Wordmark name={brand.name} tagline={brand.tagline} />} status={<LiveStatus />}>
+        <NavList groups={groups} />
+        <div className="mt-auto flex flex-col gap-2 border-t border-line pt-4">
           <LocaleSwitch />
-          <form action={signOut}><button className="text-sm underline" data-testid="sign-out">{t('signOut')}</button></form>
+          <Link
+            href="/account"
+            data-testid="nav-account"
+            className="flex min-h-11 items-center rounded-[var(--radius)] px-3 text-body text-ink hover:bg-surface-muted"
+          >
+            <span className="truncate">{t('account')}</span>
+          </Link>
+          <form action={signOut}>
+            <Button type="submit" variant="secondary" className="w-full" data-testid="sign-out">{t('signOut')}</Button>
+          </form>
         </div>
-      </header>
-      <main className="flex-1 p-4">{children}</main>
+      </ShellFrame>
+      <main className="min-w-0 flex-1 p-4">{children}</main>
     </div>
   );
 }
