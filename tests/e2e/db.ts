@@ -35,6 +35,8 @@ export async function resetTestData() {
   await admin.from('payment_methods').update({ active: true }).in('code', ['cash', 'bank_transfer', 'promptpay']);
   await admin.from('room_blocks').delete().neq('id', NIL);
   await admin.from('therapist_time_off').delete().neq('id', NIL);
+  await admin.from('therapists').update({ public: false, bio_th: null, bio_en: null, specialties: [] }).neq('id', NIL);
+  await admin.from('services').update({ bookable_online: false }).neq('id', NIL);
 
   // rooms
   const { data: allRooms } = await admin.from('rooms').select('id,code');

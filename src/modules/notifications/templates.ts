@@ -16,11 +16,15 @@ const TEXT: Record<'th' | 'en', Record<TemplateKey, string>> = {
   },
 };
 
+const CANCEL = { th: 'ยกเลิกได้ที่', en: 'Cancel here:' } as const;
+
 /** {date} is DD/MM/YYYY and {time} is HH:mm, both in Bangkok time. */
-export function renderTemplate(key: TemplateKey, payload: { starts_at: string }, locale: 'th' | 'en', senderName: string): string {
+export function renderTemplate(key: TemplateKey, payload: { starts_at: string }, locale: 'th' | 'en', senderName: string, opts?: { cancelUrl?: string }): string {
   const [y, m, d] = bangkokDay(payload.starts_at).split('-');
-  return TEXT[locale][key]
+  const text = TEXT[locale][key]
     .replace('{sender}', senderName)
     .replace('{date}', `${d}/${m}/${y}`)
     .replace('{time}', formatTime(payload.starts_at));
+  return key === 'booking_confirmed' && opts?.cancelUrl ? `${text}
+${CANCEL[locale]} ${opts.cancelUrl}` : text;
 }

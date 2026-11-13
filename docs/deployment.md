@@ -48,6 +48,11 @@ Set these on the host. A production start **refuses to run** and lists every pro
 | `BRAND_NAME` | optional; the name shown in the staff header (default `BANYAN`) |
 | `BRAND_TAGLINE` | optional; the tagline shown under the name (default `Men's Spa · Thailand`) |
 | `NEXT_PUBLIC_LIVE_POLL_MS` | optional; how often screens refresh as a fallback, in milliseconds (default 60000) |
+| `LINE_LOGIN_CHANNEL_ID`, `LINE_LOGIN_CHANNEL_SECRET` | optional; the LINE Login channel used to verify guests on the public booking page. Set all five LINE variables or none (see `docs/public-booking.md`) |
+| `LINE_MESSAGING_TOKEN` | optional; the Messaging API channel access token used to send confirmations to guests |
+| `PUBLIC_BASE_URL` | optional; the public address of the app, for example `https://spa.example.com` (used in the LINE redirect and cancel links) |
+| `PUBLIC_TOKEN_SECRET` | optional; at least 32 random characters; signs guest sessions and cancel links |
+| `LINE_API_BASE`, `LINE_AUTH_BASE` | tests only; point LINE calls at a local stub. Refused at startup in production |
 
 Used only on development machines, never set in production: `TEST_DATABASE_URL` (point the database tests at your own empty PostgreSQL instead of the throwaway one) and `E2E_DATABASE_URL` (direct SQL for the browser tests; defaults to the local Supabase database).
 

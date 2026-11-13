@@ -17,7 +17,7 @@ import { saveService, setServiceActive } from '../actions';
 
 export type ServiceRow = {
   id: string; name_th: string; name_en: string | null; duration_min: number; price_satang: number;
-  required_equipment: string[]; active: boolean; service_room_categories: { room_category_id: string }[];
+  required_equipment: string[]; active: boolean; bookable_online: boolean; service_room_categories: { room_category_id: string }[];
 };
 export type CategoryRow = { id: string; name_th: string; name_en: string | null };
 
@@ -63,6 +63,7 @@ export function ServicesAdmin({ services, categories }: { services: ServiceRow[]
                 <span className="tnum text-caption">{s.duration_min} {c('minutes')} · {formatTHB(s.price_satang)}</span>
                 <span className="min-w-0 break-words text-caption text-ink-muted">{allowed.length ? allowed.map(catName).join(', ') : t('anyCategory')}</span>
                 <Badge>{s.active ? c('active') : c('inactive')}</Badge>
+                {s.bookable_online && <Badge>{t('onlineBadge')}</Badge>}
                 <span className="ml-auto flex flex-wrap items-center gap-2">
                   <Button variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" onClick={() => setEditing(s)} data-testid="service-edit">{c('edit')}</Button>
                   {s.active ? (
@@ -94,6 +95,7 @@ function ServiceForm({ service, categories, catName, onSave, onCancel }: {
     price: service ? String(service.price_satang / 100) : '', equipment: (service?.required_equipment ?? []).join(', '),
   });
   const [cats, setCats] = useState<string[]>(service?.service_room_categories.map((x) => x.room_category_id) ?? []);
+  const [online, setOnline] = useState(service?.bookable_online ?? false);
   const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement>) => setV({ ...v, [k]: e.target.value });
   return (
     <Card>
@@ -102,7 +104,7 @@ function ServiceForm({ service, categories, catName, onSave, onCancel }: {
         e.preventDefault();
         onSave({
           id: service?.id, nameTh: v.nameTh, nameEn: v.nameEn, durationMin: Number(v.durationMin),
-          priceSatang: Math.round(Number(v.price) * 100), requiredEquipment: v.equipment.split(',').map((s) => s.trim()).filter(Boolean), categoryIds: cats,
+          priceSatang: Math.round(Number(v.price) * 100), requiredEquipment: v.equipment.split(',').map((s) => s.trim()).filter(Boolean), categoryIds: cats, bookableOnline: online,
         });
       }}>
       <Field label={t('nameTh')}><Input required value={v.nameTh} onChange={set('nameTh')} data-testid="service-name-th" /></Field>
@@ -110,6 +112,10 @@ function ServiceForm({ service, categories, catName, onSave, onCancel }: {
       <Field label={t('duration')}><Input required type="number" min={1} value={v.durationMin} onChange={set('durationMin')} data-testid="service-duration" /></Field>
       <Field label={t('price')}><Input required type="number" min={0} step="0.01" value={v.price} onChange={set('price')} data-testid="service-price" /></Field>
       <div className="sm:col-span-2"><Field label={t('equipment')}><Input value={v.equipment} onChange={set('equipment')} /></Field></div>
+      <label className="flex min-h-11 items-center gap-2 text-body text-ink sm:col-span-2">
+        <input type="checkbox" className="size-5 accent-primary" checked={online} onChange={(e) => setOnline(e.target.checked)} data-testid="service-bookable-online" />
+        <span className="min-w-0 break-words">{t('bookableOnline')}</span>
+      </label>
       <fieldset className="sm:col-span-2">
         <legend className="text-caption text-ink-muted">{t('categories')}</legend>
         <div className="mt-1 flex flex-wrap gap-x-4">

@@ -9,6 +9,10 @@ export const TherapistInput = z.object({
   employmentType: z.enum(['employee', 'freelance']),
   staffUserId: z.uuid().nullable().optional(),
   serviceIds: z.array(z.uuid()),
+  public: z.boolean().default(false),
+  bioTh: z.string().trim().max(500).optional().transform((v) => (v ? v : undefined)),
+  bioEn: z.string().trim().max(500).optional().transform((v) => (v ? v : undefined)),
+  specialties: z.array(z.string().trim()).transform((a) => a.filter(Boolean)).pipe(z.array(z.string().max(24)).max(6)).default([]),
 });
 export type TherapistInput = z.input<typeof TherapistInput>;
 

@@ -14,14 +14,19 @@ export type Settings = {
   'retention.inactive_months': number;
   'retention.audit_months': number;
   'retention.prune_enabled': boolean;
+  'online.enabled': boolean;
+  'online.max_upcoming': number;
+  'online.min_lead_min': number;
+  'online.max_ahead_days': number;
+  'online.cancel_cutoff_min': number;
 };
 export type SettingKey = keyof Settings;
 
 export type SettingMeta =
-  | { group: SettingGroup; kind: 'int'; min: number; max: number; unit: 'minutes' | 'percent' | 'months' }
+  | { group: SettingGroup; kind: 'int'; min: number; max: number; unit: 'minutes' | 'percent' | 'months' | 'days' | 'bookings' }
   | { group: SettingGroup; kind: 'bool' };
-export type SettingGroup = 'operations' | 'policy' | 'payments' | 'reports' | 'retention';
-export const SETTING_GROUPS: SettingGroup[] = ['operations', 'policy', 'payments', 'reports', 'retention'];
+export type SettingGroup = 'operations' | 'policy' | 'payments' | 'reports' | 'retention' | 'online';
+export const SETTING_GROUPS: SettingGroup[] = ['operations', 'policy', 'payments', 'reports', 'retention', 'online'];
 
 /** Mirrors private.setting_spec() in the database, which is what actually enforces these limits. */
 export const SETTING_META: Record<SettingKey, SettingMeta> = {
@@ -38,6 +43,11 @@ export const SETTING_META: Record<SettingKey, SettingMeta> = {
   'retention.inactive_months': { group: 'retention', kind: 'int', min: 6, max: 120, unit: 'months' },
   'retention.audit_months': { group: 'retention', kind: 'int', min: 12, max: 120, unit: 'months' },
   'retention.prune_enabled': { group: 'retention', kind: 'bool' },
+  'online.enabled': { group: 'online', kind: 'bool' },
+  'online.max_upcoming': { group: 'online', kind: 'int', min: 1, max: 10, unit: 'bookings' },
+  'online.min_lead_min': { group: 'online', kind: 'int', min: 0, max: 1440, unit: 'minutes' },
+  'online.max_ahead_days': { group: 'online', kind: 'int', min: 1, max: 365, unit: 'days' },
+  'online.cancel_cutoff_min': { group: 'online', kind: 'int', min: 0, max: 1440, unit: 'minutes' },
 };
 export const SETTING_KEYS = Object.keys(SETTING_META) as SettingKey[];
 

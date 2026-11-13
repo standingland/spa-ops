@@ -10,7 +10,7 @@ test('opsConfigFrom maps the four ops thresholds field for field', () => {
   expect(opsConfigFrom(s)).toEqual({ arrivalWindowMin: 11, lateArrivalMin: 22, endingSoonMin: 33, roomPrepWarnMin: 44 });
 });
 test('every setting has a label in both languages', () => {
-  expect(SETTING_KEYS).toHaveLength(13);
+  expect(SETTING_KEYS).toHaveLength(18);
   for (const k of SETTING_KEYS) {
     expect((th.settings.fields as Record<string, string>)[settingId(k)], `th ${k}`).toBeTruthy();
     expect((en.settings.fields as Record<string, string>)[settingId(k)], `en ${k}`).toBeTruthy();

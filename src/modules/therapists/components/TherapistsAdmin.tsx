@@ -20,6 +20,7 @@ import type { AbsenceInput } from '@/modules/operations/schema';
 
 export type TherapistRow = {
   id: string; display_name: string; employment_type: 'employee' | 'freelance'; active: boolean; staff_user_id: string | null; photo_path: string | null;
+  public: boolean; bio_th: string | null; bio_en: string | null; specialties: string[];
   therapist_services: { service_id: string }[];
 };
 export type ShiftRow = { id: string; therapist_id: string; start: string; end: string };
@@ -203,10 +204,14 @@ function TherapistForm({ row, services, staff, svcName, onSave, onCancel, onTogg
   const [type, setType] = useState<'employee' | 'freelance'>(row?.employment_type ?? 'employee');
   const [link, setLink] = useState(row?.staff_user_id ?? '');
   const [svc, setSvc] = useState<string[]>(row?.therapist_services.map((x) => x.service_id) ?? services.map((s) => s.id));
+  const [isPublic, setIsPublic] = useState(row?.public ?? false);
+  const [bioTh, setBioTh] = useState(row?.bio_th ?? '');
+  const [bioEn, setBioEn] = useState(row?.bio_en ?? '');
+  const [tags, setTags] = useState((row?.specialties ?? []).join(', '));
   return (
     <Card>
     <form className="grid gap-3 sm:grid-cols-2" aria-label={row ? t('edit') : t('add')}
-      onSubmit={(e) => { e.preventDefault(); onSave({ id: row?.id, displayName: name, employmentType: type, staffUserId: link || null, serviceIds: svc }); }}>
+      onSubmit={(e) => { e.preventDefault(); onSave({ id: row?.id, displayName: name, employmentType: type, staffUserId: link || null, serviceIds: svc, public: isPublic, bioTh, bioEn, specialties: tags.split(',').map((s) => s.trim()).filter(Boolean) }); }}>
       <Field label={t('name')}><Input required value={name} onChange={(e) => setName(e.target.value)} data-testid="therapist-name" /></Field>
       <Field label={t('employment')}>
         <Select value={type} onChange={(e) => setType(e.target.value as typeof type)} data-testid="therapist-type">
@@ -219,6 +224,17 @@ function TherapistForm({ row, services, staff, svcName, onSave, onCancel, onTogg
           {staff.map((s) => <option key={s.user_id} value={s.user_id}>{s.display_name}</option>)}
         </Select>
       </Field>
+      <fieldset className="flex flex-col gap-3 sm:col-span-2">
+        <legend className="text-caption text-ink-muted">{t('publicProfile.legend')}</legend>
+        <label className="flex min-h-11 items-center gap-2 text-body text-ink">
+          <input type="checkbox" className="size-5 accent-primary" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} data-testid="therapist-public" />
+          <span className="min-w-0 break-words">{t('publicProfile.show')}</span>
+        </label>
+        <p className="text-caption text-ink-muted" data-testid="therapist-public-help">{t('publicProfile.help')}</p>
+        <Field label={t('publicProfile.bioTh')}><Input value={bioTh} maxLength={500} onChange={(e) => setBioTh(e.target.value)} data-testid="therapist-bio-th" /></Field>
+        <Field label={t('publicProfile.bioEn')}><Input value={bioEn} maxLength={500} onChange={(e) => setBioEn(e.target.value)} data-testid="therapist-bio-en" /></Field>
+        <Field label={t('publicProfile.specialties')}><Input value={tags} onChange={(e) => setTags(e.target.value)} data-testid="therapist-specialties" /></Field>
+      </fieldset>
       <fieldset className="sm:col-span-2">
         <legend className="text-caption text-ink-muted">{t('services')}</legend>
         <div className="mt-1 flex flex-wrap gap-x-4">

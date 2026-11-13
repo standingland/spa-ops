@@ -18,5 +18,6 @@ export const ServiceInput = z.object({
   priceSatang: z.number().int().min(0),
   requiredEquipment: z.array(z.string().trim().min(1)),
   categoryIds: z.array(z.uuid()),
+  bookableOnline: z.boolean().default(false),
 });
 export type ServiceInput = z.input<typeof ServiceInput>;

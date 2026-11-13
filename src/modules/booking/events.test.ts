@@ -36,3 +36,12 @@ describe('describeEvent', () => {
     expect(() => describeEvent({ at, kind: 'charge_adjusted', before: null, after: null })).toThrow();
   });
 });
+
+describe('describeEvent via', () => {
+  it('carries a guest-online marker through, and ignores any other value', () => {
+    expect(describeEvent({ at, kind: 'status_changed', before: { status: 'confirmed' }, after: { status: 'cancelled' }, via: 'guest_online' }))
+      .toEqual({ at, kind: 'status_changed', from: 'confirmed', to: 'cancelled', via: 'guest_online' });
+    expect(describeEvent({ at, kind: 'status_changed', before: { status: 'confirmed' }, after: { status: 'cancelled' }, via: 'something else' })).not.toHaveProperty('via');
+    expect(describeEvent({ at, kind: 'created', before: null, after: { status: 'confirmed' } })).not.toHaveProperty('via');
+  });
+});

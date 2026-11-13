@@ -8,7 +8,7 @@ const settings = (a: Actor) => asRole(b, a, (c) => c.query(`select get_settings(
 
 test('every key has a default until the owner changes it', async () => {
   const s = await settings('therapist');
-  expect(Object.keys(s)).toHaveLength(13);
+  expect(Object.keys(s)).toHaveLength(18);
   expect([s['ops.reserved_lead_min'], s['policy.cancel_fee_percent'], s['reports.manager_can_view']]).toEqual([30, 0, true]);
 });
 test('the reserved lead time drives room status', async () => {

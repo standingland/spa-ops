@@ -78,6 +78,7 @@ export function BookingDetails({ row, role, labels, moveOptions, onClose }: {
       case 'created': return t('history.created');
       case 'status_changed':
         if (!e.to) return null;
+        if (e.via === 'guest_online' && e.to === 'cancelled') return t('history.cancelledByGuest');
         return e.from ? t('history.statusChanged', { from: t(`status.${e.from}`), to: t(`status.${e.to}`) }) : t('history.statusSet', { to: t(`status.${e.to}`) });
       case 'rescheduled': return t('history.rescheduled');
       case 'reassigned': return t('history.reassigned');
@@ -89,6 +90,7 @@ export function BookingDetails({ row, role, labels, moveOptions, onClose }: {
 
   const details: [string, string][] = [
     [t('fields.guest'), row.customerDisplayName],
+    [t('source'), t(row.source === 'online' ? 'sourceOnline' : row.source === 'walk_in' ? 'sourceWalkIn' : 'sourceAdvance')],
     [t('fields.date'), bangkokDay(row.startsAt)],
     [t('fields.time'), `${formatTime(row.startsAt)}–${formatTime(row.endsAt)}`],
     [t('fields.treatment'), labels.service],

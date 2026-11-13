@@ -13,7 +13,7 @@ import { CreateBookingInput, DayInput, MoveBookingInput, SetStatusInput, Suggest
 const DESK = ['owner', 'manager', 'receptionist'] as const;
 
 export type BoardRow = {
-  bookingId: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in';
+  bookingId: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in' | 'online';
   startsAt: string; endsAt: string; roomFreeAt: string;
   therapistId: string; roomId: string; positionId: string; partyId: string; serviceId: string;
   customerId: string | null; customerDisplayName: string;
@@ -21,7 +21,7 @@ export type BoardRow = {
 };
 
 type BoardDb = {
-  booking_id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in'; starts_at: string; ends_at: string; room_free_at: string;
+  booking_id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in' | 'online'; starts_at: string; ends_at: string; room_free_at: string;
   therapist_id: string; room_id: string; position_id: string; party_id: string; service_id: string; customer_id: string | null; customer_display_name: string;
   checked_in_at: string | null; started_at: string | null; completed_at: string | null; expected_end: string | null;
 };
@@ -72,10 +72,10 @@ export async function getBookingEvents(bookingId: string): Promise<{ ok: true; e
   if (!(await roleOrNull())) return fail('NOT_AUTHORIZED');
   if (!z.uuid().safeParse(bookingId).success) return fail('INVALID_INPUT');
   const supabase = await createClient();
-  const { data, error } = await supabase.from('booking_events').select('at, kind, before, after').eq('booking_id', bookingId).order('at', { ascending: true }).order('id', { ascending: true });
+  const { data, error } = await supabase.from('booking_events').select('at, kind, before, after, via').eq('booking_id', bookingId).order('at', { ascending: true }).order('id', { ascending: true });
   if (error) return failFrom(error);
   // charge_adjusted (money) is not part of the history view.
-  const rows = ((data ?? []) as { at: string; kind: string; before: unknown; after: unknown }[]).filter((r) => r.kind !== 'charge_adjusted');
+  const rows = ((data ?? []) as { at: string; kind: string; before: unknown; after: unknown; via: string | null }[]).filter((r) => r.kind !== 'charge_adjusted');
   return { ok: true, events: rows.map(describeEvent) };
 }
 

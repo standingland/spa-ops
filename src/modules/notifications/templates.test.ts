@@ -15,3 +15,12 @@ test('the changed and cancelled texts are exact', () => {
 test('English mirrors the Thai texts', () => {
   expect(renderTemplate('booking_confirmed', { starts_at: '2030-01-15T03:00:00Z' }, 'en', 'Studio')).toBe('Studio: Your appointment is confirmed for 15/01/2030 at 10:00.');
 });
+
+test('the confirmed text appends the cancel link only when one is given', () => {
+  const p = { starts_at: '2030-01-15T03:00:00Z' };
+  expect(renderTemplate('booking_confirmed', p, 'th', 'Studio', { cancelUrl: 'https://x.test/c?t=1' }))
+    .toBe('Studio: ยืนยันนัดหมายของคุณ วันที่ 15/01/2030 เวลา 10:00 น.\nยกเลิกได้ที่ https://x.test/c?t=1');
+  expect(renderTemplate('booking_confirmed', p, 'en', 'Studio', { cancelUrl: 'https://x.test/c?t=1' }))
+    .toBe('Studio: Your appointment is confirmed for 15/01/2030 at 10:00.\nCancel here: https://x.test/c?t=1');
+  expect(renderTemplate('booking_cancelled', p, 'th', 'Studio', { cancelUrl: 'https://x.test/c?t=1' })).not.toContain('http');
+});

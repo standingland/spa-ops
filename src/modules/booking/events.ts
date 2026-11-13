@@ -5,6 +5,8 @@ export type BookingEventView = {
   kind: 'created' | 'status_changed' | 'rescheduled' | 'reassigned';
   from?: BookingStatus;
   to?: BookingStatus;
+  /** Set when the action came from the public booking page rather than from staff. */
+  via?: 'guest_online';
 };
 
 const KINDS: BookingEventView['kind'][] = ['created', 'status_changed', 'rescheduled', 'reassigned'];
@@ -17,7 +19,7 @@ function statusOf(snapshot: unknown): BookingStatus | undefined {
 }
 
 /** A booking_events row reduced to what the screen may show. Runs on the server so no snapshot reaches the client. */
-export function describeEvent(e: { at: string; kind: string; before: unknown; after: unknown }): BookingEventView {
+export function describeEvent(e: { at: string; kind: string; before: unknown; after: unknown; via?: string | null }): BookingEventView {
   const kind = KINDS.find((k) => k === e.kind);
   if (!kind) throw new Error(`unknown booking event kind: ${e.kind}`);
   const view: BookingEventView = { at: e.at, kind };
@@ -29,5 +31,6 @@ export function describeEvent(e: { at: string; kind: string; before: unknown; af
     const to = statusOf(e.after);
     if (to) view.to = to;
   }
+  if (e.via === 'guest_online') view.via = 'guest_online';
   return view;
 }

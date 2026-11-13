@@ -32,7 +32,7 @@ export async function saveService(input: ServiceInput): Promise<ActionResult> {
   const supabase = await createClient();
   const row = {
     name_th: v.nameTh, name_en: v.nameEn ?? null, duration_min: v.durationMin,
-    price_satang: v.priceSatang, required_equipment: v.requiredEquipment,
+    price_satang: v.priceSatang, required_equipment: v.requiredEquipment, bookable_online: v.bookableOnline,
   };
   let id = v.id;
   if (id) {

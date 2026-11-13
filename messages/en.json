@@ -134,6 +134,8 @@
     "invalid": "Invalid input"
   },
   "services": {
+    "bookableOnline": "Bookable online (shown with its price on the public page)",
+    "onlineBadge": "Online",
     "title": "Services",
     "add": "Add service",
     "edit": "Edit service",
@@ -165,6 +167,7 @@
     "confirmReset": "Confirm new password"
   },
   "therapists": {
+    "publicProfile": { "legend": "Public booking page", "show": "Show on the public page", "help": "When on, this therapist's photo, nickname, bio and specialties are visible to anyone on the public booking page.", "bioTh": "Bio (Thai)", "bioEn": "Bio (English)", "specialties": "Specialties (comma separated, up to 6)" },
     "photo": {
       "change": "Change photo",
       "add": "Add photo",
@@ -236,6 +239,7 @@
     "source": "Source",
     "sourceAdvance": "Advance",
     "sourceWalkIn": "Walk-in",
+    "sourceOnline": "Online (guest booked)",
     "suggestions": "Suggested options",
     "noSuggestions": "No therapist and room available at this time",
     "therapist": "Therapist",
@@ -245,6 +249,7 @@
     "saving": "Saving…",
     "viewTherapists": "By therapist",
     "viewRooms": "By room",
+    "viewTimeline": "Timeline",
     "previousDay": "Previous day",
     "nextDay": "Next day",
     "today": "Today",
@@ -263,6 +268,7 @@
       "created": "Booking created",
       "statusChanged": "{from} → {to}",
       "statusSet": "Status: {to}",
+      "cancelledByGuest": "Cancelled by the guest online",
       "rescheduled": "Rescheduled",
       "reassigned": "Therapist or room changed"
     },
@@ -414,12 +420,15 @@
       "policy": "Cancellation and no-show",
       "payments": "Payments",
       "reports": "Reports",
-      "retention": "Data retention"
+      "retention": "Data retention",
+      "online": "Online booking"
     },
     "units": {
       "minutes": "minutes",
       "percent": "percent",
-      "months": "months"
+      "months": "months",
+      "days": "days",
+      "bookings": "bookings"
     },
     "fields": {
       "ops_arrival_window_min": "Show arrivals this long before their start time",
@@ -434,7 +443,12 @@
       "reports_manager_can_view": "Managers may view reports",
       "retention_inactive_months": "List customers for review after no activity for",
       "retention_audit_months": "Keep the audit log for",
-      "retention_prune_enabled": "Delete old data automatically (cannot be undone)"
+      "retention_prune_enabled": "Delete old data automatically (cannot be undone)",
+      "online_enabled": "Open the public booking page (needs the LINE keys)",
+      "online_max_upcoming": "Upcoming online bookings allowed per guest",
+      "online_min_lead_min": "Earliest online booking, from now",
+      "online_max_ahead_days": "Furthest online booking ahead",
+      "online_cancel_cutoff_min": "Guests can cancel online up to this long before the start"
     },
     "pruneHelp": "When automatic deletion is on, every day the system deletes audit-log entries older than the months set here, and customer messages sent more than 90 days ago. It never touches bookings, payments or customer records. Deletion cannot be undone. It is off by default."
   },
@@ -673,6 +687,69 @@
       "notifications": "Messages sent to guests",
       "staff": "Staff accounts and roles",
       "settings": "Cancellation and no-show fees, payments, reports and data retention"
+    }
+  },
+  "public": {
+    "closedTitle": "Online booking is not open yet",
+    "closedBody": "Please check back soon, or contact us directly to book.",
+    "teamTitle": "Our therapists",
+    "teamIntro": "Choose a therapist to see their profile and book a time with them.",
+    "noTherapists": "No therapists to show yet.",
+    "back": "All therapists",
+    "about": "About",
+    "specialties": "Specialties",
+    "services": "Choose a treatment",
+    "minutes": "{n} min",
+    "noServices": "This therapist has no treatments open for online booking yet.",
+    "date": "Choose a date",
+    "time": "Choose a time",
+    "loadingTimes": "Loading free times…",
+    "noTimes": "No free times on this day. Please try another date.",
+    "timezone": "All times are Bangkok time (UTC+7).",
+    "yourBooking": "Your booking",
+    "signInHelp": "We use LINE to check it is really you and to send your confirmation. You will be asked to add our LINE account as a friend.",
+    "continueLine": "Continue with LINE",
+    "bookingAs": "Booking as {name}",
+    "confirm": "Confirm booking",
+    "confirming": "Booking…",
+    "choose": "Choose a treatment and a time to continue.",
+    "errors": {
+      "closed": "Online booking is not open right now.",
+      "login": "We could not sign you in with LINE. Your choices are kept, so please try again.",
+      "busy": "Too many attempts. Please wait a moment and try again.",
+      "SLOT_TAKEN": "That time was just taken. Please choose another time.",
+      "ONLINE_CLOSED": "This treatment can no longer be booked online.",
+      "OUT_OF_WINDOW": "That time cannot be booked online. Please choose a later time.",
+      "TOO_MANY_BOOKINGS": "You already have the most upcoming online bookings allowed. Cancel one or contact us.",
+      "NOT_SIGNED_IN": "Please continue with LINE first.",
+      "RATE_LIMITED": "Too many attempts. Please wait a while and try again.",
+      "INVALID_INPUT": "Please choose a treatment and a time.",
+      "THERAPIST_OFF_SHIFT": "That time is not available. Please choose another.",
+      "THERAPIST_NOT_QUALIFIED": "This treatment is not offered by this therapist.",
+      "CANCEL_TOO_LATE": "It is too late to cancel online. Please contact us.",
+      "INVALID_TRANSITION": "This booking can no longer be cancelled online.",
+      "INVALID_LINK": "This link is not valid or has expired.",
+      "UNKNOWN": "Something went wrong. Please try again."
+    },
+    "done": {
+      "title": "You are booked",
+      "intro": "If you added our LINE account, we have sent this confirmation there too.",
+      "when": "When",
+      "with": "With",
+      "service": "Treatment",
+      "cancelHint": "Plans changed? You can cancel online up to a few hours before.",
+      "cancelLink": "Cancel this booking",
+      "invalid": "This link is not valid or has expired.",
+      "cancelled": "This booking has been cancelled."
+    },
+    "cancel": {
+      "title": "Cancel your booking",
+      "question": "Do you want to cancel this booking?",
+      "button": "Yes, cancel it",
+      "working": "Cancelling…",
+      "doneTitle": "Your booking is cancelled",
+      "already": "This booking has already been cancelled.",
+      "bookAgain": "Book another time"
     }
   }
 }
