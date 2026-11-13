@@ -4,7 +4,9 @@ import { createClient } from '@/lib/supabase/server';
 import { roleOrNull } from '@/modules/identity/session';
 import { done, fail, failFrom, type ActionResult } from '@/lib/action';
 import { addDays, bangkokDayRange, parseRange } from '@/lib/time';
+import { z } from 'zod';
 import { Monday, ShiftInput, TherapistInput, TimeOffInput } from './schema';
+import { PHOTO_BUCKET, checkPhoto, photoObjectName } from './photo';
 
 const allowed = () => roleOrNull('owner', 'manager');
 
@@ -125,4 +127,50 @@ export async function deleteTimeOff(id: string): Promise<ActionResult> {
   const { data, error } = await supabase.from('therapist_time_off').delete().eq('id', id).select('id');
   if (error) return failFrom(error);
   return data?.length ? done(id) : fail('NOT_AUTHORIZED');
+}
+
+/** Store a therapist's photo (already resized by the browser). Owner and manager only. */
+export async function uploadTherapistPhoto(form: FormData): Promise<ActionResult> {
+  if (!(await allowed())) return fail('NOT_AUTHORIZED');
+  const id = z.uuid().safeParse(form.get('therapistId'));
+  const file = form.get('file');
+  if (!id.success || !(file instanceof File) || checkPhoto(file) !== 'ok') return fail('INVALID_INPUT');
+  const supabase = await createClient();
+  const { data: row, error } = await supabase.from('therapists').select('photo_path').eq('id', id.data).maybeSingle();
+  if (error) return failFrom(error);
+  if (!row) return fail('NOT_AUTHORIZED');
+  const name = photoObjectName(id.data, Date.now());
+  const up = await supabase.storage.from(PHOTO_BUCKET).upload(name, file, { contentType: file.type, upsert: false });
+  if (up.error) return failFrom(up.error);
+  const set = await supabase.from('therapists').update({ photo_path: name }).eq('id', id.data).select('id');
+  if (set.error || !set.data?.length) {
+    await supabase.storage.from(PHOTO_BUCKET).remove([name]);
+    return set.error ? failFrom(set.error) : fail('NOT_AUTHORIZED');
+  }
+  if (row.photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([row.photo_path]);
+  return done(id.data);
+}
+
+export async function removeTherapistPhoto(therapistId: string): Promise<ActionResult> {
+  if (!(await allowed())) return fail('NOT_AUTHORIZED');
+  const id = z.uuid().safeParse(therapistId);
+  if (!id.success) return fail('INVALID_INPUT');
+  const supabase = await createClient();
+  const { data: row, error } = await supabase.from('therapists').select('photo_path').eq('id', id.data).maybeSingle();
+  if (error) return failFrom(error);
+  if (!row) return fail('NOT_AUTHORIZED');
+  const set = await supabase.from('therapists').update({ photo_path: null }).eq('id', id.data).select('id');
+  if (set.error) return failFrom(set.error);
+  if (row.photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([row.photo_path]);
+  return done(id.data);
+}
+
+/** Short-lived signed links (one hour) for the given photo paths; empty for anyone but owner and manager. */
+export async function photoUrls(paths: string[]): Promise<Record<string, string>> {
+  if (!paths.length || !(await allowed())) return {};
+  const supabase = await createClient();
+  const { data } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, 3600);
+  const out: Record<string, string> = {};
+  for (const r of data ?? []) if (r.path && r.signedUrl) out[r.path] = r.signedUrl;
+  return out;
 }

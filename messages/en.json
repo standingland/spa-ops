@@ -165,6 +165,18 @@
     "confirmReset": "Confirm new password"
   },
   "therapists": {
+    "photo": {
+      "change": "Change photo",
+      "add": "Add photo",
+      "remove": "Remove photo",
+      "unreadable": "This file could not be read. Please choose a JPEG or PNG photo."
+    },
+    "now": {
+      "title": "On shift now",
+      "empty": "Nobody is on shift right now.",
+      "inRoom": "in {room}",
+      "state": { "in_treatment": "In treatment", "on_break": "On break", "free": "Free" }
+    },
     "title": "Therapists and shifts",
     "add": "Add therapist",
     "edit": "Edit therapist",

@@ -1,5 +1,6 @@
 import { bangkokDay, bangkokDayRange } from '@/lib/time';
 import type { BoardRow } from '@/modules/booking/actions';
+import { therapistsNow, type NowState } from './onShift';
 
 export type RoomStatus = 'available' | 'reserved' | 'occupied' | 'cleaning' | 'out_of_service';
 export type RoomState = {
@@ -20,7 +21,7 @@ export type TodayModel = {
   counts: { reservations: number; cancelled: number; noShow: number } & Record<RoomStatus, number>;
   arrivals: BoardRow[]; waiting: BoardRow[]; inTreatment: BoardRow[]; endingSoon: BoardRow[];
   awaitingCleaning: RoomState[]; cancellations: BoardRow[];
-  therapists: { therapistId: string; state: 'in_treatment' | 'on_break' | 'free' }[];
+  therapists: { therapistId: string; state: NowState; roomId: string | null }[];
   attention: Attention[];
   /** The bookings the attention items refer to (they may start on another day). */
   attentionRows: BoardRow[];
@@ -61,13 +62,7 @@ export function buildToday(input: {
     .sort((a, b) => ms(a.turnoverDueAt!) - ms(b.turnoverDueAt!));
   const cancellations = today.filter((r) => r.status === 'cancelled' || r.status === 'no_show');
 
-  const contains = (s: Span) => ms(s.start) <= now && now < ms(s.end);
-  const onShift = [...new Set(input.shifts.filter(contains).map((s) => s.therapistId))].sort();
-  const therapists = onShift.map((id) => ({
-    therapistId: id,
-    state: (inTreatment.some((r) => r.therapistId === id) ? 'in_treatment'
-      : input.timeOff.some((o) => o.therapistId === id && contains(o)) ? 'on_break' : 'free') as 'in_treatment' | 'on_break' | 'free',
-  }));
+  const therapists = therapistsNow({ now: input.now, shifts: input.shifts, timeOff: input.timeOff, rows: input.rows });
 
   const attention: Attention[] = [];
   for (const s of input.stranded) {
