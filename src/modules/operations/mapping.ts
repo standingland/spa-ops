@@ -18,7 +18,7 @@ export const toRoomState = (r: RoomDb): RoomState => ({
 });
 
 export type BoardDb = {
-  booking_id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in'; starts_at: string; ends_at: string; room_free_at: string;
+  booking_id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in' | 'online'; starts_at: string; ends_at: string; room_free_at: string;
   therapist_id: string; room_id: string; position_id: string; party_id: string; service_id: string; customer_id: string | null; customer_display_name: string;
   checked_in_at: string | null; started_at: string | null; completed_at: string | null; expected_end: string | null;
 };
@@ -32,7 +32,7 @@ export const toBoardRow = (r: BoardDb): BoardRow => ({
 });
 
 type BookingDb = {
-  id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in'; service_during: string; room_during: string;
+  id: string; version: number; status: BookingStatus; source: 'advance' | 'walk_in' | 'online'; service_during: string; room_during: string;
   therapist_id: string; room_id: string; position_id: string; party_id: string; service_id: string; customer_id: string;
   checked_in_at: string | null; started_at: string | null; completed_at: string | null; customers: { display_name: string } | null;
 };

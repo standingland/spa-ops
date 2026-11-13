@@ -13,6 +13,7 @@ import { isDraggable, moveFromDrop } from '../drop';
 import type { MoveBookingInput } from '../schema';
 import { NewBookingForm } from './NewBookingForm';
 import { SpanSwitch } from './SpanSwitch';
+import { Avatar } from '@/components/ui/avatar';
 import { bookingStatusStyle } from '@/components/ui/status';
 import { BookingDetails } from './BookingDetails';
 import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
@@ -44,6 +45,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const svc = (id: string) => services.find((s) => s.id === id);
   const svcName = (id: string) => { const s = svc(id); return s ? (locale === 'en' && s.name_en ? s.name_en : s.name_th) : ''; };
   const therapistName = (id: string) => therapists.find((x) => x.id === id)?.display_name ?? '';
+  const therapistOf = (id: string) => therapists.find((x) => x.id === id);
   const roomOf = (id: string) => rooms.find((r) => r.id === id);
   const roomCodeOf = (id: string) => roomOf(id)?.code ?? retiredRooms.find((r) => r.id === id)?.code ?? '';
 
@@ -56,7 +58,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   }, [view, therapists, rooms]);
 
   const open = rows.find((r) => r.bookingId === selected) ?? null;
-  const q = (d: string, v = view) => `/calendar?day=${d}&view=${v}`;
+  const q = (d: string, v: string = view) => `/calendar?day=${d}&view=${v}`;
 
   const te = useTranslations();
   const router = useRouter();
@@ -96,6 +98,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
         <nav className="flex gap-2 text-sm" aria-label="view">
           <Link href={q(day, 'therapists')} data-testid="view-therapists" aria-current={view === 'therapists' ? 'true' : undefined} className={view === 'therapists' ? 'font-semibold underline' : ''}>{t('viewTherapists')}</Link>
           <Link href={q(day, 'rooms')} data-testid="view-rooms" aria-current={view === 'rooms' ? 'true' : undefined} className={view === 'rooms' ? 'font-semibold underline' : ''}>{t('viewRooms')}</Link>
+          <Link href={q(day, 'timeline')} data-testid="view-timeline">{t('viewTimeline')}</Link>
         </nav>
         {isDesk && <button className="rounded bg-charcoal px-3 py-1.5 text-sm text-ivory" data-testid="new-booking" onClick={() => setCreating(true)}>{t('new')}</button>}
       </div>
@@ -140,6 +143,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
                   <Card key={r.bookingId} row={r} draggable={isDraggable(r, role)} onClick={() => setSelected(r.bookingId)}
                     className={`${bookingStatusStyle(r.status).card} ${selected === r.bookingId ? 'ring-2 ring-charcoal' : ''}`}
                     style={{ top, height: h, left: `calc(${(lane / col.lanes) * 100}% + 2px)`, width: `calc(${100 / col.lanes}% - 4px)` }}>
+                    {therapistOf(r.therapistId) && <Avatar name={therapistName(r.therapistId)} src={therapistOf(r.therapistId)?.photoUrl} size="sm" className="absolute right-1 top-1" />}
                     <span className="tnum font-semibold">{formatTime(r.startsAt)}–{formatTime(r.endsAt)}</span>
                     <span className="block truncate">{svcName(r.serviceId)}</span>
                     <span className="block truncate">{r.customerDisplayName}</span>

@@ -20,7 +20,7 @@ export default async function TherapistsPage({ searchParams }: { searchParams: P
   const nowIso = now.toISOString();
   const nowRange = `[${nowIso},${new Date(now.getTime() + 1000).toISOString()})`;
   const [ths, shifts, off, svcs, staff, nowShifts, nowOff, rooms, board] = await Promise.all([
-    supabase.from('therapists').select('id, display_name, employment_type, active, staff_user_id, photo_path, therapist_services(service_id)').order('sort_order'),
+    supabase.from('therapists').select('id, display_name, employment_type, active, staff_user_id, photo_path, public, bio_th, bio_en, specialties, therapist_services(service_id)').order('sort_order'),
     supabase.from('therapist_shifts').select('id, therapist_id, during').filter('during', 'ov', range),
     supabase.from('therapist_time_off').select('id, therapist_id, during, kind, note').filter('during', 'ov', range),
     supabase.from('services').select('id, name_th, name_en').eq('active', true).order('sort_order'),

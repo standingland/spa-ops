@@ -16,7 +16,10 @@ export async function saveTherapist(input: TherapistInput): Promise<ActionResult
   if (!p.success) return fail('INVALID_INPUT');
   const v = p.data;
   const supabase = await createClient();
-  const row = { display_name: v.displayName, employment_type: v.employmentType, staff_user_id: v.staffUserId ?? null };
+  const row = {
+    display_name: v.displayName, employment_type: v.employmentType, staff_user_id: v.staffUserId ?? null,
+    public: v.public, bio_th: v.bioTh ?? null, bio_en: v.bioEn ?? null, specialties: v.specialties,
+  };
   let id = v.id;
   if (id) {
     const { data, error } = await supabase.from('therapists').update(row).eq('id', id).select('id');

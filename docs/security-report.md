@@ -80,9 +80,9 @@ A concurrency storm (many staff booking the same slots at once on the year-sized
 ## Unresolved risks and limitations
 
 1. **Privacy law review is outstanding.** The system gives you a consent record, export, anonymisation and a retention list. It does not decide what the law requires. Do not enter real customer data before a legal review (consent wording, retention periods, where data is stored).
-2. **No real customer messages.** Messages are only logged until a provider (SMS, LINE or email) is connected, which costs money and needs the owner's approval. Appointment reminders are not built.
+2. **Customer messages go out only through LINE, and only once configured.** Without the LINE keys messages are only logged; SMS and email still have no provider. Connecting LINE costs money beyond LINE's free allowance and needs the owner's approval. Appointment reminders are not built.
 3. **No payment provider.** Staff record payments; transfers stay unverified until a manager checks the bank. Nothing moves money.
-4. **No customer self-service portal** and **no audit-log viewer**; the audit log is written but not shown, and it is not pruned.
+4. **Customer self-service is limited to the public booking page** (`docs/public-booking.md`): a guest verified by LINE can book and cancel their own online bookings, nothing else, and there is no guest booking history screen. The page is a new public attack surface: it is closed until the owner turns it on, every public database function is service-role only (`tests/db/public-isolation.test.ts`), requests are rate limited, and guest sessions and cancel links are signed and expire. Guests without LINE cannot book online. There is also **no audit-log viewer**; the audit log is written but not shown, and it is not pruned.
 5. **Staff sign in with a password only.** Two-step sign-in can be turned on in Supabase for the owner but is not enforced.
 6. **Numbers come from a developer laptop.** Production hosting may be slower or faster; re-measure after the first deploy.
 7. **Hosting facts are unconfirmed:** whether the chosen plan pauses idle projects, how many days of backups it keeps, point-in-time recovery, and how often a scheduled job may run. `docs/deployment.md` lists what to check.
