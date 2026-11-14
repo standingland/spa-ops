@@ -45,5 +45,7 @@ next-env.d.ts
 .superpowers/
 test-results/
 playwright-report/
+/.playwright-cli/
+/output/playwright/
 tests/e2e/.auth/
 backups/
