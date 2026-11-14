@@ -7,7 +7,7 @@ import { getBrand } from '@/lib/brand';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
 
-const serif = Noto_Serif_Thai({ variable: '--font-noto-serif', subsets: ['thai', 'latin'], weight: ['500', '600'] });
+const serif = Noto_Serif_Thai({ variable: '--font-noto-serif', subsets: ['thai', 'latin'], weight: ['400', '500', '600'] });
 const plex = IBM_Plex_Sans_Thai({ variable: '--font-plex', subsets: ['thai', 'latin'], weight: ['400', '500', '600'] });
 
 export async function generateMetadata(): Promise<Metadata> {
