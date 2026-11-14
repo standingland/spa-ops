@@ -23,7 +23,25 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
   const [names, setNames] = useState(false);
   const [full, setFull] = useState(false);
   const [notice, setNotice] = useState('');
+  const [awake, setAwake] = useState(false);
+  const wake = useRef<WakeLockSentinel | null>(null);
+  const keepAwake = useRef(false);
   const root = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const restore = async () => {
+      if (!document.hidden && keepAwake.current && 'wakeLock' in navigator) {
+        try {
+          const lock = await navigator.wakeLock.request('screen');
+          if (!keepAwake.current) { await lock.release(); return; }
+          wake.current = lock;
+          setAwake(true);
+          lock.addEventListener('release', () => setAwake(false), { once: true });
+        } catch { setAwake(false); }
+      }
+    };
+    document.addEventListener('visibilitychange', restore);
+    return () => { keepAwake.current = false; document.removeEventListener('visibilitychange', restore); void wake.current?.release(); };
+  }, []);
   useEffect(() => {
     const tick = () => { const date = new Date(); setNow(date); if (bangkokDay(date) !== day) router.refresh(); };
     const initial = setTimeout(tick, 0);
@@ -47,6 +65,15 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
     : therapists.map(p => ({ id: p.id, title: p.display_name, sub: '', lanes: 1, match: (b: BoardRow) => b.therapistId === p.id, lane: () => 0 }));
   const current = active.filter(r => r.status === 'in_treatment').length;
   const button = 'min-h-12 rounded-xl border border-line bg-surface px-4 text-sm font-medium active:bg-surface-muted';
+  async function toggleAwake() {
+    if (keepAwake.current) { keepAwake.current = false; await wake.current?.release(); setAwake(false); return; }
+    if (!('wakeLock' in navigator)) { setNotice(th ? 'อุปกรณ์นี้ไม่รองรับเปิดจอค้าง กรุณาตั้งเวลาล็อกหน้าจอในเครื่อง' : 'Keep screen on is unavailable. Adjust auto-lock in device settings.'); return; }
+    try {
+      const lock = await navigator.wakeLock.request('screen');
+      wake.current = lock; keepAwake.current = true; setAwake(true);
+      lock.addEventListener('release', () => setAwake(false), { once: true });
+    } catch { setNotice(th ? 'เปิดจอค้างไม่ได้ กรุณาตรวจโหมดประหยัดแบตเตอรี่' : 'Unable to keep screen on. Check battery-saving settings.'); }
+  }
   async function fullscreen() {
     try { if (document.fullscreenElement) await document.exitFullscreen(); else if (root.current?.requestFullscreen) await root.current.requestFullscreen(); else setNotice(th ? 'อุปกรณ์นี้ไม่รองรับเต็มจอ ใช้เพิ่มไปยังหน้าจอโฮมได้' : 'Fullscreen unavailable. Add this page to your home screen.'); }
     catch { setNotice(th ? 'เปิดเต็มจอไม่ได้บนอุปกรณ์นี้' : 'Fullscreen unavailable on this device.'); }
@@ -60,6 +87,7 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
       <button className={button} aria-pressed={by === 'rooms'} onClick={() => setBy('rooms')}>{t('viewRooms')}</button><button className={button} aria-pressed={by === 'therapists'} onClick={() => setBy('therapists')}>{t('viewTherapists')}</button>
       <label className={`${button} inline-flex items-center gap-2`}><input type="checkbox" checked={names} onChange={e => setNames(e.target.checked)} className="size-5" />{th ? 'แสดงชื่อแขก' : 'Show guest names'}</label>
       <button className={button} onClick={() => router.refresh()}>{th ? 'รีเฟรช' : 'Refresh'}</button><button className={button} onClick={fullscreen}>{full ? (th ? 'ออกจากเต็มจอ' : 'Exit fullscreen') : (th ? 'เต็มจอ' : 'Fullscreen')}</button>
+      <button className={button} aria-pressed={awake} onClick={toggleAwake}>{awake ? (th ? 'เปิดจอค้างอยู่' : 'Screen stays on') : (th ? 'เปิดจอค้าง' : 'Keep screen on')}</button>
       <Link href="/calendar?view=timeline" className={`${button} inline-flex items-center`}>{th ? 'จัดการการจอง ↗' : 'Manage bookings ↗'}</Link>
       <p className="ml-auto text-sm text-ink-muted">{active.length} {th ? 'รายการ' : 'bookings'} · {current} {th ? 'กำลังให้บริการ' : 'in treatment'}</p>
     </div>
