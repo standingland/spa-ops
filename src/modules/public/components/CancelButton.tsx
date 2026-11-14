@@ -33,7 +33,7 @@ export function CancelButton({ token }: { token: string }) {
     <div className="flex flex-col gap-3">
       {error && <Alert tone="error" data-testid="cancel-error">{t.has(`errors.${error}`) ? t(`errors.${error}`) : t('errors.UNKNOWN')}</Alert>}
       <p className="text-body text-ink">{t('cancel.question')}</p>
-      <Button variant="danger" disabled={busy} onClick={cancel} data-testid="cancel-confirm">{busy ? t('cancel.working') : t('cancel.button')}</Button>
+      <Button variant="secondary" className="w-fit border-danger text-danger" disabled={busy} onClick={cancel} data-testid="cancel-confirm">{busy ? t('cancel.working') : t('cancel.button')}</Button>
     </div>
   );
 }

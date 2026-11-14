@@ -1,13 +1,12 @@
 import { getTranslations } from 'next-intl/server';
-import { Alert } from '@/components/ui/alert';
 
 /** Shown on every public page until LINE is configured and the owner has turned online booking on. */
 export async function Closed() {
   const t = await getTranslations('public');
   return (
-    <Alert data-testid="book-closed">
-      <h1 className="font-serif text-heading text-ink">{t('closedTitle')}</h1>
-      <p className="mt-1">{t('closedBody')}</p>
-    </Alert>
+    <section className="flex max-w-xl flex-col gap-4 pt-10" data-testid="book-closed" role="status">
+      <h1 className="text-pretty font-serif text-4xl font-normal leading-[1.3] text-ink">{t('closedTitle')}</h1>
+      <p className="max-w-[42ch] text-body text-ink-muted">{t('closedBody')}</p>
+    </section>
   );
 }

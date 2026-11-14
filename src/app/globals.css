@@ -95,3 +95,54 @@ h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
 .tnum { font-variant-numeric: tabular-nums; }
 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/*
+ * The public booking pages: "Banyan at night". Only the semantic tokens change, so every shared component
+ * (Button, Card, Alert, LocaleSwitch...) follows. Contrast is guarded by src/components/ui/contrast-night.test.ts.
+ */
+.theme-night {
+  --ivory: #101A17;
+  --stone: #2B3A34;
+  --stone-dark: #A7B4AC;
+  --charcoal: #ECE4D3;
+  --sage: #8FA394;
+  --brass: #D4A24E;
+  --clay: #E0917A;
+  --surface: #1A2A25;
+  --surface-muted: #101A17;
+  --ink: #ECE4D3;
+  --ink-muted: #A7B4AC;
+  --line: #2F403A;
+  --line-strong: #6F8279;
+  --primary: #D4A24E;
+  --primary-foreground: #101A17;
+  --danger: #F0A08A;
+  --focus: #ECE4D3;
+  --teak: #4A3624;
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+/* A doorway: a semicircular top over a near-square base, for therapist portraits. */
+.arch {
+  border-radius: 50% 50% 14px 14px / 37.5% 37.5% 14px 14px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+/* The one entrance on the public pages: portraits rise into their doorways once, staggered by --i. */
+@keyframes arch-rise {
+  from { clip-path: inset(100% 0 0 0); opacity: 0; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+.arch-reveal { animation: arch-rise 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 110ms); }
+@media (prefers-reduced-motion: reduce) {
+  .arch-reveal { animation: none; }
+}
+
+/* A mark that draws itself when a booking is confirmed (an answer to the guest's action, so it may move). */
+@keyframes draw-check { from { stroke-dashoffset: 28; } to { stroke-dashoffset: 0; } }
+.draw-check { stroke-dasharray: 28; animation: draw-check 600ms 150ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .draw-check { animation: none; stroke-dashoffset: 0; }
+}
