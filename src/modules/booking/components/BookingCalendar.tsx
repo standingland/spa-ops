@@ -94,7 +94,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
         <span className="tnum font-semibold" data-testid="day-label">{day}</span>
         <Link href={q(addDays(day, 1))} className="underline" data-testid="day-next">{t('nextDay')} →</Link>
         <Link href={q(bangkokDay(new Date()))} className="underline">{t('today')}</Link>
-        <span className="ml-auto"><SpanSwitch span="day" day={day} view={view} /></span>
+        <Link href="/counter" className="min-h-11 rounded-lg border border-line px-3 py-2 text-sm">{locale === 'th' ? 'จอเคาน์เตอร์ ↗' : 'Counter display ↗'}</Link><span className="ml-auto"><SpanSwitch span="day" day={day} view={view} /></span>
         <nav className="flex gap-2 text-sm" aria-label="view">
           <Link href={q(day, 'therapists')} data-testid="view-therapists" aria-current={view === 'therapists' ? 'true' : undefined} className={view === 'therapists' ? 'font-semibold underline' : ''}>{t('viewTherapists')}</Link>
           <Link href={q(day, 'rooms')} data-testid="view-rooms" aria-current={view === 'rooms' ? 'true' : undefined} className={view === 'rooms' ? 'font-semibold underline' : ''}>{t('viewRooms')}</Link>
