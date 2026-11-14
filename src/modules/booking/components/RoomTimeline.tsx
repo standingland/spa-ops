@@ -54,7 +54,7 @@ export function RoomTimeline({ day, by = 'room', role, rows, therapists, rooms, 
         <span className="tnum font-semibold" data-testid="day-label">{day}</span>
         <Link href={q(addDays(day, 1), 'timeline')} className="underline">{t('nextDay')} →</Link>
         <Link href={q(bangkokDay(new Date()), 'timeline')} className="underline">{t('today')}</Link>
-        <span className="ml-auto"><SpanSwitch span="day" day={day} view="timeline" /></span>
+        <Link href="/counter" className="min-h-11 rounded-lg border border-line px-3 py-2 text-sm">{locale === 'th' ? 'จอเคาน์เตอร์ ↗' : 'Counter display ↗'}</Link><span className="ml-auto"><SpanSwitch span="day" day={day} view="timeline" /></span>
         <nav className="flex gap-2 text-sm" aria-label="view">
           <Link href={q(day, 'therapists')}>{t('viewTherapists')}</Link>
           <Link href={q(day, 'rooms')}>{t('viewRooms')}</Link>
