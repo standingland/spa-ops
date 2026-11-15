@@ -9,6 +9,8 @@ const PATHS: Record<IconName, React.ReactNode> = {
   rooms: (<><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5" /><circle cx="7" cy="11" r="1.5" /></>),
   payments: (<><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6.5 9.5v.01M17.5 14.5v.01" /></>),
   reports: (<><path d="M5 20V10M12 20V4M19 20v-7" /></>),
+  earnings: (<><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a6 6 0 0112 0v2M17 8h4M19 6v4M17 15h4M17 19h4" /></>),
+  inventory: (<><path d="M3 7l9-4 9 4v12l-9 3-9-3zM3 7l9 4 9-4M12 11v11M7 5l10 4" /></>),
   settings: (<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /></>),
   menu: (<path d="M4 7h16M4 12h16M4 17h16" />),
   close: (<path d="M6 6l12 12M18 6L6 18" />),

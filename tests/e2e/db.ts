@@ -19,6 +19,13 @@ const SEED_USER_IDS = ['1', '2', '3', '4'].map((n) => `00000000-0000-4000-8000-0
 
 /** Restores the seeded state: removes everything the tests created. */
 export async function resetTestData() {
+  // Business ledgers reference bookings, services and therapists: clear dependants first.
+  await admin.from('stock_movements').delete().neq('id', NIL);
+  await admin.from('service_materials').delete().neq('id', NIL);
+  await admin.from('inventory_items').delete().neq('id', NIL);
+  await admin.from('staff_tips').delete().neq('id', NIL);
+  await admin.from('booking_commissions').delete().neq('id', NIL);
+  await admin.from('commission_rules').delete().neq('id', NIL);
   await admin.from('notification_outbox').delete().neq('id', NIL);
   await admin.from('room_turnovers').delete().neq('id', NIL);
   await admin.from('room_reports').delete().neq('id', NIL);
