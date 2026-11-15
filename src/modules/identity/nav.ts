@@ -1,7 +1,7 @@
 // Pure navigation model: no React, no server imports (type-only Role import is erased).
 import type { Role } from '@/modules/identity/session';
 
-export type NavId = 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'settings';
+export type NavId = 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings';
 export type IconName = NavId | 'menu' | 'close';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'business' | 'setup'; items: NavItem[] };
@@ -28,6 +28,8 @@ const GROUPS: NavGroup[] = [
     id: 'business',
     items: [
       { id: 'payments', href: '/payments', icon: 'payments', roles: MANAGEMENT },
+      { id: 'earnings', href: '/earnings', icon: 'earnings', roles: MANAGEMENT },
+      { id: 'inventory', href: '/inventory', icon: 'inventory', roles: MANAGEMENT },
       { id: 'reports', href: '/reports', icon: 'reports', roles: MANAGEMENT },
     ],
   },

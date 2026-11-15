@@ -26,7 +26,9 @@
       "operate": "Operate",
       "business": "Business",
       "setup": "Setup"
-    }
+    },
+    "earnings": "Commissions",
+    "inventory": "Inventory"
   },
   "login": {
     "title": "Sign in",
@@ -167,7 +169,14 @@
     "confirmReset": "Confirm new password"
   },
   "therapists": {
-    "publicProfile": { "legend": "Public booking page", "show": "Show on the public page", "help": "When on, this therapist's photo, nickname, bio and specialties are visible to anyone on the public booking page.", "bioTh": "Bio (Thai)", "bioEn": "Bio (English)", "specialties": "Specialties (comma separated, up to 6)" },
+    "publicProfile": {
+      "legend": "Public booking page",
+      "show": "Show on the public page",
+      "help": "When on, this therapist's photo, nickname, bio and specialties are visible to anyone on the public booking page.",
+      "bioTh": "Bio (Thai)",
+      "bioEn": "Bio (English)",
+      "specialties": "Specialties (comma separated, up to 6)"
+    },
     "photo": {
       "change": "Change photo",
       "add": "Add photo",
@@ -178,7 +187,11 @@
       "title": "On shift now",
       "empty": "Nobody is on shift right now.",
       "inRoom": "in {room}",
-      "state": { "in_treatment": "In treatment", "on_break": "On break", "free": "Free" }
+      "state": {
+        "in_treatment": "In treatment",
+        "on_break": "On break",
+        "free": "Free"
+      }
     },
     "title": "Therapists and shifts",
     "add": "Add therapist",
@@ -262,7 +275,14 @@
     "loadFailed": "Could not load the calendar",
     "retry": "Try again",
     "openDetails": "Details",
-    "fields": { "guest": "Guest", "date": "Date", "time": "Time", "treatment": "Treatment", "therapist": "Therapist", "room": "Room" },
+    "fields": {
+      "guest": "Guest",
+      "date": "Date",
+      "time": "Time",
+      "treatment": "Treatment",
+      "therapist": "Therapist",
+      "room": "Room"
+    },
     "history": {
       "title": "Activity",
       "created": "Booking created",
@@ -754,5 +774,75 @@
       "already": "This booking has already been cancelled.",
       "bookAgain": "Book another time"
     }
+  },
+  "business": {
+    "earningsTitle": "Commissions",
+    "earningsSubtitle": "Review completed treatment commissions and set rates by service or therapist",
+    "from": "From",
+    "to": "To",
+    "show": "Show",
+    "export": "Download CSV",
+    "commission": "Commission",
+    "earningsHelp": "Accruals for treatments completed after this feature was added, not payroll paid. The basis is the service price after discounts and refunds, excluding fees. Fixed commissions reduce proportionally with refunds. Rates are captured at completion; later rule edits do not change them. No rule means zero commission. Earlier reports can change when later discounts or refunds are recorded.",
+    "saved": "Saved",
+    "byTherapist": "By therapist",
+    "therapist": "Therapist",
+    "treatments": "Completed treatments",
+    "treatmentCount": "{count} completed treatments",
+    "commissionBaht": "Commission (THB)",
+    "rules": "Commission rules",
+    "rulesHelp": "Set a rate for a service. A therapist-specific rate overrides its general rate. Save the same service and therapist to update a rule. Changes apply only to subsequent completions.",
+    "service": "Service",
+    "choose": "Choose",
+    "allTherapists": "General service rate",
+    "commissionMode": "Calculation",
+    "percent": "Percentage",
+    "fixed": "Fixed per treatment",
+    "ratePercent": "Rate (%)",
+    "fixedBaht": "Per treatment (THB)",
+    "removeRule": "Remove rule",
+    "reason": "Reason / reference",
+    "details": "Commission details",
+    "latestRows": "Showing {shown} of {total} latest entries. Summary totals include all entries in this period.",
+    "netBase": "Basis after refunds",
+    "inventoryTitle": "Inventory and material costs",
+    "inventorySubtitle": "Receive supplies, review balances, and set materials used per treatment",
+    "stockValue": "Current stock value",
+    "lowStock": "Low stock items",
+    "materialCostPeriod": "Material cost used in period",
+    "inventoryHelp": "Balances show current stock; history and material usage costs use the selected dates. Materials are deducted at treatment completion using the average cost captured at that time. Only completions after this feature was added are included. Negative stock is flagged without preventing treatment completion. Service refunds do not automatically return consumed materials.",
+    "stockItems": "Materials",
+    "onlyLow": "Low stock only",
+    "negativeStock": "Negative stock: check count",
+    "itemName": "Material name",
+    "unit": "Unit",
+    "onHand": "On hand",
+    "unitCost": "Average unit cost",
+    "reorderLevel": "Alert at or below",
+    "unitCostBaht": "Purchase cost / unit (THB)",
+    "editItem": "Edit material",
+    "addItem": "Add material",
+    "unitPlaceholder": "e.g. ml, gram, piece",
+    "receiveAdjust": "Receive and adjust stock",
+    "movementHelp": "Receipts update the weighted average cost. Always use the material unit. Adjust by the quantity added or removed, e.g. -2 to remove two units. Adjustments keep the existing average cost and require a reason.",
+    "movementKind": "Movement type",
+    "receipt": "Receipt",
+    "adjustment": "Adjustment",
+    "usage": "Treatment usage",
+    "quantity": "Quantity (material units)",
+    "recipe": "Materials per treatment",
+    "recipeHelp": "Set materials and quantities for one treatment. Completion deducts them exactly once. Recipe edits affect subsequent completions only. Save an empty recipe to clear it. Inactive materials remain consumed by existing recipes until removed.",
+    "quantityPerService": "Quantity per treatment",
+    "removeMaterial": "Remove",
+    "addMaterial": "Add material to recipe",
+    "estimatedCost": "Estimated material cost per treatment",
+    "saveRecipe": "Save recipe",
+    "movements": "Stock history",
+    "invalidPeriod": "Choose valid dates, with the end on or after the start and no more than 366 days apart.",
+    "loadFailed": "Could not load data. Check the connection and database update, then try again.",
+    "costByService": "Material costs by service",
+    "costByServiceHelp": "Actual material deductions in this period, averaged only over treatments with material usage. Excludes labor, rent and other expenses.",
+    "materialCostTotal": "Total material cost",
+    "averageMaterialCost": "Average material cost per treatment"
   }
 }

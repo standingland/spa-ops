@@ -27,7 +27,7 @@ describe('visibleNav', () => {
 
   it('gives an owner payments, reports and settings, and never bookings', () => {
     const list = ids('owner');
-    expect(list).toEqual(expect.arrayContaining(['payments', 'reports', 'settings']));
+    expect(list).toEqual(expect.arrayContaining(['payments', 'earnings', 'inventory', 'reports', 'settings']));
     expect(list).not.toContain('bookings');
     expect(visibleNav('owner', { managerReports: true }).map((g) => g.id)).toEqual(['operate', 'business', 'setup']);
   });
