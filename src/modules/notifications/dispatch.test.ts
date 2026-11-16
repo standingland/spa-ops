@@ -75,3 +75,24 @@ test('the cancel link is asked for with the booking id and its start, so the lin
   await dispatchPending(port, { send: async () => {} }, { senderName: 'Studio' });
   expect(asked).toEqual([['ba', '2030-01-15T03:00:00Z']]);
 });
+
+test('LINE confirmations send a Flex card with Bangkok time and the cancellation button; cancellations stay text', async () => {
+  const messages: Parameters<Sender['send']>[0][] = [];
+  const port: OutboxPort = {
+    claim: async () => [lineRow('a'), lineRow('b', 'booking_cancelled')],
+    contact: async () => contacts.cl, complete: async () => {},
+    cancelUrl: async () => 'https://spa.example.com/th/book/cancel?token=secret',
+  };
+  await dispatchPending(port, { send: async (m) => { messages.push(m); } }, { senderName: 'Banyan Spa' });
+  const card = messages[0].flex!;
+  expect(card.type).toBe('flex');
+  expect(card.altText).toContain('15/01/2030 10:00');
+  expect(JSON.stringify(card.contents)).toContain('https://spa.example.com/th/book/cancel?token=secret');
+  expect(messages[1].flex).toBeUndefined();
+});
+
+test('a confirmation without a cancellation link has no button', async () => {
+  const { bookingConfirmationFlex } = await import('./flex');
+  const card = bookingConfirmationFlex('2030-01-15T03:00:00Z', 'Banyan Spa');
+  expect(card.contents).not.toHaveProperty('footer');
+});

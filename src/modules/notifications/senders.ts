@@ -1,6 +1,12 @@
 import type { Sender } from './dispatch';
 
-/** LINE messages go to the LINE sender when one is configured; everything else (and LINE without keys) goes to the fallback. */
+/** LINE delivery must not be reported as sent when its sender is unavailable. */
 export function routeSender(line: Sender | null, fallback: Sender): Sender {
-  return { send: (m) => (m.channel === 'line' && line ? line.send(m) : fallback.send(m)) };
+  return { send: (m) => {
+    if (m.channel === 'line') {
+      if (!line) return Promise.reject(new Error('LINE_NOT_CONFIGURED'));
+      return line.send(m);
+    }
+    return fallback.send(m);
+  } };
 }

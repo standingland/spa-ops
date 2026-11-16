@@ -1,6 +1,6 @@
 # Public booking page
 
-Guests open `/th/book` (or `/en/book`), see the public therapists as a wall of photos, tap one to read their profile, and book a treatment with them. They sign in with LINE, the booking is **confirmed instantly**, and the confirmation (with a cancel link) arrives as a LINE message and on the confirmation page. The page is closed until you finish the steps below.
+Guests open `/th/book` (or `/en/book`), see the public therapists as a wall of photos, tap one to read their profile, and book a treatment with them. They sign in with LINE, the booking is **confirmed instantly**, and the confirmation appears on the confirmation page and is queued as a LINE Flex Message with a cancel button. The page is closed until you finish the steps below.
 
 Design and decisions: `docs/superpowers/specs/2026-11-13-public-booking-design.md`.
 
@@ -21,7 +21,7 @@ Design and decisions: `docs/superpowers/specs/2026-11-13-public-booking-design.m
    * **Therapists:** open a therapist, turn on **Show on the public page**, and fill in the bio and specialties. Read the note beside the switch: turning it on makes this therapist's **existing photo** visible to anyone. Turning it off, or replacing or removing the photo, stops it being served.
    * **Services:** turn on **Bookable online** for the treatments guests may book. Their prices are shown on the public page.
 6. As the owner, open **Settings → Online booking** and turn on **Open the public booking page**. This is the last switch; until it is on (and the LINE keys are set) every public page says "Online booking is not open yet".
-7. Make sure the message job is scheduled (`POST /api/internal/dispatch`, see `docs/operations.md`). Confirmations and cancellations are sent by that job, so they arrive within a minute or two of the scheduler's interval.
+7. Make sure the message job is scheduled (`POST /api/internal/dispatch`, see `docs/operations.md`). Confirmations (as a discreet Flex card with Bangkok date and time) and cancellations are sent by that job, so they arrive within a minute or two of the scheduler's interval.
 8. Try it yourself: book with your own LINE account, check the confirmation message, then cancel from its link.
 
 ## Costs and limits

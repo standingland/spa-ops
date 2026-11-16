@@ -1,5 +1,6 @@
 import { parseEnv, type LineConfig } from './env';
 import type { Sender } from '@/modules/notifications/dispatch';
+import type { BookingConfirmationFlex } from '@/modules/notifications/flex';
 
 /** The configured LINE channels; throws when the LINE variables are not all set. */
 export function lineConfig(): LineConfig {
@@ -40,13 +41,13 @@ export async function exchangeCode(code: string, redirectUri: string, expectedNo
   return { lineUserId: p.sub, name: p.name?.trim() || '' };
 }
 
-/** Sends one text message. Throws (with the HTTP status) when LINE refuses, for example when the guest blocked the account. */
-export async function pushLine(lineUserId: string, text: string): Promise<void> {
+/** Sends one message. Throws (with the HTTP status) when LINE refuses the push. */
+export async function pushLine(lineUserId: string, text: string, flex?: BookingConfirmationFlex): Promise<void> {
   const c = lineConfig();
   const r = await fetch(`${c.apiBase}/v2/bot/message/push`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${c.messagingToken}` },
-    body: JSON.stringify({ to: lineUserId, messages: [{ type: 'text', text }] }),
+    body: JSON.stringify({ to: lineUserId, messages: [flex ?? { type: 'text', text }] }),
   });
   if (!r.ok) throw new Error(`LINE_PUSH_FAILED ${r.status}`);
 }
@@ -54,6 +55,6 @@ export async function pushLine(lineUserId: string, text: string): Promise<void> 
 export const lineSender: Sender = {
   async send(m) {
     if (m.channel !== 'line') throw new Error('LINE_SENDER_CHANNEL');
-    await pushLine(m.to, m.text);
+    await pushLine(m.to, m.text, m.flex);
   },
 };

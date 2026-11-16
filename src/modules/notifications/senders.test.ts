@@ -12,8 +12,8 @@ test('line messages go to the LINE sender when it is configured, everything else
   await s.send({ channel: 'email', to: 'a@b.c', text: 'x' });
   expect([l.got, f.got]).toEqual([['line'], ['sms', 'email']]);
 });
-test('without a LINE sender, line messages go to the fallback (log only)', async () => {
+test('without a LINE sender, LINE messages fail rather than being reported as delivered', async () => {
   const f = rec();
-  await routeSender(null, f.s).send({ channel: 'line', to: 'U1', text: 'x' });
-  expect(f.got).toEqual(['line']);
+  await expect(routeSender(null, f.s).send({ channel: 'line', to: 'U1', text: 'x' })).rejects.toThrow('LINE_NOT_CONFIGURED');
+  expect(f.got).toEqual([]);
 });

@@ -1,4 +1,5 @@
 import { renderTemplate, type TemplateKey } from './templates';
+import { bookingConfirmationFlex, type BookingConfirmationFlex } from './flex';
 
 export type OutboxRow = { id: string; customer_id: string; template: TemplateKey; payload: { booking_id: string; starts_at: string } };
 
@@ -9,7 +10,7 @@ export interface OutboxPort {
   /** A link the guest can use to cancel this booking, for bookings made on the public page; null for every other booking. */
   cancelUrl?(bookingId: string, startsAt: string): Promise<string | null>;
 }
-export interface Sender { send(m: { channel: 'sms' | 'email' | 'line'; to: string; text: string }): Promise<void> }
+export interface Sender { send(m: { channel: 'sms' | 'email' | 'line'; to: string; text: string; flex?: BookingConfirmationFlex }): Promise<void> }
 
 /**
  * Sends what the outbox hands over. One failing message never stops the rest; every outcome is recorded,
@@ -26,7 +27,9 @@ export async function dispatchPending(port: OutboxPort, sender: Sender, opts: { 
       if (!channel) { await port.complete(row.id, false, 'NO_CONTACT'); failed++; continue; }
       const to = channel === 'line' ? c.lineUserId! : channel === 'sms' ? c.phone! : c.email!;
       const cancelUrl = row.template === 'booking_confirmed' && port.cancelUrl ? await port.cancelUrl(row.payload.booking_id, row.payload.starts_at) : null;
-      await sender.send({ channel, to, text: renderTemplate(row.template, row.payload, 'th', opts.senderName, cancelUrl ? { cancelUrl } : undefined) });
+      await sender.send({ channel, to, text: renderTemplate(row.template, row.payload, 'th', opts.senderName, cancelUrl ? { cancelUrl } : undefined),
+        ...(channel === 'line' && row.template === 'booking_confirmed' ? { flex: bookingConfirmationFlex(row.payload.starts_at, opts.senderName, cancelUrl ?? undefined) } : {}),
+      });
       await port.complete(row.id, true);
       sent++;
     } catch (e) {
