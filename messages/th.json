@@ -24,8 +24,7 @@
     "closeMenu": "ปิดเมนู",
     "group": {
       "operate": "งานประจำวัน",
-      "business": "ธุรกิจ",
-      "setup": "ตั้งค่า"
+      "management": "จัดการร้าน"
     },
     "earnings": "ค่าคอมมิชชัน",
     "inventory": "สต็อกวัสดุ"

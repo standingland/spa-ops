@@ -29,7 +29,10 @@ describe('visibleNav', () => {
     const list = ids('owner');
     expect(list).toEqual(expect.arrayContaining(['payments', 'earnings', 'inventory', 'reports', 'settings']));
     expect(list).not.toContain('bookings');
-    expect(visibleNav('owner', { managerReports: true }).map((g) => g.id)).toEqual(['operate', 'business', 'setup']);
+    const groups = visibleNav('owner', { managerReports: true });
+    expect(groups.map((g) => g.id)).toEqual(['operate', 'management']);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['today', 'schedule', 'guests', 'rooms']);
+    expect(groups[1].items.map((i) => i.id)).toEqual(['therapists', 'payments', 'earnings', 'inventory', 'reports', 'settings']);
   });
 });
 
