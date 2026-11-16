@@ -26,6 +26,10 @@ Design and decisions: `docs/superpowers/specs/2026-11-13-public-booking-design.m
 
 ## Costs and limits
 
+### Incoming LINE webhook
+
+The optional endpoint `/api/line/webhook` verifies requests with the **Messaging API channel secret** stored in `LINE_MESSAGING_CHANNEL_SECRET`. This is different from the LINE Login channel secret. Configure it as a server-side secret, deploy, then set the webhook URL to `https://<your domain>/api/line/webhook`, verify it in LINE Developers and enable Use webhook. The endpoint accepts authenticated events but does not store them, create guest records, or send replies; events received now cannot be replayed later. Booking confirmations are outgoing messages and still require the scheduled dispatcher.
+
 * LINE charges for messages beyond the free allowance of your Official Account plan. Check LINE's current plan and price pages for Thailand before opening the page to the public.
 * If a guest blocks your Official Account, the confirmation message fails and is retried a few times, then marked dead in **Admin → Notifications**. The booking itself stands, and the confirmation page still shows the cancel link.
 
