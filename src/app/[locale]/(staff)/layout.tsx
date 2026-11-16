@@ -36,7 +36,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   }));
 
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="staff-shell min-h-screen lg:flex">
       <ShellFrame brand={<Wordmark name={brand.name} tagline={brand.tagline} />} status={<LiveStatus />}>
         <NavList groups={groups} />
         <div className="mt-auto flex flex-col gap-2 border-t border-line pt-4">
@@ -53,7 +53,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           </form>
         </div>
       </ShellFrame>
-      <main className="min-w-0 flex-1 p-4">{children}</main>
+      <main className="staff-main min-w-0 flex-1 p-4 sm:p-6 xl:px-10 xl:py-8">{children}</main>
     </div>
   );
 }

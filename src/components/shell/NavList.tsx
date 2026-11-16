@@ -22,8 +22,8 @@ export function NavList({ groups }: { groups: Group[] }) {
               data-testid={`nav-${i.id}`}
               aria-current={current ? 'page' : undefined}
               className={cn(
-                'flex min-h-11 items-center gap-3 rounded-[var(--radius)] border-l-4 px-3 text-body text-ink',
-                current ? 'border-primary bg-tint-available font-medium' : 'border-transparent hover:bg-surface-muted',
+                'flex min-h-11 items-center gap-3 rounded-xl border-l-4 px-3 text-body text-ink transition-colors',
+                current ? 'border-primary bg-tint-available font-semibold' : 'border-transparent hover:bg-surface-muted',
               )}
             >
               <Icon name={i.icon} className="shrink-0" />
@@ -58,7 +58,7 @@ export function NavList({ groups }: { groups: Group[] }) {
         </details>
       ) : (
         <div key={g.id} className="flex flex-col gap-1">
-          <h2 className="px-3 text-caption font-medium text-ink-muted">{g.label}</h2>
+          <h2 className="px-4 pb-2 text-caption font-medium text-ink-muted">{g.label}</h2>
           {links(g.items)}
         </div>
       ))}
