@@ -146,3 +146,37 @@ h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
 @media (prefers-reduced-motion: reduce) {
   .draw-check { animation: none; stroke-dashoffset: 0; }
 }
+
+/* Staff workspace: quiet surfaces keep operational status and actions in focus. */
+.staff-shell {
+  --ivory: #f1f4f1;
+  --surface-muted: #f1f4f1;
+  --line: #dce4de;
+  --radius: 0.75rem;
+  background: var(--ivory);
+}
+.staff-sidebar { box-shadow: 8px 0 32px rgba(31, 55, 43, 0.035); }
+.staff-sidebar [data-testid="live-status"] {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+.staff-main .page-header { padding-bottom: 0.35rem; }
+.staff-main .page-header h1 {
+  font-size: clamp(1.85rem, 2.6vw, 2.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.staff-main .today-section {
+  border-color: var(--line);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 18px rgba(31, 55, 43, 0.035);
+}
+.staff-main .today-section h2 { font-size: 1.125rem; }
+.staff-main .today-stats { box-shadow: 0 4px 18px rgba(31, 55, 43, 0.035); }
+@media (max-width: 639px) {
+  .staff-main .today-section { padding: 1rem; }
+}

@@ -85,7 +85,7 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   }
 
   const section = (title: string, children: React.ReactNode) => (
-    <Card className="flex min-w-0 flex-col gap-2"><h2 className="font-serif text-heading text-ink">{title}</h2>{children}</Card>
+    <Card className="today-section flex min-w-0 flex-col gap-3"><h2 className="font-serif text-heading text-ink">{title}</h2>{children}</Card>
   );
   const empty = <EmptyState>{t('nothing')}</EmptyState>;
   const rowBox = 'flex min-w-0 flex-wrap items-center gap-3 rounded-[var(--radius)] border border-line bg-surface p-3';
@@ -106,7 +106,7 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
 
       {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
 
-      <section aria-label={t('roomStatus')} className="flex flex-wrap gap-x-5 gap-y-2 rounded-[var(--radius)] border border-line bg-surface px-4 py-2">
+      <section aria-label={t('roomStatus')} className="today-stats grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4 xl:grid-cols-8">
         <Stat label={t('reservations')} value={model.counts.reservations} id="reservations" />
         <Stat label={t('cancelled')} value={model.counts.cancelled} id="cancelled" />
         <Stat label={t('noShow')} value={model.counts.noShow} id="noshow" />
@@ -200,9 +200,9 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
 
 function Stat({ label, value, id, dot }: { label: string; value: number; id: string; dot?: RoomStatus }) {
   return (
-    <div className="flex items-baseline gap-2">
+    <div className="flex min-w-0 flex-col gap-2 bg-surface px-4 py-4">
       <span className="flex items-center gap-1.5 text-caption text-ink-muted">{dot && <StatusDot status={dot} />}{label}</span>
-      <span className="tnum text-heading text-ink" data-testid={`count-${id}`}>{value}</span>
+      <span className="tnum text-2xl font-semibold leading-none text-ink" data-testid={`count-${id}`}>{value}</span>
     </div>
   );
 }
