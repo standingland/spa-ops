@@ -14,17 +14,45 @@ test('reception sees the front-of-house links and none of the management ones', 
   for (const id of ['today', 'schedule', 'guests', 'rooms']) await expect(page.getByTestId(`nav-${id}`)).toBeVisible();
   await expect(page.getByTestId('nav-payments')).toHaveCount(0);
   await expect(page.getByTestId('nav-settings')).toHaveCount(0);
+  await expect(page.getByTestId('management-menu')).toHaveCount(0);
 });
 
-test('a therapist sees only Today, Schedule and Rooms, and no business or setup group', async ({ page }) => {
+test('a therapist sees only Today, Schedule and Rooms, and no management menu', async ({ page }) => {
   await signIn(page, 'therapist@spa.test');
   await openMenuIfPhone(page);
   await expect(page.locator('[data-testid^="nav-"]:not([data-testid="nav-account"])')).toHaveCount(3);
   for (const id of ['today', 'schedule', 'rooms']) await expect(page.getByTestId(`nav-${id}`)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'งานประจำวัน', level: 2 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'ธุรกิจ', level: 2 })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'ตั้งค่า', level: 2 })).toHaveCount(0);
+  await expect(page.getByTestId('management-menu')).toHaveCount(0);
   await expect(page.getByTestId('nav-account')).toBeVisible();
+});
+
+test('management starts collapsed on Today and opens for the selected management page', async ({ page }) => {
+  await signIn(page, 'owner@spa.test');
+  await openMenuIfPhone(page);
+  const menu = page.getByTestId('management-menu');
+  const toggle = page.getByTestId('management-toggle');
+  await expect(toggle).toHaveText('จัดการร้าน');
+  await expect(menu).not.toHaveAttribute('open');
+  await expect(page.getByTestId('nav-payments')).toBeHidden();
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  await expect(menu).toHaveAttribute('open');
+  for (const id of ['therapists', 'payments', 'earnings', 'inventory', 'reports', 'settings']) {
+    await expect(page.getByTestId(`nav-${id}`)).toBeVisible();
+  }
+  await page.getByTestId('nav-therapists').click();
+  await expect(page).toHaveURL(/\/th\/admin\/therapists/);
+  if (isPhone()) await expect(page.getByTestId('menu-button')).toHaveAttribute('aria-expanded', 'false');
+  await openMenuIfPhone(page);
+  await expect(menu).toHaveAttribute('open');
+  await expect(page.getByTestId('nav-therapists')).toHaveAttribute('aria-current', 'page');
+  await toggle.click();
+  await expect(page.getByTestId('nav-therapists')).toBeHidden();
+  await page.getByTestId('nav-today').click();
+  await expect(page).toHaveURL(/\/th\/today/);
+  await openMenuIfPhone(page);
+  await expect(menu).not.toHaveAttribute('open');
 });
 
 test('the therapist admin page marks Therapists, not Settings, as current', async ({ page }) => {

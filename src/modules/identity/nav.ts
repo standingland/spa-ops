@@ -4,7 +4,7 @@ import type { Role } from '@/modules/identity/session';
 export type NavId = 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings';
 export type IconName = NavId | 'menu' | 'close';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
-export type NavGroup = { id: 'operate' | 'business' | 'setup'; items: NavItem[] };
+export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
 export type AdminTool = { id: 'adminRooms' | 'services' | 'notifications' | 'staff' | 'settings'; href: string; roles: Role[] };
 
 const ALL: Role[] = ['owner', 'manager', 'receptionist', 'therapist'];
@@ -20,20 +20,20 @@ const GROUPS: NavGroup[] = [
       // Not rendered until sub-project 4.
       { id: 'bookings', href: '/bookings', icon: 'bookings', roles: ALL, hidden: true },
       { id: 'guests', href: '/customers', icon: 'guests', roles: FRONT },
-      { id: 'therapists', href: '/admin/therapists', icon: 'therapists', roles: MANAGEMENT },
       { id: 'rooms', href: '/rooms', icon: 'rooms', roles: ALL },
     ],
   },
   {
-    id: 'business',
+    id: 'management',
     items: [
+      { id: 'therapists', href: '/admin/therapists', icon: 'therapists', roles: MANAGEMENT },
       { id: 'payments', href: '/payments', icon: 'payments', roles: MANAGEMENT },
       { id: 'earnings', href: '/earnings', icon: 'earnings', roles: MANAGEMENT },
       { id: 'inventory', href: '/inventory', icon: 'inventory', roles: MANAGEMENT },
       { id: 'reports', href: '/reports', icon: 'reports', roles: MANAGEMENT },
+      { id: 'settings', href: '/admin', icon: 'settings', roles: MANAGEMENT },
     ],
   },
-  { id: 'setup', items: [{ id: 'settings', href: '/admin', icon: 'settings', roles: MANAGEMENT }] },
 ];
 
 const ADMIN_TOOLS: AdminTool[] = [

@@ -23,9 +23,8 @@
     "menu": "Menu",
     "closeMenu": "Close menu",
     "group": {
-      "operate": "Operate",
-      "business": "Business",
-      "setup": "Setup"
+      "operate": "Daily work",
+      "management": "Management"
     },
     "earnings": "Commissions",
     "inventory": "Inventory"
