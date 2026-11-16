@@ -55,3 +55,13 @@ test('lineSender only sends on the line channel', async () => {
   await lineSender.send({ channel: 'line', to: 'U1', text: 'x' });
   expect(f).toHaveBeenCalledTimes(1);
 });
+
+test('lineSender pushes the Flex confirmation as a LINE message', async () => {
+  const { lineSender } = await import('./line');
+  const { bookingConfirmationFlex } = await import('@/modules/notifications/flex');
+  const f = vi.spyOn(globalThis, 'fetch').mockResolvedValue(json({}));
+  const flex = bookingConfirmationFlex('2030-01-15T03:00:00Z', 'Banyan Spa', 'https://spa.example.com/cancel');
+  await lineSender.send({ channel: 'line', to: 'U1', text: 'fallback', flex });
+  const init = f.mock.calls[0][1] as RequestInit;
+  expect(JSON.parse(String(init.body))).toEqual({ to: 'U1', messages: [flex] });
+});

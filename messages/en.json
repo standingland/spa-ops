@@ -755,7 +755,7 @@
     },
     "done": {
       "title": "You are booked",
-      "intro": "If you added our LINE account, we have sent this confirmation there too.",
+      "intro": "If you added our LINE account, we will also send this confirmation there.",
       "when": "When",
       "with": "With",
       "service": "Treatment",
