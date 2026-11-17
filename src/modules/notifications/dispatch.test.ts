@@ -1,7 +1,23 @@
-import { test, expect } from 'vitest';
+import { test, expect, vi } from 'vitest';
 import { dispatchPending, type OutboxPort, type OutboxRow, type Sender } from './dispatch';
 
 const row = (id: string, customer: string): OutboxRow => ({ id, customer_id: customer, template: 'booking_confirmed', payload: { booking_id: 'b' + id, starts_at: '2030-01-15T03:00:00Z' } });
+
+test('guest care messages carry a manage link without service details and never fall back to SMS', async () => {
+  const messages: Parameters<Sender['send']>[0][] = [];
+  const port: OutboxPort = {
+    claim: async () => [{ ...row('a', 'line'), template: 'booking_reminder' }, { ...row('b', 'phone'), template: 'waitlist_offer' }],
+    contact: async (id) => id === 'line' ? { phone: null, email: null, lineUserId: 'U1' } : { phone: '0810000000', email: null },
+    complete: async () => {}, manageUrl: () => 'https://spa.test/th/book/mine',
+  };
+  expect(await dispatchPending(port, { send: async (m) => { messages.push(m); } }, { senderName: 'Studio' })).toEqual({ sent: 1, failed: 1 });
+  expect(messages[0].text).toContain('https://spa.test/th/book/mine'); expect(messages[0].channel).toBe('line'); expect(messages[0].text).not.toMatch(/นวด|therapist|massage/);
+});
+test('a cancelled or expired guest care message is rechecked immediately before sending', async () => {
+  const send = vi.fn(); const complete = vi.fn();
+  const port: OutboxPort = { claim: async () => [{ ...row('a', 'c'), template: 'booking_reminder' }], contact: async () => ({ phone: null, email: null, lineUserId: 'U1' }), complete, valid: async () => false };
+  await dispatchPending(port, { send }, { senderName: 'Studio' }); expect(send).not.toHaveBeenCalled(); expect(complete).toHaveBeenCalledWith('a', false, 'STALE_GUEST_CARE');
+});
 
 test('one bad message does not stop the others, and each outcome is recorded', async () => {
   const done: [string, boolean, string?][] = [];

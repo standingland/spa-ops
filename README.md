@@ -41,6 +41,7 @@ The seed creates four logins, **for local development only** (password `local-de
 
 * `docs/architecture.md` — data model, rules, permission matrix, acceptance evidence per plan
 * `docs/earnings-inventory.md` — commissions, material recipes, stock movements and cost calculations
+* `docs/guest-care.md` — LINE reminders, My appointments, waitlist offers, customer preferences and commission settlement
 * `docs/operations.md` — backups, restore, rollback, schedules, logs, monthly checklist
 * `docs/deployment.md` — the go-live runbook (every cloud or paid step is the owner's decision)
 * `docs/security-report.md` and `docs/acceptance.md` — what was verified, and what is still open

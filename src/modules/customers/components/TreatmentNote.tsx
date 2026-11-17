@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getBookingDetail } from '../actions';
+import { BookingPreferences } from '@/modules/care/components/BookingPreferences';
 
 /** The treatment notes for one booking (booking note and the customer's treatment preferences); never contact details. */
 export function TreatmentNote({ bookingId }: { bookingId: string }) {
@@ -13,6 +14,5 @@ export function TreatmentNote({ bookingId }: { bookingId: string }) {
     });
     return () => { live = false; };
   }, [bookingId]);
-  if (!text) return null;
-  return <span data-testid="treatment-note" className="w-full min-w-0 break-words text-caption italic text-ink-muted">{text}</span>;
+  return <>{text && <span data-testid="treatment-note" className="w-full min-w-0 break-words text-caption italic text-ink-muted">{text}</span>}<BookingPreferences bookingId={bookingId} /></>;
 }

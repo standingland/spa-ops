@@ -35,7 +35,7 @@ test('export gathers everything held about one person, for owner and manager onl
   const k = await asRole(b, 'receptionist', (c) => book(c, b)); await pay(b, 'receptionist', k.id, 150000);
   await asRole(b, 'manager', (c) => c.query(`insert into customer_private_notes(customer_id, body) values ($1,'n')`, [b.c1]));
   const e = (await asRole(b, 'manager', (c) => c.query(`select export_customer($1) e`, [b.c1]))).rows[0].e;
-  expect(Object.keys(e).sort()).toEqual(['bookings', 'notes', 'payments', 'profile']);
+  expect(Object.keys(e).sort()).toEqual(['bookings', 'notes', 'payments', 'preferences', 'profile', 'waitlist']);
   expect([e.bookings.length, e.payments.length, e.notes.length]).toEqual([1, 1, 1]);
   await expectCode(asRole(b, 'receptionist', (c) => c.query(`select export_customer($1)`, [b.c1])), 'NOT_AUTHORIZED');
 });

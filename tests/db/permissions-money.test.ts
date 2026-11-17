@@ -28,7 +28,7 @@ const STMTS: Stmt[] = [
   { name: 'select pending_payments()', run: (c) => c.query(`select * from pending_payments()`), expect: DESK_OK },
   { name: 'select customer_summary(…)', run: (c, b) => c.query(`select * from customer_summary($1)`, [b.c1]), expect: DESK_OK },
   { name: 'select booking_detail(…)', run: (c, _b, i) => c.query(`select * from booking_detail($1)`, [i.booking]), expect: ['ok', 'ok', 'ok', 'ok', NA, NA] },
-  { name: 'select export_customer(…)', run: (c, b) => c.query(`select export_customer($1)`, [b.c1]), expect: MANAGERS_OK },
+  { name: 'select export_customer(…)', run: (c, b) => c.query(`select export_customer($1)`, [b.c1]), expect: ['ok', 'ok', NA, NA, NA, '42501'] },
   { name: 'select anonymise_customer(…)', run: (c, b) => c.query(`select anonymise_customer($1,'x')`, [b.c2]), expect: ['ok', NA, NA, NA, NA, NA] },
   { name: 'select retention_candidates()', run: (c) => c.query(`select * from retention_candidates()`), expect: ['ok', NA, NA, NA, NA, NA] },
   { name: 'select report_summary(…)', run: (c) => c.query(`select * from report_summary('2030-01-15','2030-01-15')`), expect: ['ok', 'ok', NA, NA, NA, NA] },
@@ -58,6 +58,8 @@ describe.each(STMTS)('$name', (s) => {
       const r = await attempt;
       if (want === 'rows') expect(r.rowCount).toBeGreaterThan(0);
       else if (typeof want === 'number') expect(r.rowCount).toBe(want);
+    } else if (want === '42501') {
+      await expect(attempt).rejects.toMatchObject({ code: '42501' });
     } else {
       await expectCode(attempt, want);
     }

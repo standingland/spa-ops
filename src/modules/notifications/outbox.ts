@@ -5,11 +5,24 @@ import { cancelTtlSec } from '@/modules/public/http';
 import { signCancelToken } from '@/modules/public/session';
 import type { OutboxPort, OutboxRow, Sender } from './dispatch';
 
+/** Scheduling uses the same trusted boundary as outbox claiming and contact lookup. */
+export async function scheduleGuestCare(): Promise<void> {
+  const { error } = await createAdminClient().rpc('process_guest_care', { p_limit: 100 });
+  if (error) throw new Error('GUEST_CARE_SCHEDULING_FAILED');
+}
+
 
 /** The only notifications file that uses the service-key client. */
 export function supabaseOutbox(): OutboxPort {
   const admin = createAdminClient();
   return {
+    manageUrl() { const line = parseEnv(process.env).line; return line ? `${line.publicBaseUrl}/th/book/mine` : null; },
+    async valid(row) {
+      if (!['booking_reminder', 'waitlist_offer'].includes(row.template)) return true;
+      const { data, error } = await admin.rpc('guest_notification_valid', { p_id: row.id });
+      if (error) throw new Error(error.message);
+      return data === true;
+    },
     async claim(limit) {
       const { data, error } = await admin.rpc('claim_notifications', { p_limit: limit });
       if (error) throw new Error(error.message);

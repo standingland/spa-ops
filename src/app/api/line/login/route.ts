@@ -18,7 +18,8 @@ export async function GET(request: NextRequest) {
     u.searchParams.set('error', error);
     return NextResponse.redirect(u);
   };
-  if (!(await isOpen())) return back('closed');
+  // Existing guests may manage appointments even when new online bookings are paused.
+  if (!parseEnv(process.env).line || (!/^\/(th|en)\/book\/mine$/.test(returnTo) && !(await isOpen()))) return back('closed');
   if (!(await allow(`login:${clientIp(request.headers)}`, 20, 60))) return back('busy');
 
   const nonce = randomBytes(16).toString('base64url');
