@@ -1,0 +1,26 @@
+export const directoryCopy = {
+  en: {
+    skip: 'Skip to booking', navigation: 'Spa navigation', therapists: 'Therapists', experience: 'Our experience', home: 'Back to spa',
+    heroLabel: 'Banyan Spa · Bangkok', heroTitle: 'Find your moment of calm.', heroBody: 'A little space to slow down. Find your therapist, choose your treatment, and make time for yourself.',
+    find: 'Find your therapist', heroNote: 'Your time. Your pace. Your Banyan.', concept: 'Treatment suite concept',
+    teamTitle: 'Good hands. Better days.', teamBody: 'Get to know the people behind your next moment of rest. Choose a therapist to explore their treatments and available times.',
+    fit: 'Find your fit', reset: 'Reset filters', search: 'Therapist name', searchPlaceholder: 'Search by name', date: 'Preferred date', dateHint: 'Your date carries through to booking. Available times appear after you choose a treatment.',
+    specialty: 'Specialty', all: 'All specialties', results: 'Our therapists', count: (n: number) => `${n} ${n === 1 ? 'therapist' : 'therapists'}`,
+    view: 'View & book', emptyTitle: 'Let’s find another match.', emptyBody: 'Try a different name or specialty, or reset your filters to see the whole team.', noTeam: 'No therapists are available to browse yet. Please check back soon.',
+    helpTitle: 'A simple path to slowing down.', helpBody: 'Choose a therapist, explore their treatments, then select an available time. Continue with LINE to confirm your booking.',
+    line: 'Book securely with LINE', bannerTitle: 'Make room for a little rest.', bannerBody: 'Discover the spaces and thoughtful details that make Banyan your place to pause.', bannerLink: 'The Banyan experience',
+    footer: 'A little time, just for you.', staff: 'Staff sign in', portrait: 'Photo coming soon', profile: 'Explore treatments',
+  },
+  th: {
+    skip: 'ข้ามไปยังการจอง', navigation: 'เมนูสปา', therapists: 'เทอราปิสต์', experience: 'ประสบการณ์ของเรา', home: 'กลับหน้าสปา',
+    heroLabel: 'Banyan Spa · กรุงเทพฯ', heroTitle: 'ให้เวลากับความผ่อนคลาย', heroBody: 'พื้นที่เล็ก ๆ ให้คุณได้พัก เลือกเทอราปิสต์และทรีตเมนต์ที่ใช่ แล้วให้เวลานี้เป็นของคุณ',
+    find: 'เลือกเทอราปิสต์ของคุณ', heroNote: 'เวลาของคุณ ในจังหวะที่คุณเลือก', concept: 'ภาพแนวคิดห้องทรีตเมนต์',
+    teamTitle: 'สัมผัสที่ดี เพื่อวันดี ๆ', teamBody: 'รู้จักผู้ดูแลช่วงเวลาแห่งการพักผ่อนของคุณ เลือกเทอราปิสต์เพื่อดูทรีตเมนต์และเวลาที่ว่าง',
+    fit: 'ค้นหาคนที่ใช่', reset: 'ล้างตัวกรอง', search: 'ชื่อเทอราปิสต์', searchPlaceholder: 'ค้นหาด้วยชื่อ', date: 'วันที่ต้องการ', dateHint: 'วันที่เลือกจะถูกส่งต่อไปยังหน้าจอง เลือกทรีตเมนต์เพื่อดูเวลาที่ว่าง',
+    specialty: 'ความเชี่ยวชาญ', all: 'ทั้งหมด', results: 'เทอราปิสต์ของเรา', count: (n: number) => `${n} คน`,
+    view: 'ดูโปรไฟล์และจอง', emptyTitle: 'ลองค้นหาอีกครั้ง', emptyBody: 'ลองเปลี่ยนชื่อหรือความเชี่ยวชาญ หรือล้างตัวกรองเพื่อดูเทอราปิสต์ทั้งหมด', noTeam: 'ยังไม่มีเทอราปิสต์ให้เลือกในขณะนี้ กรุณากลับมาใหม่อีกครั้ง',
+    helpTitle: 'เริ่มต้นช่วงเวลาพักง่าย ๆ', helpBody: 'เลือกเทอราปิสต์ ดูทรีตเมนต์ แล้วเลือกเวลาที่ว่าง เข้าสู่ระบบด้วย LINE เพื่อยืนยันการจอง',
+    line: 'ยืนยันการจองผ่าน LINE', bannerTitle: 'เผื่อเวลาให้ตัวเองได้พัก', bannerBody: 'ค้นพบพื้นที่และรายละเอียดที่เราใส่ใจ เพื่อให้บันยันเป็นที่พักใจของคุณ', bannerLink: 'สัมผัสประสบการณ์บันยัน',
+    footer: 'ช่วงเวลาพักที่เป็นของคุณ', staff: 'เข้าสู่ระบบพนักงาน', portrait: 'ยังไม่มีรูปภาพ', profile: 'ดูทรีตเมนต์',
+  },
+};

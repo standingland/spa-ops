@@ -1,19 +1,34 @@
+import { getLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { getBrand } from '@/lib/brand';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
+import { directoryCopy } from '@/modules/public/components/directoryCopy';
+import styles from '@/modules/public/components/directory.module.css';
 
-/** The public pages: an evening palette, no staff navigation, nothing that needs a login. */
-export default function BookLayout({ children }: { children: React.ReactNode }) {
+export default async function BookLayout({ children }: { children: React.ReactNode }) {
   const brand = getBrand(process.env);
+  const locale = await getLocale();
+  const t = directoryCopy[locale === 'th' ? 'th' : 'en'];
   return (
-    <div className="theme-night min-h-screen">
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-6">
-        <div className="min-w-0">
-          <div className="truncate font-serif text-xl tracking-[0.16em] text-ink">{brand.name}</div>
-          <div className="truncate text-caption text-ink-muted">{brand.tagline}</div>
-        </div>
-        <LocaleSwitch />
+    <div className={styles.site}>
+      <a href="#booking-main" className={styles.skip}>{t.skip}</a>
+      <header className={styles.header}>
+        <Link href="/" className={styles.brand} aria-label={brand.name}>
+          <span className={styles.brandMark} aria-hidden="true">B</span>
+          <span>{brand.name}<small>{brand.tagline}</small></span>
+        </Link>
+        <nav className={styles.navigation} aria-label={t.navigation}>
+          <Link href="/book#therapists">{t.therapists}</Link>
+          <Link href="/#experience">{t.experience}</Link>
+        </nav>
+        <div className={styles.headerActions}><LocaleSwitch /><Link className={styles.homeLink} href="/">{t.home} <span aria-hidden="true">↗</span></Link></div>
       </header>
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 pb-16">{children}</main>
+      <main id="booking-main" className={styles.main}>{children}</main>
+      <footer className={styles.footer}>
+        <Link href="/" className={styles.footerBrand}>{brand.name}<small>{brand.tagline}</small></Link>
+        <p>{t.footer}</p>
+        <Link href="/login">{t.staff}</Link>
+      </footer>
     </div>
   );
 }
