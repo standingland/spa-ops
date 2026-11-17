@@ -1,7 +1,7 @@
 import { renderTemplate, type TemplateKey } from './templates';
 import { bookingConfirmationFlex, type BookingConfirmationFlex } from './flex';
 
-export type OutboxRow = { id: string; customer_id: string; template: TemplateKey; payload: { booking_id: string; starts_at: string } };
+export type OutboxRow = { id: string; customer_id: string; template: TemplateKey; payload: { booking_id: string; starts_at: string; waitlist_id?: string } };
 
 export interface OutboxPort {
   claim(limit: number): Promise<OutboxRow[]>;
@@ -9,6 +9,8 @@ export interface OutboxPort {
   complete(id: string, ok: boolean, error?: string): Promise<void>;
   /** A link the guest can use to cancel this booking, for bookings made on the public page; null for every other booking. */
   cancelUrl?(bookingId: string, startsAt: string): Promise<string | null>;
+  manageUrl?(): string | null;
+  valid?(row: OutboxRow): Promise<boolean>;
 }
 export interface Sender { send(m: { channel: 'sms' | 'email' | 'line'; to: string; text: string; flex?: BookingConfirmationFlex }): Promise<void> }
 
@@ -22,12 +24,15 @@ export async function dispatchPending(port: OutboxPort, sender: Sender, opts: { 
   let failed = 0;
   for (const row of await port.claim(opts.limit ?? 20)) {
     try {
+      if (port.valid && !(await port.valid(row))) { await port.complete(row.id, false, 'STALE_GUEST_CARE'); continue; }
       const c = await port.contact(row.customer_id);
-      const channel = c.lineUserId ? 'line' : c.phone ? 'sms' : c.email ? 'email' : null;
+      const lineOnly = row.template === 'booking_reminder' || row.template === 'waitlist_offer';
+      const channel = c.lineUserId ? 'line' : lineOnly ? null : c.phone ? 'sms' : c.email ? 'email' : null;
       if (!channel) { await port.complete(row.id, false, 'NO_CONTACT'); failed++; continue; }
       const to = channel === 'line' ? c.lineUserId! : channel === 'sms' ? c.phone! : c.email!;
       const cancelUrl = row.template === 'booking_confirmed' && port.cancelUrl ? await port.cancelUrl(row.payload.booking_id, row.payload.starts_at) : null;
-      await sender.send({ channel, to, text: renderTemplate(row.template, row.payload, 'th', opts.senderName, cancelUrl ? { cancelUrl } : undefined),
+      const manageUrl = ['booking_reminder', 'waitlist_offer'].includes(row.template) ? port.manageUrl?.() : null;
+      await sender.send({ channel, to, text: renderTemplate(row.template, row.payload, 'th', opts.senderName, cancelUrl ? { cancelUrl } : undefined) + (manageUrl ? `\n${manageUrl}` : ''),
         ...(channel === 'line' && row.template === 'booking_confirmed' ? { flex: bookingConfirmationFlex(row.payload.starts_at, opts.senderName, cancelUrl ?? undefined) } : {}),
       });
       await port.complete(row.id, true);

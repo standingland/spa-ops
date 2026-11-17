@@ -9,6 +9,7 @@ import { TherapistPhoto } from '@/modules/public/components/TherapistPhoto';
 import { SESSION_COOKIE } from '@/modules/public/http';
 import { getTherapist, isOpen } from '@/modules/public/queries';
 import { verifySession } from '@/modules/public/session';
+import { publicDb } from '@/modules/public/db';
 
 export default async function TherapistPage({ params, searchParams }: {
   params: Promise<{ therapistId: string }>; searchParams: Promise<{ serviceId?: string; day?: string; start?: string; error?: string }>;
@@ -22,6 +23,7 @@ export default async function TherapistPage({ params, searchParams }: {
   const t = await getTranslations('public');
   const locale = await getLocale();
   const guest = verifySession((await cookies()).get(SESSION_COOKIE)?.value ?? '');
+  const { data: waitlistSetting } = await publicDb().from('app_settings').select('value').eq('key', 'care.waitlist_enabled').maybeSingle();
   const bio = locale === 'en' ? th.bioEn || th.bioTh : th.bioTh || th.bioEn;
   return (
     <>
@@ -38,7 +40,7 @@ export default async function TherapistPage({ params, searchParams }: {
             {th.specialties.length > 0 && <p className="text-caption text-ink-muted" aria-label={t('specialties')}>{th.specialties.join(', ')}</p>}
           </div>
         </section>
-        <BookingPanel therapistId={th.id} services={services} guestName={guest ? guest.name : null} today={bangkokDay(new Date())}
+        <BookingPanel therapistId={th.id} services={services} guestName={guest ? guest.name : null} today={bangkokDay(new Date())} waitlistEnabled={waitlistSetting?.value === true}
           initial={{ serviceId: sp.serviceId, day: sp.day, start: sp.start }} error={sp.error ?? null} />
       </div>
     </>

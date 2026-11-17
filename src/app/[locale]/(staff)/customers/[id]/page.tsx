@@ -5,6 +5,7 @@ import { Alert } from '@/components/ui/alert';
 import { requireRole } from '@/modules/identity/session';
 import { getCustomer } from '@/modules/customers/actions';
 import { CustomerProfile } from '@/modules/customers/components/CustomerProfile';
+import { getPreferences } from '@/modules/care/actions';
 
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireRole('owner', 'manager', 'receptionist');
@@ -26,5 +27,5 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
     therapists: Object.fromEntries((ths.data ?? []).map((x) => [x.id, x.display_name])),
     rooms: Object.fromEntries((rooms.data ?? []).map((x) => [x.id, x.code])),
   };
-  return <CustomerProfile customer={r.customer} role={session.role} names={names} />;
+  return <CustomerProfile customer={r.customer} role={session.role} names={names} preferences={await getPreferences(id)} />;
 }

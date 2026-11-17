@@ -17,6 +17,10 @@ const publicFns = () => asAdmin((c) => c.query(
 
 /** What the public page's functions may return. Adding a column to a public function means changing this list on purpose. */
 const ALLOWED_RESULTS: Record<string, string> = {
+  public_my_appointments: 'jsonb',
+  public_join_waitlist: 'uuid',
+  public_cancel_waitlist: 'void',
+  public_accept_waitlist: 'TABLE(booking_id uuid, starts_at timestamp with time zone)',
   public_book: 'TABLE(booking_id uuid, starts_at timestamp with time zone)',
   public_booking_view: 'TABLE(starts_at timestamp with time zone, ends_at timestamp with time zone, status booking_status, service_name_th text, service_name_en text, therapist_name text)',
   public_cancel: 'void',

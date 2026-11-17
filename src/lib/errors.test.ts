@@ -14,8 +14,8 @@ test('every new error code has Thai and English text', () => {
     expect((th.errors as Record<string, string>)[c] && (en.errors as Record<string, string>)[c]).toBeTruthy();
   }
 });
-test('all 22 database codes plus UNKNOWN exist in both message files', () => {
-  expect(ERROR_CODES).toHaveLength(22);
+test('all 30 database codes plus UNKNOWN exist in both message files', () => {
+  expect(ERROR_CODES).toHaveLength(30);
   for (const code of [...ERROR_CODES, 'UNKNOWN']) {
     expect((th.errors as Record<string, string>)[code], `th ${code}`).toBeTruthy();
     expect((en.errors as Record<string, string>)[code], `en ${code}`).toBeTruthy();

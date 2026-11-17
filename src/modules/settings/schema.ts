@@ -1,6 +1,11 @@
 import type { OpsConfig } from '@/modules/operations/today';
 
 export type Settings = {
+  'care.reminders_enabled': boolean;
+  'care.reminder_first_min': number;
+  'care.reminder_second_min': number;
+  'care.waitlist_enabled': boolean;
+  'care.offer_lifetime_min': number;
   'ops.arrival_window_min': number;
   'ops.late_arrival_min': number;
   'ops.ending_soon_min': number;
@@ -25,11 +30,16 @@ export type SettingKey = keyof Settings;
 export type SettingMeta =
   | { group: SettingGroup; kind: 'int'; min: number; max: number; unit: 'minutes' | 'percent' | 'months' | 'days' | 'bookings' }
   | { group: SettingGroup; kind: 'bool' };
-export type SettingGroup = 'operations' | 'policy' | 'payments' | 'reports' | 'retention' | 'online';
-export const SETTING_GROUPS: SettingGroup[] = ['operations', 'policy', 'payments', 'reports', 'retention', 'online'];
+export type SettingGroup = 'operations' | 'policy' | 'payments' | 'reports' | 'retention' | 'online' | 'care';
+export const SETTING_GROUPS: SettingGroup[] = ['operations', 'policy', 'payments', 'reports', 'retention', 'online', 'care'];
 
 /** Mirrors private.setting_spec() in the database, which is what actually enforces these limits. */
 export const SETTING_META: Record<SettingKey, SettingMeta> = {
+  'care.reminders_enabled': { group: 'care', kind: 'bool' },
+  'care.reminder_first_min': { group: 'care', kind: 'int', min: 1, max: 10080, unit: 'minutes' },
+  'care.reminder_second_min': { group: 'care', kind: 'int', min: 1, max: 10080, unit: 'minutes' },
+  'care.waitlist_enabled': { group: 'care', kind: 'bool' },
+  'care.offer_lifetime_min': { group: 'care', kind: 'int', min: 5, max: 60, unit: 'minutes' },
   'ops.arrival_window_min': { group: 'operations', kind: 'int', min: 5, max: 240, unit: 'minutes' },
   'ops.late_arrival_min': { group: 'operations', kind: 'int', min: 1, max: 120, unit: 'minutes' },
   'ops.ending_soon_min': { group: 'operations', kind: 'int', min: 1, max: 60, unit: 'minutes' },

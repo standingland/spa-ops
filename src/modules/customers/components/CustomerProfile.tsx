@@ -15,11 +15,13 @@ import { bangkokDay, formatTime } from '@/lib/time';
 import { addPrivateNote, saveCustomer } from '../actions';
 import type { CustomerProfile as Profile } from '../schema';
 import { PrivacyTools } from './PrivacyTools';
+import { PreferencesForm } from '@/modules/care/components/PreferencesForm';
+import type { Preferences } from '@/modules/care/schema';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
 export type ProfileNames = { services: Record<string, string>; therapists: Record<string, string>; rooms: Record<string, string> };
 
-export function CustomerProfile({ customer: c, role, names }: { customer: Profile; role: Role; names: ProfileNames }) {
+export function CustomerProfile({ customer: c, role, names, preferences = {} }: { customer: Profile; role: Role; names: ProfileNames; preferences?: Preferences }) {
   const t = useTranslations('customers');
   const tp = useTranslations('payments');
   const tb = useTranslations('booking');
@@ -130,6 +132,8 @@ export function CustomerProfile({ customer: c, role, names }: { customer: Profil
           </ul>
         </section>
       </Card>
+
+      <PreferencesForm key={c.id} customerId={c.id} initial={preferences} disabled={gone} />
 
       {isManager && (
         <Card>

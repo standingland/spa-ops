@@ -15,6 +15,7 @@ const PAGE = 50;
 
 export function CustomerList({ rows, total, page, q, isOwner }: { rows: CustomerRow[]; total: number; page: number; q: string; isOwner: boolean }) {
   const t = useTranslations('customers');
+  const care = useTranslations('care');
   const te = useTranslations();
   const router = useRouter();
   const [term, setTerm] = useState(q);
@@ -32,7 +33,7 @@ export function CustomerList({ rows, total, page, q, isOwner }: { rows: Customer
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <PageHeader title={t('title')}
-        actions={isOwner ? <Link href="/customers?tab=retention" className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0" data-testid="retention-tab">{t('retention')}</Link> : undefined} />
+        actions={<><Link href="/waitlist" className="inline-flex min-h-11 items-center px-2 text-primary underline">{care('waitlist')}</Link>{isOwner && <Link href="/customers?tab=retention" className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0" data-testid="retention-tab">{t('retention')}</Link>}</>} />
       <Input type="search" aria-label={t('search')} placeholder={t('search')} value={term} onChange={(e) => setTerm(e.target.value)}
         data-testid="customer-search" className="max-w-md" />
       {rows.length === 0 && <EmptyState>{te('common.empty')}</EmptyState>}

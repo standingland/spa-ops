@@ -10,6 +10,7 @@ import { addDays, formatTime } from '@/lib/time';
 import { bookOnline, loadTimes } from '../actions';
 import type { PublicService } from '../queries';
 import { afterBookError } from './bookingState';
+import { WaitlistJoin } from '@/modules/care/components/WaitlistJoin';
 
 export type Selection = { serviceId?: string; day?: string; start?: string };
 
@@ -19,8 +20,8 @@ const DAYS_SHOWN = 14;
 
 const heading = 'font-serif text-xl font-normal text-ink';
 
-export function BookingPanel({ therapistId, services, guestName, today, initial, error: initialError }: {
-  therapistId: string; services: PublicService[]; guestName: string | null; today: string; initial: Selection; error: string | null;
+export function BookingPanel({ therapistId, services, guestName, today, initial, error: initialError, waitlistEnabled = false }: {
+  therapistId: string; services: PublicService[]; guestName: string | null; today: string; initial: Selection; error: string | null; waitlistEnabled?: boolean;
 }) {
   const t = useTranslations('public');
   const locale = useLocale();
@@ -136,6 +137,8 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
           <p className="text-caption text-ink-muted">{t('timezone')}</p>
         </section>
       )}
+
+      {waitlistEnabled && serviceId && <WaitlistJoin key={`${serviceId}|${day}`} therapistId={therapistId} serviceId={serviceId} day={day} signedIn={signedIn} />}
 
       <div className="flex flex-col gap-3">
         {signedIn

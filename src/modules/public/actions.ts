@@ -14,7 +14,7 @@ const BookInput = z.object({
 });
 
 /** Nobody is free at that time any more: the page shows "that time was just taken" and keeps the guest's choices. */
-const TAKEN = new Set(['THERAPIST_BUSY', 'POSITION_TAKEN', 'ROOM_OTHER_PARTY', 'SLOT_TAKEN']);
+const TAKEN = new Set(['THERAPIST_BUSY', 'POSITION_TAKEN', 'ROOM_OTHER_PARTY', 'SLOT_TAKEN', 'SLOT_HELD']);
 const PASS = new Set(['ONLINE_CLOSED', 'OUT_OF_WINDOW', 'TOO_MANY_BOOKINGS', 'THERAPIST_OFF_SHIFT', 'THERAPIST_NOT_QUALIFIED']);
 
 export async function bookOnline(input: z.input<typeof BookInput>): Promise<{ ok: true; bookingId: string; cancelToken: string } | { ok: false; code: string }> {

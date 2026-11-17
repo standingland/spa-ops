@@ -1,15 +1,19 @@
 import { bangkokDay, formatTime } from '@/lib/time';
 
-export type TemplateKey = 'booking_confirmed' | 'booking_changed' | 'booking_cancelled';
+export type TemplateKey = 'booking_confirmed' | 'booking_changed' | 'booking_cancelled' | 'booking_reminder' | 'waitlist_offer';
 
 // Discreet by design: no service, therapist, room or business-type wording.
 const TEXT: Record<'th' | 'en', Record<TemplateKey, string>> = {
   th: {
+    booking_reminder: '{sender}: เตือนนัดหมายของคุณ วันที่ {date} เวลา {time} น.',
+    waitlist_offer: '{sender}: มีคิวว่างสำหรับคุณ วันที่ {date} เวลา {time} น. กรุณาเข้าสู่ระบบเพื่อดูและรับข้อเสนอก่อนหมดเวลา',
     booking_confirmed: '{sender}: ยืนยันนัดหมายของคุณ วันที่ {date} เวลา {time} น.',
     booking_changed: '{sender}: นัดหมายของคุณเปลี่ยนเป็นวันที่ {date} เวลา {time} น.',
     booking_cancelled: '{sender}: นัดหมายวันที่ {date} เวลา {time} น. ถูกยกเลิกแล้ว',
   },
   en: {
+    booking_reminder: '{sender}: A reminder of your appointment on {date} at {time}.',
+    waitlist_offer: '{sender}: A time is available for you on {date} at {time}. Sign in to review and accept before the offer expires.',
     booking_confirmed: '{sender}: Your appointment is confirmed for {date} at {time}.',
     booking_changed: '{sender}: Your appointment has been changed to {date} at {time}.',
     booking_cancelled: '{sender}: Your appointment on {date} at {time} has been cancelled.',

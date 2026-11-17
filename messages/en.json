@@ -93,7 +93,15 @@
     "OVERPAYMENT": "The amount is more than what is due",
     "REFUND_EXCEEDS_PAYMENT": "The refund is more than what was paid",
     "CARD_DATA_REFUSED": "Card numbers must not be recorded. Remove the card number and try again",
-    "REASON_REQUIRED": "Please give a reason"
+    "REASON_REQUIRED": "Please give a reason",
+    "SLOT_HELD": "This time is temporarily held for another guest. Please choose another time.",
+    "OFFER_EXPIRED": "This offer has expired. Please choose another time or join the waitlist again.",
+    "WAITLIST_LIMIT": "You can have at most 5 active waitlist requests.",
+    "NOTHING_TO_SETTLE": "There are no commission changes to approve.",
+    "OUT_OF_WINDOW": "Choose a date and time within the booking window.",
+    "ONLINE_CLOSED": "Online booking or waitlist is currently closed.",
+    "TOO_MANY_BOOKINGS": "You have reached the upcoming online appointment limit.",
+    "SLOT_TAKEN": "This time was just booked. Please choose another time."
   },
   "rooms": {
     "title": "Rooms and beds",
@@ -428,7 +436,9 @@
     "templates": {
       "booking_confirmed": "Booking confirmed",
       "booking_changed": "Booking changed",
-      "booking_cancelled": "Booking cancelled"
+      "booking_cancelled": "Booking cancelled",
+      "booking_reminder": "Appointment reminder",
+      "waitlist_offer": "Waitlist offer"
     }
   },
   "settings": {
@@ -440,7 +450,8 @@
       "payments": "Payments",
       "reports": "Reports",
       "retention": "Data retention",
-      "online": "Online booking"
+      "online": "Online booking",
+      "care": "Guest care and waitlist"
     },
     "units": {
       "minutes": "minutes",
@@ -467,7 +478,12 @@
       "online_max_upcoming": "Upcoming online bookings allowed per guest",
       "online_min_lead_min": "Earliest online booking, from now",
       "online_max_ahead_days": "Furthest online booking ahead",
-      "online_cancel_cutoff_min": "Guests can cancel online up to this long before the start"
+      "online_cancel_cutoff_min": "Guests can cancel online up to this long before the start",
+      "care_reminders_enabled": "Enable LINE appointment reminders",
+      "care_reminder_first_min": "First reminder before appointment",
+      "care_reminder_second_min": "Second reminder before appointment",
+      "care_waitlist_enabled": "Enable the waitlist",
+      "care_offer_lifetime_min": "Time to accept a waitlist offer"
     },
     "pruneHelp": "When automatic deletion is on, every day the system deletes audit-log entries older than the months set here, and customer messages sent more than 90 days ago. It never touches bookings, payments or customer records. Deletion cannot be undone. It is off by default."
   },
@@ -843,5 +859,71 @@
     "costByServiceHelp": "Actual material deductions in this period, averaged only over treatments with material usage. Excludes labor, rent and other expenses.",
     "materialCostTotal": "Total material cost",
     "averageMaterialCost": "Average material cost per treatment"
+  },
+  "care": {
+    "preferences": "Treatment preferences",
+    "preferencesHelp": "Record service preferences only. Desk staff can edit; the assigned therapist can read them for their booking.",
+    "pressure": "Pressure",
+    "pressures": {
+      "light": "Light",
+      "medium": "Medium",
+      "firm": "Firm"
+    },
+    "oil": "Preferred oil",
+    "room": "Room preferences",
+    "preferenceNotes": "Other preferences",
+    "saved": "Saved",
+    "myAppointments": "My appointments",
+    "timezone": "All dates and times are in Thailand time (Bangkok).",
+    "upcoming": "Upcoming appointments",
+    "noUpcoming": "You have no upcoming appointments.",
+    "history": "Past appointments",
+    "noHistory": "No past appointments yet.",
+    "historyPages": "Appointment history pages",
+    "previous": "Previous",
+    "next": "Next",
+    "manage": "View / cancel appointment",
+    "bookAgain": "Book again",
+    "signIn": "Continue with LINE",
+    "signInHelp": "Sign in with the LINE account you used to book to view your appointments and waitlist.",
+    "loginFailed": "Sign-in could not be completed. Please try again.",
+    "lineUnavailable": "LINE sign-in is not available yet. Please contact the spa to manage your appointment.",
+    "loadFailed": "Could not load this information. Please try again.",
+    "waitlist": "Waitlist",
+    "joinHelp": "Choose acceptable start times for this date. We offer available times in order. If offered, your room and therapist are held until the displayed deadline; confirm before it expires.",
+    "windowFrom": "Earliest start (Bangkok)",
+    "windowTo": "Latest start (Bangkok)",
+    "join": "Join the waitlist",
+    "joined": "Your request is on the waitlist. We will notify you via LINE if a time is offered.",
+    "waitlistStatus": {
+      "waiting": "Waiting for an available time",
+      "offered": "A time has been offered",
+      "accepted": "Accepted",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    },
+    "noWaitlist": "No active waitlist requests.",
+    "offerTime": "Offered start",
+    "expires": "Accept before",
+    "accept": "Accept and confirm booking",
+    "leaveWaitlist": "Cancel waitlist request",
+    "backCustomers": "Back to customers",
+    "staffWaitlistHelp": "Up to 200 active requests, oldest first. The scheduled dispatcher checks availability and offers times automatically. Offers may expire before the next screen refresh.",
+    "settlement": "Commission settlement",
+    "settlementHelp": "Approval freezes the difference from earlier approved commissions. Later refunds or discounts appear as a new positive or negative adjustment. Recording a payout acknowledges a payment or adjustment made outside this system; it does not transfer money.",
+    "pendingApproval": "Amount awaiting approval",
+    "settlementCount": "{count} commission entries to settle",
+    "approve": "Review and close period",
+    "approveWarning": "Approve these amounts for this period? Approved records cannot be edited. Later changes will be recorded as separate adjustments.",
+    "confirmApproval": "Approve and close",
+    "approvedBatches": "Approved settlements (latest 50 overlapping this period)",
+    "noBatches": "No approved settlements in this period.",
+    "approvedAt": "Approved",
+    "paid": "Payment / adjustment recorded",
+    "payoutReference": "Payment or adjustment reference",
+    "recordPaid": "Record payment made",
+    "recordAdjustment": "Record adjustment applied",
+    "payoutDate": "Payment / adjustment date and time (Bangkok)",
+    "waitlistConsent": "I agree to receive appointment and waitlist messages via LINE."
   }
 }
