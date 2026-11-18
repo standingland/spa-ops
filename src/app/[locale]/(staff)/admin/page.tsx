@@ -3,11 +3,11 @@ import { Link } from '@/i18n/navigation';
 import { requireRole } from '@/modules/identity/session';
 import { visibleAdminTools } from '@/modules/identity/nav';
 import { Icon } from '@/components/shell/Icon';
-import type { IconName } from '@/modules/identity/nav';
+import type { AdminTool, IconName } from '@/modules/identity/nav';
 
-const toolIcons: Record<string, IconName> = {
+const toolIcons: Record<AdminTool['id'], IconName> = {
   adminRooms: 'rooms', services: 'bookings', notifications: 'bookings',
-  staff: 'guests', settings: 'settings',
+  staff: 'guests', settings: 'settings', guide: 'guide',
 };
 
 export default async function AdminHubPage() {

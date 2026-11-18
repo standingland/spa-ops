@@ -2,10 +2,10 @@
 import type { Role } from '@/modules/identity/session';
 
 export type NavId = 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings';
-export type IconName = NavId | 'menu' | 'close';
+export type IconName = NavId | 'menu' | 'close' | 'guide';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
-export type AdminTool = { id: 'adminRooms' | 'services' | 'notifications' | 'staff' | 'settings'; href: string; roles: Role[] };
+export type AdminTool = { id: 'adminRooms' | 'services' | 'notifications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
 
 const ALL: Role[] = ['owner', 'manager', 'receptionist', 'therapist'];
 const FRONT: Role[] = ['owner', 'manager', 'receptionist'];
@@ -42,6 +42,7 @@ const ADMIN_TOOLS: AdminTool[] = [
   { id: 'notifications', href: '/admin/notifications', roles: MANAGEMENT },
   { id: 'staff', href: '/admin/staff', roles: ['owner'] },
   { id: 'settings', href: '/admin/settings', roles: ['owner'] },
+  { id: 'guide', href: '/admin/guide', roles: MANAGEMENT },
 ];
 
 export function visibleNav(role: Role, opts: { managerReports: boolean }): NavGroup[] {
