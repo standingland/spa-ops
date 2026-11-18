@@ -11,6 +11,7 @@
     "language": "Language",
     "today": "Today",
     "adminRooms": "Manage rooms",
+    "guide": "System user guide",
     "notifications": "Customer messages",
     "settings": "Settings",
     "payments": "Payments",
@@ -721,7 +722,40 @@
       "services": "Treatments, prices and durations",
       "notifications": "Messages sent to guests",
       "staff": "Staff accounts and roles",
-      "settings": "Cancellation and no-show fees, payments, reports and data retention"
+      "settings": "Cancellation and no-show fees, payments, reports and data retention",
+      "guide": "How to set up the spa and handle bookings, payments and daily operations"
+    }
+  },
+  "adminGuide": {
+    "back": "Back to settings",
+    "intro": "Use these steps to set up the spa and manage each appointment from booking to checkout.",
+    "setup": {
+      "title": "Set up rooms, services and therapists",
+      "body": "Set up room categories and rooms first. Add each service with its price, duration and eligible room categories. In Therapists, set which services each therapist offers and add their shifts."
+    },
+    "booking": {
+      "title": "Create or move a booking",
+      "body": "In Schedule, choose the date and select New booking. Select the guest, service, therapist, time and an available room. To move an appointment, open the booking, choose Move, then confirm the new time."
+    },
+    "visit": {
+      "title": "Check in guests and turn over rooms",
+      "body": "Open the appointment in Today. Check in the guest when they arrive, start the treatment when it begins and mark it complete when it ends. In Rooms, mark the room ready after cleaning."
+    },
+    "guests": {
+      "title": "Manage guests and the waitlist",
+      "body": "Find the guest by name or phone number. Open their profile to see visit history and update treatment preferences. Open Waitlist from Guests to review requests or cancel a request."
+    },
+    "payments": {
+      "title": "Record and reconcile payments",
+      "body": "Open the appointment and record the amount and payment method after receiving payment. In Payments, select the date and compare the recorded totals by method with the amounts received."
+    },
+    "stock": {
+      "title": "Track inventory and settle commissions",
+      "body": "In Inventory, add materials, record receipts and set the quantity each service uses. In Commissions, set rates, review the closing preview for the period and approve it. Record each payout after sending it."
+    },
+    "owner": {
+      "title": "Manage access and spa policies",
+      "body": "In Staff, invite team members and assign their roles. In Policies, review booking limits, cancellation and no-show fees, and access to reports."
     }
   },
   "public": {

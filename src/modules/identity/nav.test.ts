@@ -52,10 +52,10 @@ describe('activeHref', () => {
 describe('visibleAdminTools', () => {
   it('excludes staff and settings for a manager', () => {
     const tools = visibleAdminTools('manager').map((t) => t.id);
-    expect(tools).toEqual(['adminRooms', 'services', 'notifications']);
+    expect(tools).toEqual(['adminRooms', 'services', 'notifications', 'guide']);
   });
   it('gives the owner everything', () => {
-    expect(visibleAdminTools('owner').map((t) => t.id)).toEqual(['adminRooms', 'services', 'notifications', 'staff', 'settings']);
+    expect(visibleAdminTools('owner').map((t) => t.id)).toEqual(['adminRooms', 'services', 'notifications', 'staff', 'settings', 'guide']);
   });
   it('gives others nothing', () => {
     expect(visibleAdminTools('therapist')).toEqual([]);

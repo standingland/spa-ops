@@ -181,44 +181,33 @@ h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
   .staff-main .today-section { padding: 1rem; }
 }
 
-/* Admin workspace: light surfaces and teal accents inspired by the reference. */
+/* Admin workspace uses the staff palette and a slightly larger corner radius. */
 .staff-shell:has(.admin-workspace) {
-  --ivory: #f2f7f9;
-  --surface-muted: #f2f7f9;
-  --ink: #183542;
-  --ink-muted: #526b76;
-  --line: #dce8eb;
-  --line-strong: #829ba3;
-  --primary: #007d83;
-  --primary-foreground: #ffffff;
-  --focus: #005a60;
-  --tint-available: #e2f3f3;
   --radius: 0.875rem;
   color: var(--ink);
 }
 .staff-shell:has(.admin-workspace) .staff-sidebar { box-shadow: none; }
-.staff-shell:has(.admin-workspace) .staff-sidebar [aria-current="page"] { border-left-color: transparent; color: #006d74; }
+.staff-shell:has(.admin-workspace) .staff-sidebar [aria-current="page"] { border-left-color: transparent; color: var(--primary); }
 .admin-workspace h1, .admin-workspace h2, .admin-workspace .font-serif { font-family: var(--font-plex), system-ui, sans-serif; }
 .admin-hub { max-width: 1200px; margin: 0 auto; }
 .admin-intro { margin: 0 0 1.5rem; }
 .admin-eyebrow { display: block; font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
-.admin-intro .admin-eyebrow { color: #607c87; }
+.admin-intro .admin-eyebrow { color: var(--ink-muted); }
 .admin-intro h1 { margin-top: .35rem; font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 700; line-height: 1.2; letter-spacing: -.025em; }
 .admin-intro p { margin-top: .5rem; color: var(--ink-muted); }
-.admin-hero { min-height: 210px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: clamp(1.5rem, 4vw, 3rem); overflow: hidden; border-radius: 1.25rem; color: white; background: linear-gradient(120deg, #104c58, #087c81 65%, #65aaa2); }
-.admin-hero .admin-eyebrow { color: #c5eeee; }
+.admin-hero { min-height: 210px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: clamp(1.5rem, 4vw, 3rem); overflow: hidden; border-radius: 1.25rem; color: var(--primary-foreground); background: linear-gradient(120deg, color-mix(in srgb, var(--primary), black 25%), var(--primary)); }
 .admin-hero h2 { margin-top: .8rem; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; }
-.admin-hero p { margin-top: .45rem; color: #e0f3f2; }
+.admin-hero p { margin-top: .45rem; }
 .admin-hero-mark { display: grid; width: 112px; height: 112px; flex: none; place-items: center; border: 1px solid #ffffff66; border-radius: 50%; background: #ffffff1c; }
 .admin-hero-mark svg { width: 46px; height: 46px; }
 .admin-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
-.admin-tool { display: flex; min-height: 124px; height: 100%; align-items: flex-start; gap: 1rem; padding: 1.3rem; border: 1px solid var(--line); border-radius: 1rem; background: white; box-shadow: 0 3px 12px #163c4b08; transition: border-color .15s, transform .15s, box-shadow .15s; }
-.admin-tool:hover { border-color: #89c4c3; transform: translateY(-2px); box-shadow: 0 8px 24px #163c4b12; }
-.admin-tool-icon { display: grid; width: 48px; height: 48px; flex: none; place-items: center; color: #007d83; border-radius: .85rem; background: #e3f3f3; }
+.admin-tool { display: flex; min-height: 124px; height: 100%; align-items: flex-start; gap: 1rem; padding: 1.3rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); box-shadow: 0 3px 12px rgba(31, 55, 43, .035); transition: border-color .15s, transform .15s, box-shadow .15s; }
+.admin-tool:hover { border-color: var(--sage); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(31, 55, 43, .07); }
+.admin-tool-icon { display: grid; width: 48px; height: 48px; flex: none; place-items: center; color: var(--primary); border-radius: .85rem; background: var(--tint-available); }
 .admin-tool-copy { min-width: 0; flex: 1; }
 .admin-tool-title { display: block; font-size: 1.05rem; font-weight: 700; }
 .admin-tool-description { display: block; margin-top: .35rem; color: var(--ink-muted); font-size: .9rem; line-height: 1.5; }
-.admin-tool-arrow { color: #007d83; font-size: 1.25rem; }
+.admin-tool-arrow { color: var(--primary); font-size: 1.25rem; }
 @media (max-width: 639px) {
   .admin-tools { grid-template-columns: 1fr; }
   .admin-hero { min-height: 180px; }
