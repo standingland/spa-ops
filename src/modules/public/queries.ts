@@ -27,10 +27,15 @@ export async function getTherapist(id: string): Promise<{ therapist: PublicThera
   if (!z.uuid().safeParse(id).success) return null;
   const therapist = (await listTherapists()).find((t) => t.id === id);
   if (!therapist) return null;
+  return { therapist, services: await getTherapistServices(id) };
+}
+
+/** Only the public, online-bookable treatments returned by the public RPC. */
+export async function getTherapistServices(id: string): Promise<PublicService[]> {
   const { data } = await publicDb().rpc('public_therapist_services', { p_therapist_id: id });
   const services = ((data ?? []) as { service_id: string; name_th: string; name_en: string | null; duration_min: number; price_satang: number }[])
     .map((s) => ({ id: s.service_id, nameTh: s.name_th, nameEn: s.name_en, durationMin: s.duration_min, priceSatang: s.price_satang }));
-  return { therapist, services };
+  return services;
 }
 
 const FreeTimesInput = z.object({ therapistId: z.uuid(), serviceId: z.uuid(), day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) });

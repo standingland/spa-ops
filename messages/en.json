@@ -742,6 +742,7 @@
     "date": "Day",
     "time": "Time",
     "loadingTimes": "Loading free times…",
+    "retryTimes": "Load times again",
     "noTimes": "No free times on this day. Please try another date.",
     "timezone": "Times are Bangkok time (UTC+7).",
     "yourBooking": "Your booking",
