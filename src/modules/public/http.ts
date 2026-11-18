@@ -16,7 +16,7 @@ export function safeReturnTo(p: string | null | undefined): string | null {
 }
 
 /** What the guest had chosen, carried through the LINE round trip. Only these keys, short values. */
-export const SELECTION_KEYS = ['serviceId', 'start', 'day'] as const;
+export const SELECTION_KEYS = ['therapistId', 'serviceId', 'start', 'day'] as const;
 export function pickSelection(params: URLSearchParams): Record<string, string> {
   const out: Record<string, string> = {};
   for (const k of SELECTION_KEYS) { const v = params.get(k); if (v && v.length <= 64) out[k] = v; }

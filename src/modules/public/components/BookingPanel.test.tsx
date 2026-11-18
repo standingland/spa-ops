@@ -40,6 +40,16 @@ it('a signed-in guest sees who they are booking as and a confirm button, disable
   expect(html).toMatch(/<button[^>]*disabled[^>]*data-testid="book-confirm"|<button[^>]*data-testid="book-confirm"[^>]*disabled/);
   expect(html).not.toContain('Continue with LINE');
 });
+it('single-page booking returns to /book with the therapist and all choices after LINE sign-in', () => {
+  const html = render({ singlePage: true, initial: { serviceId: S, day: '2030-01-16', start: '2030-01-16T05:00:00.000Z' } });
+  const href = /href="([^"]*\/api\/line\/login[^"]*)"/.exec(html)?.[1]?.replaceAll('&amp;', '&') ?? '';
+  const u = new URL(href, 'https://x.test');
+  expect(Object.fromEntries(u.searchParams)).toEqual({ returnTo: '/en/book', therapistId: T, serviceId: S, day: '2030-01-16', start: '2030-01-16T05:00:00.000Z' });
+});
+it('a restored time cannot be confirmed before its availability has been checked', () => {
+  const html = render({ guestName: 'Nok', initial: { serviceId: S, day: '2030-01-16', start: '2030-01-16T05:00:00.000Z' } });
+  expect(html).toMatch(/<button[^>]*disabled[^>]*data-testid="book-confirm"|<button[^>]*data-testid="book-confirm"[^>]*disabled/);
+});
 it('a failed sign-in shows its message; an unknown error code from the address bar is ignored', () => {
   expect(render({ error: 'login' })).toContain('could not sign you in with LINE');
   expect(render({ error: '<script>alert(1)</script>' })).not.toContain('script');

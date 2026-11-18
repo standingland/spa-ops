@@ -110,6 +110,22 @@ test('callback with a valid state signs the guest in and returns to the page wit
   expect(r.headers.getSetCookie().some((x) => x.startsWith(c.name + '=;') || x.startsWith(c.name + '=') && /Max-Age=0|Expires=Thu, 01 Jan 1970/i.test(x))).toBe(true);   // the state cookie is cleared
 });
 
+test('single-page LINE login restores the therapist, treatment, day and time on /book', async () => {
+  const { GET: login } = await import('./login/route');
+  const { GET: callback } = await import('./callback/route');
+  const selection = { therapistId: '11111111-1111-4111-8111-111111111111', serviceId: 's1', day: '2030-01-15', start: '2030-01-15T05:00:00Z' };
+  const l = await login(req(`${base}/api/line/login?${new URLSearchParams({ returnTo: '/en/book', ...selection })}`));
+  const c = stateCookie(l);
+  const { verifyState } = await import('@/modules/public/session');
+  vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify({ id_token: 'IDT' })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ sub: 'U1', name: 'Nok', nonce: verifyState(c.value)!.nonce })));
+  const r = await callback(req(`${base}/api/line/callback?code=C&state=${c.value}`, c.header));
+  const to = new URL(r.headers.get('location')!);
+  expect(to.pathname).toBe('/en/book');
+  expect(Object.fromEntries(to.searchParams)).toEqual(selection);
+  expect(cookieOf(r, 'guest_session')).not.toBe('');
+});
+
 test('callback when LINE rejects the code goes back with the page and choices, an error, and no session', async () => {
   const { GET: login } = await import('./login/route');
   const { GET } = await import('./callback/route');

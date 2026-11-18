@@ -30,6 +30,7 @@ test('a guest sees only public therapists, books through the stubbed LINE login,
   await page.goto('/en/book');
   await expect(page.getByTestId('therapist-card')).toHaveCount(1);
   await page.getByTestId('therapist-card').click();
+  await expect(page).toHaveURL(/\/en\/book$/);
   await expect(page.getByTestId('therapist-profile')).toContainText('Ten years of Thai massage');
 
   await page.getByTestId('service-option').first().check();
@@ -37,10 +38,12 @@ test('a guest sees only public therapists, books through the stubbed LINE login,
   await page.getByTestId('time-option').first().click();
   await page.getByTestId('book-line').click();                  // stub LINE sends the browser straight back, signed in
   await expect(page.getByTestId('booking-as')).toContainText('E2E Guest');
+  await expect(page).toHaveURL(/\/en\/book\?/);
   await expect(page.getByTestId('time-option').first()).toHaveAttribute('aria-pressed', 'true');   // the choices survived the round trip
   await page.getByTestId('book-confirm').click();
 
   await expect(page.getByTestId('booking-summary')).toBeVisible();
+  await expect(page).toHaveURL(/\/en\/book\?token=/);
   const { data: b } = await admin.from('bookings').select('source, status').eq('source', 'online');
   expect(b).toEqual([{ source: 'online', status: 'confirmed' }]);
 

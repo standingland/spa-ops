@@ -1,6 +1,6 @@
 # Public booking page
 
-Guests open `/th/book` (or `/en/book`), see the public therapists as a wall of photos, tap one to read their profile, and book a treatment with them. They sign in with LINE, the booking is **confirmed instantly**, and the confirmation appears on the confirmation page and is queued as a LINE Flex Message with a cancel button. The page is closed until you finish the steps below.
+Guests open `/th/book` (or `/en/book`), choose a therapist from the photo wall, then select their treatment, date and available time in the booking form on the same page. LINE sign-in returns to `/book` with the therapist and all selections preserved; availability is checked again before confirmation. The booking is **confirmed instantly**, and its summary appears at `/book?token=…` and is queued as a LINE Flex Message with a cancel button. Existing therapist-specific and `/book/done` links still work. The page is closed until you finish the steps below.
 
 Design and decisions: `docs/superpowers/specs/2026-11-13-public-booking-design.md`.
 

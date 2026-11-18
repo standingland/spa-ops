@@ -8,13 +8,13 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { uiErrorKey } from '@/lib/errors';
 import { joinWaitlist } from '../actions';
 
-export function WaitlistJoin({ therapistId, serviceId, day, signedIn }: { therapistId: string; serviceId: string; day: string; signedIn: boolean }) {
+export function WaitlistJoin({ therapistId, serviceId, day, signedIn, singlePage = false }: { therapistId: string; serviceId: string; day: string; signedIn: boolean; singlePage?: boolean }) {
   const t = useTranslations('care'); const te = useTranslations(); const locale = useLocale();
   const [busy, transition] = useTransition(); const [error, setError] = useState(''); const [saved, setSaved] = useState(false);
   const [from, setFrom] = useState('10:00'); const [to, setTo] = useState('20:00');
   const [consent, setConsent] = useState(false);
   const times = Array.from({ length: 48 }, (_, i) => `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
-  const login = `/api/line/login?${new URLSearchParams({ returnTo: `/${locale}/book/${therapistId}`, serviceId, day })}`;
+  const login = `/api/line/login?${new URLSearchParams({ returnTo: singlePage ? `/${locale}/book` : `/${locale}/book/${therapistId}`, ...(singlePage ? { therapistId } : {}), serviceId, day })}`;
   return <section className="flex flex-col gap-3 rounded-2xl border border-line p-4" aria-label={t('waitlist')}>
     <h3 className="font-serif text-heading">{t('waitlist')}</h3><p className="text-caption text-ink-muted">{t('joinHelp')}</p>
     {saved ? <p role="status">{t('joined')} <Link href="/book/mine" className="underline">{t('myAppointments')}</Link></p> : <>

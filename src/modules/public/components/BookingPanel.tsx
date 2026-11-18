@@ -20,20 +20,22 @@ const DAYS_SHOWN = 14;
 
 const heading = 'font-serif text-xl font-normal text-ink';
 
-export function BookingPanel({ therapistId, services, guestName, today, initial, error: initialError, waitlistEnabled = false }: {
+export function BookingPanel({ therapistId, services, guestName, today, initial, error: initialError, waitlistEnabled = false, singlePage = false, onBusyChange }: {
   therapistId: string; services: PublicService[]; guestName: string | null; today: string; initial: Selection; error: string | null; waitlistEnabled?: boolean;
+  singlePage?: boolean; onBusyChange?: (busy: boolean) => void;
 }) {
   const t = useTranslations('public');
   const locale = useLocale();
   const router = useRouter();
   const [serviceId, setServiceId] = useState(services.some((s) => s.id === initial.serviceId) ? initial.serviceId! : '');
   const [day, setDay] = useState(initial.day && initial.day >= today ? initial.day : today);
-  const [loaded, setLoaded] = useState<{ key: string; list: string[] } | null>(null);
+  const [loaded, setLoaded] = useState<{ key: string; list: string[]; failed?: boolean } | null>(null);
   const [start, setStart] = useState(initial.start ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(initialError && KNOWN.has(initialError) ? initialError : null);
   const [reload, setReload] = useState(0);
   const [signedOut, setSignedOut] = useState(false);
+  const submitting = useRef(false);
   const attempt = useRef<{ sel: string; key: string } | null>(null);
 
   // "loading" is derived: the list on hand belongs to a (service, day) key, and any other key means it is still loading
@@ -46,6 +48,8 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
       if (!live) return;
       setLoaded({ key: timesKey, list });
       setStart((s) => (s && !list.includes(s) ? '' : s));   // a choice that is no longer free is dropped, not submitted
+    }).catch(() => {
+      if (live) setLoaded({ key: timesKey, list: [], failed: true });
     });
     return () => { live = false; };
   }, [therapistId, serviceId, day, timesKey]);
@@ -57,25 +61,39 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
 
   const name = (s: PublicService) => (locale === 'en' && s.nameEn ? s.nameEn : s.nameTh);
   const chosen = services.find((s) => s.id === serviceId);
-  const ready = Boolean(serviceId && start);
-  const returnTo = `/${locale}/book/${therapistId}`;
-  const loginHref = `/api/line/login?${new URLSearchParams({ returnTo, ...(serviceId ? { serviceId } : {}), ...(day ? { day } : {}), ...(start ? { start } : {}) })}`;
+  const ready = Boolean(serviceId && start && times?.includes(start));
+  const returnTo = singlePage ? `/${locale}/book` : `/${locale}/book/${therapistId}`;
+  const loginHref = `/api/line/login?${new URLSearchParams({ returnTo, ...(singlePage ? { therapistId } : {}), ...(serviceId ? { serviceId } : {}), ...(day ? { day } : {}), ...(start ? { start } : {}) })}`;
   const errText = (code: string) => (t.has(`errors.${code}`) ? t(`errors.${code}`) : t('errors.UNKNOWN'));
 
   async function confirm() {
-    if (!ready || busy) return;
+    if (!ready || submitting.current) return;
     const sel = `${serviceId}|${start}`;
     // the same choice keeps one idempotency key, so a double tap or a retry can never book twice
     if (attempt.current?.sel !== sel) attempt.current = { sel, key: crypto.randomUUID() };
-    setBusy(true); setError(null);
-    const r = await bookOnline({ therapistId, serviceId, start, idempotencyKey: attempt.current.key });
-    setBusy(false);
-    if (r.ok) { router.push(`/book/done?token=${encodeURIComponent(r.cancelToken)}`); return; }
-    setError(r.code);
-    const next = afterBookError(r.code);
-    if (next.clearStart) setStart('');
-    if (next.reload) setReload((n) => n + 1);
-    if (next.signedOut) setSignedOut(true);
+    submitting.current = true;
+    setBusy(true); onBusyChange?.(true); setError(null);
+    let booked = false;
+    try {
+      const r = await bookOnline({ therapistId, serviceId, start, idempotencyKey: attempt.current.key });
+      if (r.ok) {
+        router.push(`${singlePage ? '/book' : '/book/done'}?token=${encodeURIComponent(r.cancelToken)}`);
+        booked = true;
+        return;
+      }
+      setError(r.code);
+      const next = afterBookError(r.code);
+      if (next.clearStart) setStart('');
+      if (next.reload) setReload((n) => n + 1);
+      if (next.signedOut) setSignedOut(true);
+    } catch {
+      setError('UNKNOWN');
+    } finally {
+      if (!booked) {
+        submitting.current = false;
+        setBusy(false); onBusyChange?.(false);
+      }
+    }
   }
 
   if (services.length === 0) return <Alert>{t('noServices')}</Alert>;
@@ -86,7 +104,7 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
     <div className="flex min-w-0 flex-col gap-9" data-testid="booking-panel">
       {error && <Alert tone="error" data-testid="book-error">{KNOWN.has(error) ? t(`errors.${error}`) : errText(error)}</Alert>}
 
-      <fieldset className="flex flex-col">
+      <fieldset className="flex flex-col" disabled={busy}>
         <legend className={`${heading} mb-2`}>{t('services')}</legend>
         {services.map((s) => (
           <label key={s.id} className="flex min-h-16 cursor-pointer items-center gap-4 border-b border-line py-3">
@@ -106,7 +124,7 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
         <h2 id="day-heading" className={heading}>{t('date')}</h2>
         <div className="-mx-5 flex snap-x scroll-px-5 gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]" role="group" aria-labelledby="day-heading">
           {strip.map((d) => (
-            <button key={d} type="button" data-testid="day-option" aria-pressed={day === d} onClick={() => { setDay(d); setStart(''); }}
+            <button key={d} type="button" disabled={busy} data-testid="day-option" aria-pressed={day === d} onClick={() => { setDay(d); setStart(''); }}
               className={`flex min-h-[4.25rem] w-14 shrink-0 snap-start flex-col items-center justify-center rounded-2xl border text-center ${day === d ? 'border-primary bg-primary text-primary-foreground' : 'border-line-strong text-ink'}`}>
               <span className="text-caption">{label(d, { weekday: 'short' })}</span>
               <span className="tnum font-serif text-xl leading-6">{Number(d.slice(8))}</span>
@@ -115,9 +133,9 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
         </div>
         <label className="flex items-center gap-3 text-caption text-ink-muted">
           {t('anotherDate')}
-          <input type="date" min={today} value={day} data-testid="book-day"
+          <input type="date" disabled={busy} min={today} value={day} data-testid="book-day"
             onChange={(e) => { setDay(e.target.value || today); setStart(''); }}
-            className="min-h-11 rounded-[var(--radius)] border border-line-strong bg-transparent px-3 text-body text-ink [color-scheme:dark]" />
+            className="min-h-11 min-w-0 rounded-[var(--radius)] border border-line-strong bg-transparent px-3 text-body text-ink [color-scheme:light]" />
         </label>
       </section>
 
@@ -125,10 +143,13 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
         <section className="flex flex-col gap-3" aria-live="polite">
           <h2 className={heading}>{t('time')}</h2>
           {times === null && <p className="text-caption text-ink-muted">{t('loadingTimes')}</p>}
-          {times?.length === 0 && <p className="text-body text-ink-muted" data-testid="no-times">{t('noTimes')}</p>}
+          {loaded?.key === timesKey && loaded.failed ? <Alert tone="error">
+            <p>{t('errors.UNKNOWN')}</p>
+            <button type="button" className="mt-2 min-h-11 underline" onClick={() => setReload((n) => n + 1)}>{t('retryTimes')}</button>
+          </Alert> : times?.length === 0 && <p className="text-body text-ink-muted" data-testid="no-times">{t('noTimes')}</p>}
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
             {times?.map((iso) => (
-              <button key={iso} type="button" data-testid="time-option" aria-pressed={start === iso} onClick={() => setStart(iso)}
+              <button key={iso} type="button" disabled={busy} data-testid="time-option" aria-pressed={start === iso} onClick={() => setStart(iso)}
                 className={`tnum min-h-11 rounded-full border text-body ${start === iso ? 'border-primary bg-primary text-primary-foreground' : 'border-line-strong text-ink'}`}>
                 {formatTime(iso)}
               </button>
@@ -138,7 +159,7 @@ export function BookingPanel({ therapistId, services, guestName, today, initial,
         </section>
       )}
 
-      {waitlistEnabled && serviceId && <WaitlistJoin key={`${serviceId}|${day}`} therapistId={therapistId} serviceId={serviceId} day={day} signedIn={signedIn} />}
+      {waitlistEnabled && serviceId && <WaitlistJoin key={`${serviceId}|${day}`} therapistId={therapistId} serviceId={serviceId} day={day} signedIn={signedIn} singlePage={singlePage} />}
 
       <div className="flex flex-col gap-3">
         {signedIn
