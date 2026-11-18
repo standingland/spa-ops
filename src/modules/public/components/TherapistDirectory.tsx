@@ -39,7 +39,7 @@ export function TherapistDirectory({ therapists, locale, today, guestName, initi
           <h1 id="directory-title">{t.heroTitle}</h1>
           <p className={styles.heroBody}>{t.heroBody}</p>
           <a className={styles.primary} href="#therapists">{t.find}<span aria-hidden="true">↗</span></a>
-          <p className={styles.heroNote}><span aria-hidden="true">✳</span>{t.heroNote}</p>
+          <p className={styles.heroNote}>{t.heroNote}</p>
         </div>
         <figure className={styles.heroImage}>
           <Image src="/images/banyan/banyan-suite.webp" alt={t.concept} fill priority sizes="(max-width: 680px) 100vw, 55vw" />
@@ -50,7 +50,6 @@ export function TherapistDirectory({ therapists, locale, today, guestName, initi
       <section id="therapists" className={styles.team} aria-labelledby="team-heading">
         <div className={styles.teamIntro}>
           <div><h2 id="team-heading">{t.teamTitle}</h2><p>{t.teamBody}</p></div>
-          <span className={styles.introMark} aria-hidden="true">✳</span>
         </div>
         <div className={styles.bookingLayout}>
           <aside className={styles.filters} aria-labelledby="filter-heading">
@@ -59,7 +58,7 @@ export function TherapistDirectory({ therapists, locale, today, guestName, initi
               <label htmlFor="therapist-search">{t.search}</label>
               <input id="therapist-search" type="search" placeholder={t.searchPlaceholder} value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <div className={styles.help}><span aria-hidden="true">✳</span><h3>{t.helpTitle}</h3><p>{t.helpBody}</p><span className={styles.lineNote}>{t.line}</span></div>
+            <div className={styles.help}><h3>{t.helpTitle}</h3><p>{t.helpBody}</p><span className={styles.lineNote}>{t.line}</span></div>
           </aside>
           <div className={styles.results}>
             <div className={styles.resultsTop}><h3>{t.results}</h3><span role="status" aria-live="polite">{t.count(visible.length)}</span></div>
@@ -81,7 +80,7 @@ export function TherapistDirectory({ therapists, locale, today, guestName, initi
                         {!th.hasPhoto && <span className={styles.photoNote}>{t.portrait}</span>}
                         <span className={styles.cardArrow} aria-hidden="true">↗</span>
                       </div>
-                      <div className={styles.cardName}><h4>{th.name}</h4><span aria-hidden="true">✳</span></div>
+                      <div className={styles.cardName}><h4>{th.name}</h4></div>
                       {bio && <p className={styles.bio}>{bio}</p>}
                       <div className={styles.cardBottom}><span>{th.specialties.join(', ') || t.profile}</span><strong>{therapistId === th.id ? t.selected : t.view}</strong></div>
                     </button>
@@ -106,7 +105,7 @@ export function TherapistDirectory({ therapists, locale, today, guestName, initi
         </div>
       </section>
 
-      <section className={styles.banner} aria-labelledby="rest-heading"><div><h2 id="rest-heading">{t.bannerTitle}</h2><p>{t.bannerBody}</p><Link href="/#experience" className={styles.secondary}>{t.bannerLink}<span aria-hidden="true">↗</span></Link></div><span aria-hidden="true" className={styles.bannerMark}>✳</span></section>
+      <section className={styles.banner} aria-labelledby="rest-heading"><div><h2 id="rest-heading">{t.bannerTitle}</h2><p>{t.bannerBody}</p><Link href="/#experience" className={styles.secondary}>{t.bannerLink}<span aria-hidden="true">↗</span></Link></div></section>
     </div>
   );
 }
