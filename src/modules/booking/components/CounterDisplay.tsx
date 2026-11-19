@@ -10,6 +10,11 @@ import { counterSlot, counterVisible } from '../counter';
 import type { BoardRow } from '../actions';
 import type { RoomOpt, TherapistOpt } from './types';
 
+type Mode = 'light' | 'dark' | 'oled';
+const MODE_KEY = 'counter-mode';
+// Small drifts, one per minute, so no static edge stays lit on the same pixels (OLED burn-in).
+const DRIFT: ReadonlyArray<readonly [number, number]> = [[0, 0], [5, 3], [-4, 5], [3, -4], [-5, -3], [4, 1], [-2, -5]];
+
 const TABLES = ['bookings', 'rooms', 'room_positions', 'therapists', 'room_blocks', 'therapist_shifts', 'therapist_time_off'] as const;
 
 export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand: string; day: string; rows: BoardRow[]; rooms: RoomOpt[]; therapists: TherapistOpt[] }) {
@@ -24,6 +29,8 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
   const [full, setFull] = useState(false);
   const [notice, setNotice] = useState('');
   const [awake, setAwake] = useState(false);
+  const [mode, setMode] = useState<Mode>('light');
+  const [drift, setDrift] = useState(0);
   const wake = useRef<WakeLockSentinel | null>(null);
   const keepAwake = useRef(false);
   const root = useRef<HTMLElement>(null);
@@ -42,6 +49,15 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
     document.addEventListener('visibilitychange', restore);
     return () => { keepAwake.current = false; document.removeEventListener('visibilitychange', restore); void wake.current?.release(); };
   }, []);
+  useEffect(() => {
+    try { const saved = localStorage.getItem(MODE_KEY); if (saved === 'dark' || saved === 'oled') setTimeout(() => setMode(saved), 0); } catch { /* storage unavailable: stay light */ }
+  }, []);
+  useEffect(() => {
+    if (mode !== 'oled') return;
+    const timer = setInterval(() => setDrift(d => (d + 1) % DRIFT.length), 60000);
+    return () => { clearInterval(timer); setDrift(0); };
+  }, [mode]);
+  function pickMode(next: Mode) { setMode(next); try { localStorage.setItem(MODE_KEY, next); } catch { /* ignore */ } }
   useEffect(() => {
     const tick = () => { const date = new Date(); setNow(date); if (bangkokDay(date) !== day) router.refresh(); };
     const initial = setTimeout(tick, 0);
@@ -78,15 +94,17 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
     try { if (document.fullscreenElement) await document.exitFullscreen(); else if (root.current?.requestFullscreen) await root.current.requestFullscreen(); else setNotice(th ? 'อุปกรณ์นี้ไม่รองรับเต็มจอ ใช้เพิ่มไปยังหน้าจอโฮมได้' : 'Fullscreen unavailable. Add this page to your home screen.'); }
     catch { setNotice(th ? 'เปิดเต็มจอไม่ได้บนอุปกรณ์นี้' : 'Fullscreen unavailable on this device.'); }
   }
-  return <main ref={root} className="min-h-dvh bg-surface-muted p-4 text-ink sm:p-6" data-testid="counter-display">
+  return <main ref={root} className={`min-h-dvh bg-surface-muted text-ink ${mode === 'dark' ? 'counter-dark' : mode === 'oled' ? 'counter-oled' : ''}`} data-testid="counter-display" data-mode={mode}>
+    <div className="counter-shift p-4 sm:p-6" style={mode === 'oled' ? { '--shift-x': `${DRIFT[drift][0]}px`, '--shift-y': `${DRIFT[drift][1]}px` } as React.CSSProperties : undefined}>
     <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
       <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">{brand} · {th ? 'เคาน์เตอร์' : 'RECEPTION'}</p><h1 className="mt-1 text-2xl sm:text-3xl">{th ? 'ตารางวันนี้' : 'Today’s schedule'}</h1><p className="mt-1 text-sm text-ink-muted">{new Intl.DateTimeFormat(th ? 'th-TH' : 'en-GB', { dateStyle: 'full', timeZone: 'Asia/Bangkok' }).format(new Date(`${day}T12:00:00+07:00`))}</p></div>
-      <div className="text-right"><p className="tnum text-4xl font-semibold tracking-tight">{now ? formatTime(now.toISOString()) : '—:—'}</p><p className="text-sm text-ink-muted">{th ? 'เวลาประเทศไทย' : 'Bangkok time'}</p><p role="status" className={`mt-1 text-sm ${live === 'offline' ? 'text-danger' : 'text-primary'}`}>{live === 'live' ? (th ? '● เชื่อมต่อแล้ว' : '● Connected') : live === 'offline' ? (th ? 'ออฟไลน์ — ข้อมูลอาจไม่ล่าสุด' : 'Offline — data may be stale') : (th ? 'กำลังเชื่อมต่อ…' : 'Connecting…')}</p></div>
+      <div className="text-right"><p className="tnum text-7xl font-semibold leading-none tracking-tight sm:text-8xl lg:text-9xl" data-testid="counter-clock">{now ? formatTime(now.toISOString()) : '—:—'}</p><p className="text-sm text-ink-muted">{th ? 'เวลาประเทศไทย' : 'Bangkok time'}</p><p role="status" className={`mt-1 text-sm ${live === 'offline' ? 'text-danger' : 'text-primary'}`}>{live === 'live' ? (th ? '● เชื่อมต่อแล้ว' : '● Connected') : live === 'offline' ? (th ? 'ออฟไลน์ — ข้อมูลอาจไม่ล่าสุด' : 'Offline — data may be stale') : (th ? 'กำลังเชื่อมต่อ…' : 'Connecting…')}</p></div>
     </header>
     <div className="mb-4 flex flex-wrap items-center gap-2">
       <button className={button} aria-pressed={by === 'rooms'} onClick={() => setBy('rooms')}>{t('viewRooms')}</button><button className={button} aria-pressed={by === 'therapists'} onClick={() => setBy('therapists')}>{t('viewTherapists')}</button>
       <label className={`${button} inline-flex items-center gap-2`}><input type="checkbox" checked={names} onChange={e => setNames(e.target.checked)} className="size-5" />{th ? 'แสดงชื่อแขก' : 'Show guest names'}</label>
-      <button className={button} onClick={() => router.refresh()}>{th ? 'รีเฟรช' : 'Refresh'}</button><button className={button} onClick={fullscreen}>{full ? (th ? 'ออกจากเต็มจอ' : 'Exit fullscreen') : (th ? 'เต็มจอ' : 'Fullscreen')}</button>
+      <button className={button} onClick={() => router.refresh()}>{th ? 'รีเฟรช' : 'Refresh'}</button><div role="group" aria-label={th ? 'โหมดหน้าจอ' : 'Screen mode'} className="inline-flex overflow-hidden rounded-xl border border-line">{([['light', th ? 'สว่าง' : 'Light'], ['dark', th ? 'มืด' : 'Dark'], ['oled', 'OLED']] as const).map(([m, label]) => <button key={m} type="button" data-testid={`counter-mode-${m}`} aria-pressed={mode === m} onClick={() => pickMode(m)} className={`min-h-12 px-4 text-sm font-medium ${mode === m ? 'bg-primary text-primary-foreground' : 'bg-surface text-ink active:bg-surface-muted'}`}>{label}</button>)}</div>
+<button className={button} onClick={fullscreen}>{full ? (th ? 'ออกจากเต็มจอ' : 'Exit fullscreen') : (th ? 'เต็มจอ' : 'Fullscreen')}</button>
       <button className={button} aria-pressed={awake} onClick={toggleAwake}>{awake ? (th ? 'เปิดจอค้างอยู่' : 'Screen stays on') : (th ? 'เปิดจอค้าง' : 'Keep screen on')}</button>
       <Link href="/calendar?view=timeline" className={`${button} inline-flex items-center`}>{th ? 'จัดการการจอง ↗' : 'Manage bookings ↗'}</Link>
       <p className="ml-auto text-sm text-ink-muted">{active.length} {th ? 'รายการ' : 'bookings'} · {current} {th ? 'กำลังให้บริการ' : 'in treatment'}</p>
@@ -109,5 +127,6 @@ export function CounterDisplay({ brand, day, rows, rooms, therapists }: { brand:
       </div>
     </section>
     <footer className="mt-4 flex flex-wrap gap-4 text-xs text-ink-muted">{(['confirmed', 'checked_in', 'in_treatment', 'completed'] as const).map(s => <span key={s} className={bookingStatusStyle(s).chip}>{t(`status.${s}`)}</span>)}<span className="ml-auto self-center">{th ? 'อัปเดตอัตโนมัติ · เปลี่ยนวันตามเวลาประเทศไทย' : 'Updates automatically · follows the Bangkok date'}</span></footer>
+    </div>
   </main>;
 }

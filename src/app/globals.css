@@ -236,3 +236,25 @@ h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
   .admin-hero-mark svg { width: 30px; height: 30px; }
 }
 @media (prefers-reduced-motion: reduce) { .admin-tool { transition: none; } }
+
+/*
+ * Counter screen modes. "dark" reuses the night palette; "oled" is true black (unlit pixels) with softened ink so
+ * large static shapes burn in less. Booking tints are re-declared because the light ones assume dark text.
+ */
+.counter-dark, .counter-oled {
+  --stone-dark: #A7B4AC; --sage: #8FA394; --brass: #D4A24E; --clay: #E0917A;
+  --surface: #1A2A25; --surface-muted: #101A17; --ink: #ECE4D3; --ink-muted: #A7B4AC;
+  --line: #2F403A; --line-strong: #6F8279; --primary: #D4A24E; --primary-foreground: #101A17;
+  --danger: #F0A08A; --focus: #ECE4D3;
+  --tint-requested: #2E2B22; --tint-confirmed: #3A3320; --tint-checked-in: #213528;
+  --tint-in-treatment: #2B3340; --tint-completed: #262A27; --tint-cancelled: #222422; --tint-no-show: #3B2822;
+  background: var(--surface-muted); color-scheme: dark;
+}
+.counter-oled {
+  --surface: #000; --surface-muted: #000; --ink: #D9D3C5; --ink-muted: #8A928C;
+  --line: #1D211F; --line-strong: #4B544F; --primary: #C9964A; --danger: #E8957F;
+  --tint-requested: #17160F; --tint-confirmed: #201B0E; --tint-checked-in: #0F1C14;
+  --tint-in-treatment: #121A26; --tint-completed: #121513; --tint-cancelled: #0E100F; --tint-no-show: #22130F;
+}
+.counter-shift { transition: transform 2.5s ease-in-out; transform: translate(var(--shift-x, 0), var(--shift-y, 0)); }
+@media (prefers-reduced-motion: reduce) { .counter-shift { transition: none; } }
