@@ -22,8 +22,8 @@ export function NavList({ groups }: { groups: Group[] }) {
               data-testid={`nav-${i.id}`}
               aria-current={current ? 'page' : undefined}
               className={cn(
-                'flex min-h-11 items-center gap-3 rounded-xl border-l-4 px-3 text-body text-ink transition-colors',
-                current ? 'border-primary bg-tint-available font-semibold' : 'border-transparent hover:bg-surface-muted',
+                'flex min-h-11 items-center gap-3 rounded-md px-3 text-body text-ink transition-colors',
+                current ? 'bg-tint-available font-semibold' : 'hover:bg-surface-muted',
               )}
             >
               <Icon name={i.icon} className="shrink-0" />

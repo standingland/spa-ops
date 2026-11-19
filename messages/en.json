@@ -3,6 +3,8 @@
     "name": "Spa Ops"
   },
   "nav": {
+    "workspace": "Workspace",
+    "adminOverview": "Overview",
     "rooms": "Rooms",
     "services": "Services",
     "therapists": "Therapists",
@@ -716,6 +718,16 @@
     "changed": "Password changed"
   },
   "adminHub": {
+    "title": "Operations overview",
+    "bangkokTime": "Bangkok time",
+    "openCalendar": "Open calendar",
+    "roomsReady": "Rooms ready",
+    "operationsFailed": "Could not load the operations snapshot. Refresh to try again.",
+    "schedule": "Today’s appointments",
+    "noIssues": "Nothing needs attention right now.",
+    "noRooms": "No active rooms.",
+    "manageWaitlist": "Manage",
+    "activeWaitlist": "{count} awaiting a time or response",
     "subtitle": "Rooms, services, messages and house rules.",
     "desc": {
       "adminRooms": "Rooms, zones and categories",

@@ -12,6 +12,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
   earnings: (<><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a6 6 0 0112 0v2M17 8h4M19 6v4M17 15h4M17 19h4" /></>),
   inventory: (<><path d="M3 7l9-4 9 4v12l-9 3-9-3zM3 7l9 4 9-4M12 11v11M7 5l10 4" /></>),
   settings: (<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /></>),
+  waitlist: (<path d="M6 18 18 6M8 6h10v10" />),
   menu: (<path d="M4 7h16M4 12h16M4 17h16" />),
   guide: (<path d="M12 6.5c-2.5-2-5.5-2-9-1v13c3.5-1 6.5-1 9 1 2.5-2 5.5-2 9-1v-13c-3.5-1-6.5-1-9 1zm0 0v13" />),
   close: (<path d="M6 6l12 12M18 6L6 18" />),

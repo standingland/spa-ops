@@ -147,21 +147,49 @@ h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
   .draw-check { animation: none; stroke-dashoffset: 0; }
 }
 
-/* Staff workspace: quiet surfaces keep operational status and actions in focus. */
+/* Staff workspace surfaces follow the Operations Lab palette. */
 .staff-shell {
-  --ivory: #f1f4f1;
-  --surface-muted: #f1f4f1;
-  --line: #dce4de;
-  --radius: 0.75rem;
+  --ivory: #f5f3ee;
+  --surface: #fffefa;
+  --surface-muted: #eeeee6;
+  --line: #e1e2d9;
+  --ink: #293d34;
+  --ink-muted: #57655c;
+  --primary: #375d4d;
+  --focus: #375d4d;
+  --radius: .5rem;
   background: var(--ivory);
 }
-.staff-sidebar { box-shadow: 8px 0 32px rgba(31, 55, 43, 0.035); }
-.staff-sidebar [data-testid="live-status"] {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.35rem 0.65rem;
+
+.staff-sidebar { background: #eeeee6; }
+.staff-sidebar [data-testid="live-status"] { color: var(--ink-muted); font-size: .75rem; }
+.workspace-header, .workspace-location, .workspace-account {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.workspace-header {
+  justify-content: space-between;
+  min-height: 3.6rem;
+  padding: .45rem 1rem;
+  border-bottom: 1px solid var(--line);
   color: var(--ink-muted);
-  font-size: 0.75rem;
+  font-size: .8125rem;
+}
+.workspace-location { flex-wrap: wrap; }
+.workspace-location strong { color: var(--ink); }
+.workspace-account {
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  padding-inline: .65rem;
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.workspace-account:hover { background: var(--surface-muted); }
+@media (min-width: 64rem) {
+  .staff-brand { text-align: center; }
+  .staff-brand .font-serif { font-size: 1.65rem; letter-spacing: .13em; }
+  .workspace-header { min-height: 4.75rem; padding-inline: 2.5rem; }
 }
 .staff-main .page-header { padding-bottom: 0.35rem; }
 .staff-main .page-header h1 {
@@ -181,13 +209,6 @@ h1, h2, h3 { font-family: var(--font-noto-serif), serif; }
   .staff-main .today-section { padding: 1rem; }
 }
 
-/* Admin workspace uses the staff palette and a slightly larger corner radius. */
-.staff-shell:has(.admin-workspace) {
-  --radius: 0.875rem;
-  color: var(--ink);
-}
-.staff-shell:has(.admin-workspace) .staff-sidebar { box-shadow: none; }
-.staff-shell:has(.admin-workspace) .staff-sidebar [aria-current="page"] { border-left-color: transparent; color: var(--primary); }
 .admin-workspace h1, .admin-workspace h2, .admin-workspace .font-serif { font-family: var(--font-plex), system-ui, sans-serif; }
 .admin-hub { max-width: 1200px; margin: 0 auto; }
 .admin-intro { margin: 0 0 1.5rem; }

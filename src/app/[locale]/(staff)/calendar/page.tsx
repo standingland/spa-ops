@@ -10,7 +10,7 @@ import { MonthView } from '@/modules/booking/components/MonthView';
 import { WeekView } from '@/modules/booking/components/WeekView';
 import type { RoomOpt, ServiceOpt, TherapistOpt } from '@/modules/booking/components/types';
 
-export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ day?: string; view?: string; span?: string; by?: string }> }) {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ day?: string; view?: string; span?: string; by?: string; create?: string }> }) {
   const session = await requireRole();
   const sp = await searchParams;
   const today = bangkokDay(new Date());
@@ -49,5 +49,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const board = await getBoard(day);
   if (!board.ok) return failed;
   if (timeline) return <RoomTimeline day={day} by={sp.by === 'therapist' ? 'therapist' : 'room'} role={session.role} rows={board.rows} therapists={therapists} rooms={roomOpts} services={services} />;
-  return <BookingCalendar day={day} view={view} role={session.role} rows={board.rows} therapists={therapists} rooms={roomOpts} services={services} retiredRooms={retired.data ?? []} />;
+  const initiallyCreating = sp.create === '1' && session.role !== 'therapist';
+  return <BookingCalendar key={initiallyCreating ? 'create' : 'browse'} initiallyCreating={initiallyCreating} day={day} view={view} role={session.role} rows={board.rows} therapists={therapists} rooms={roomOpts} services={services} retiredRooms={retired.data ?? []} />;
 }

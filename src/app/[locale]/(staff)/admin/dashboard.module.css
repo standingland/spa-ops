@@ -1,0 +1,131 @@
+.dashboard {
+  --paper: #fffefa;
+  --banyan: #293d34;
+  --muted: #53645a;
+  --rule: #dbdfd6;
+  --sage: #e7eee5;
+  max-width: 86rem;
+  margin-inline: auto;
+  color: var(--banyan);
+}
+
+.intro, .actions, .panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.intro { padding-block: .5rem 1.5rem; }
+.dashboard .intro h1 {
+  font-family: var(--font-noto-serif), Georgia, serif;
+  font-size: clamp(1.9rem, 3.7vw, 3rem);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.intro p { margin-top: .45rem; color: var(--muted); }
+.primary, .secondary {
+  padding: .65rem .95rem;
+  border: 1px solid var(--rule);
+  border-radius: .5rem;
+  background: var(--paper);
+  font-size: .875rem;
+  font-weight: 600;
+}
+.primary { background: var(--banyan); color: white; border-color: var(--banyan); }
+.secondary:hover { background: var(--sage); }
+.primary:hover { background: #375d4d; }
+
+.metrics, .tools {
+  display: grid;
+  gap: .8rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.metrics { margin-bottom: 1.25rem; }
+.metric {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: .55rem;
+  height: 100%;
+  padding: .9rem 1rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: .65rem;
+  font-size: .875rem;
+}
+.metric:hover, .tool:hover { background: var(--sage); }
+.metric svg, .tool svg { width: 1.15rem; height: 1.15rem; color: #375d4d; }
+.metric strong {
+  grid-column: 1 / -1;
+  font: 500 2rem/1.1 var(--font-noto-serif), Georgia, serif;
+  font-variant-numeric: tabular-nums;
+}
+.metric small { font: 500 .875rem var(--font-plex), sans-serif; color: var(--muted); }
+
+.workspace {
+  display: grid;
+  align-items: start;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  gap: 1.2rem;
+}
+.side { display: grid; gap: 1rem; }
+.panel {
+  border: 1px solid var(--rule);
+  border-radius: .65rem;
+  background: var(--paper);
+  scroll-margin-top: 5rem;
+  min-width: 0;
+}
+.panelHead { padding: .9rem 1rem; border-bottom: 1px solid var(--rule); }
+.panelHead h2, .settings h2 { font-size: 1.05rem; font-weight: 600; }
+.panelHead a { font-size: .85rem; color: #375d4d; text-decoration: underline; text-underline-offset: .18em; }
+.timelineViews { display: flex; flex-wrap: wrap; gap: .25rem; padding: .45rem .7rem; border-bottom: 1px solid var(--rule); }
+.timelineViews a { padding: .35rem .6rem; border-radius: .3rem; font-size: .85rem; }
+.timelineViews a:hover, .timelineViews a[aria-current] { background: var(--sage); }
+.timelineViews a[aria-current] { font-weight: 600; }
+.empty, .notice { padding: 1rem; color: var(--muted); font-size: .875rem; }
+.notice { margin-bottom: 1rem; border: 1px solid var(--rule); border-radius: .5rem; background: var(--paper); }
+
+.issues li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .7rem;
+  align-items: center;
+  padding: .75rem 1rem;
+  font-size: .875rem;
+}
+.issues li + li { border-top: 1px solid var(--rule); }
+.issues span { color: var(--muted); font-size: .8rem; }
+.issues strong { color: #7e4c1e; }
+.rooms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; padding: .75rem; }
+.rooms li { background: #f2f5ef; border-radius: .45rem; padding: .6rem; display: grid; justify-items: start; gap: .3rem; overflow-wrap: anywhere; }
+
+.settings { margin-top: 1.6rem; }
+.settings h2 { margin-bottom: .7rem; }
+.tools { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tool {
+  display: flex;
+  gap: .7rem;
+  height: 100%;
+  padding: .85rem;
+  border: 1px solid var(--rule);
+  border-radius: .55rem;
+  background: var(--paper);
+}
+.tool svg { flex: 0 0 auto; margin-top: .15rem; }
+.tool small { display: block; margin-top: .2rem; color: var(--muted); }
+.dashboard a:focus-visible { outline: 2px solid #375d4d; outline-offset: 2px; }
+
+@media (max-width: 64rem) {
+  .workspace { grid-template-columns: minmax(0, 1fr); }
+  .side { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+@media (max-width: 42rem) {
+  .metrics, .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .side { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 25rem) {
+  .tools { grid-template-columns: minmax(0, 1fr); }
+}
