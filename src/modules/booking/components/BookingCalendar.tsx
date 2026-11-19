@@ -21,8 +21,9 @@ import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
 const PX_PER_MIN = 1;
 const LIVE_TABLES = ['bookings', 'room_blocks', 'therapist_shifts', 'therapist_time_off', 'payments'] as const;
 
-export function BookingCalendar({ day, view, role, rows, therapists, rooms, services, retiredRooms = [] }: {
+export function BookingCalendar({ day, view, role, rows, therapists, rooms, services, retiredRooms = [], initiallyCreating = false }: {
   /** Deactivated rooms: not offered or shown as columns, but their code still appears on past bookings. */
+  initiallyCreating?: boolean;
   retiredRooms?: { id: string; code: string }[];
   day: string; view: 'therapists' | 'rooms'; role: Role; rows: BoardRow[];
   therapists: TherapistOpt[]; rooms: RoomOpt[]; services: ServiceOpt[];
@@ -31,7 +32,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const c = useTranslations('common');
   const locale = useLocale();
   useLiveRefresh(LIVE_TABLES);
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(initiallyCreating && role !== 'therapist');
   const [selected, setSelected] = useState<string | null>(null);
   const isDesk = role !== 'therapist';
 

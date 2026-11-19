@@ -12,13 +12,12 @@ import { Avatar } from '@/components/ui/avatar';
 import { SpanSwitch } from './SpanSwitch';
 import type { Role, RoomOpt, ServiceOpt, TherapistOpt } from './types';
 
-const PX_PER_MIN = 1;
 const LANE_H = 48;
-const LABEL_W = 144;
 const LIVE_TABLES = ['bookings', 'room_blocks', 'therapist_shifts', 'therapist_time_off', 'payments'] as const;
 
 /** The whole day left to right, one row per room (a room with several positions gets one lane per position). Click a booking to open it. */
-export function RoomTimeline({ day, by = 'room', role, rows, therapists, rooms, services }: {
+export function RoomTimeline({ day, by = 'room', role, rows, therapists, rooms, services, embedded = false }: {
+  embedded?: boolean;
   day: string; by?: 'room' | 'therapist'; role: Role; rows: BoardRow[]; therapists: TherapistOpt[]; rooms: RoomOpt[]; services: ServiceOpt[];
 }) {
   const t = useTranslations('booking');
@@ -27,11 +26,13 @@ export function RoomTimeline({ day, by = 'room', role, rows, therapists, rooms, 
   useLiveRefresh(LIVE_TABLES);
   const [selected, setSelected] = useState<string | null>(null);
 
+  const pixelsPerMinute = embedded ? 0.58 : 1;
+  const labelWidth = embedded ? 96 : 144;
   const dayStartMs = new Date(`${day}T00:00:00+07:00`).getTime();
   const minOf = (iso: string) => Math.max(0, Math.min(1440, (new Date(iso).getTime() - dayStartMs) / 60000));
   const earliest = rows.length ? Math.min(...rows.map((r) => minOf(r.startsAt))) : 1440;
   const startHour = Math.min(8, Math.floor(earliest / 60));
-  const width = (24 - startHour) * 60 * PX_PER_MIN;
+  const width = (24 - startHour) * 60 * pixelsPerMinute;
   const hours = Array.from({ length: 24 - startHour }, (_, i) => startHour + i);
 
   const svcName = (id: string) => { const s = services.find((x) => x.id === id); return s ? (locale === 'en' && s.name_en ? s.name_en : s.name_th) : ''; };
@@ -47,8 +48,8 @@ export function RoomTimeline({ day, by = 'room', role, rows, therapists, rooms, 
     });
 
   return (
-    <div className={`flex flex-col gap-3 ${open ? 'lg:pr-[29rem]' : ''}`}>
-      <div className="flex flex-wrap items-center gap-3">
+    <div className={`min-w-0 flex flex-col gap-3 ${open && !embedded ? 'lg:pr-[29rem]' : ''}`}>
+      {!embedded && <div className="flex flex-wrap items-center gap-3">
         <h1 className="mr-2 text-2xl">{t('title')}</h1>
         <Link href={q(addDays(day, -1), 'timeline')} className="underline">← {t('previousDay')}</Link>
         <span className="tnum font-semibold" data-testid="day-label">{day}</span>
@@ -63,32 +64,38 @@ export function RoomTimeline({ day, by = 'room', role, rows, therapists, rooms, 
           <Link href={q(day, 'timeline', 'room')} data-testid="timeline-by-room" aria-current={by === 'room' ? 'true' : undefined} className={by === 'room' ? 'font-semibold underline' : ''}>{t('viewRooms')}</Link>
           <Link href={q(day, 'timeline', 'therapist')} data-testid="timeline-by-therapist" aria-current={by === 'therapist' ? 'true' : undefined} className={by === 'therapist' ? 'font-semibold underline' : ''}>{t('viewTherapists')}</Link>
         </nav>
-      </div>
+      </div>}
 
       {open && <BookingDetails key={open.bookingId + open.version} row={open} role={role} moveOptions={{ therapists, rooms }}
         labels={{ service: svcName(open.serviceId), therapist: therapistName(open.therapistId), room: roomCodeOf(open.roomId) }} onClose={() => setSelected(null)} />}
 
-      {rows.length === 0 && <p className="text-stone-dark">{t('noBookings')}</p>}
+      {rows.length === 0 && <p className={embedded ? 'px-4 pt-3 text-sm text-ink-muted' : 'text-stone-dark'}>{t('noBookings')}</p>}
 
-      <div tabIndex={0} className="overflow-x-auto rounded border border-stone bg-white" data-testid="timeline-scroll">
+      <div tabIndex={0} role="region" aria-label={t('viewTimeline')}
+        className={embedded ? 'overflow-x-auto' : 'overflow-x-auto rounded border border-stone bg-white'} data-testid="timeline-scroll">
         <div className="min-w-max">
           <div className="flex h-8 border-b border-stone bg-ivory">
-            <div className="sticky left-0 z-20 shrink-0 border-r border-stone bg-ivory" style={{ width: LABEL_W }} />
+            <div className="sticky left-0 z-20 shrink-0 border-r border-stone bg-ivory" style={{ width: labelWidth }} />
             <div className="relative" style={{ width }} aria-hidden>
-              {hours.map((h) => <div key={h} className="tnum absolute top-0 h-full border-l border-stone/60 pl-1 pt-1.5 text-xs text-stone-dark" style={{ left: (h - startHour) * 60 * PX_PER_MIN }}>{String(h).padStart(2, '0')}:00</div>)}
+              {hours.map((h) => (
+                <div key={h} className="tnum absolute top-0 h-full border-l border-stone/60 pl-1 pt-1.5 text-xs text-stone-dark"
+                  style={{ left: (h - startHour) * 60 * pixelsPerMinute }}>
+                  {(!embedded || (h - startHour) % 2 === 0) && `${String(h).padStart(2, '0')}:00`}
+                </div>
+              ))}
             </div>
           </div>
           {lines.map((line) => (
             <div key={line.id} className="flex border-b border-stone last:border-b-0" data-testid="timeline-row" data-row-id={line.id}>
-              <div className="sticky left-0 z-10 flex shrink-0 items-center gap-2 border-r border-stone bg-ivory px-2 text-sm" style={{ width: LABEL_W }}>
+              <div className="sticky left-0 z-10 flex shrink-0 items-center gap-2 border-r border-stone bg-ivory px-2 text-sm" style={{ width: labelWidth }}>
                 {line.photo !== undefined && <Avatar name={line.title} src={line.photo} size="sm" />}
                 <span className="min-w-0 flex flex-col"><span className="truncate font-medium">{line.title}</span>{line.sub && <span className="truncate text-xs text-stone-dark">{line.sub}</span>}</span>
               </div>
               <div className="relative" style={{ width, height: line.lanes * LANE_H }}>
-                {hours.map((h) => <div key={h} className="absolute h-full border-l border-stone/60" style={{ left: (h - startHour) * 60 * PX_PER_MIN }} />)}
+                {hours.map((h) => <div key={h} className="absolute h-full border-l border-stone/60" style={{ left: (h - startHour) * 60 * pixelsPerMinute }} />)}
                 {rows.filter(line.match).map((r) => {
-                  const left = (minOf(r.startsAt) - startHour * 60) * PX_PER_MIN;
-                  const w = Math.max(28, (minOf(r.endsAt) - minOf(r.startsAt)) * PX_PER_MIN);
+                  const left = (minOf(r.startsAt) - startHour * 60) * pixelsPerMinute;
+                  const w = Math.max(28, (minOf(r.endsAt) - minOf(r.startsAt)) * pixelsPerMinute);
                   return (
                     <button key={r.bookingId} onClick={() => setSelected(r.bookingId)} data-testid="booking-card" data-booking-id={r.bookingId} data-status={r.status}
                       className={`absolute overflow-hidden rounded px-1.5 py-0.5 text-left text-xs leading-tight ${bookingStatusStyle(r.status).card} ${selected === r.bookingId ? 'ring-2 ring-charcoal' : ''}`}
