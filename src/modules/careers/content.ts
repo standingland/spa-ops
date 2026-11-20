@@ -68,7 +68,20 @@ export const careers = {
     certificate: p("Massage certificate", "ใบรับรองการนวด"),
     work: p("Preferred work", "รูปแบบงานที่ต้องการ"),
     skills: p("Massage styles and languages (optional)", "สายนวดและภาษาที่ใช้ได้ (ถ้ามี)"),
-    submit: p("Review application", "ตรวจสอบใบสมัคร"),
+    submit: p("Submit application", "ส่งใบสมัคร"),
+    sending: p("Sending…", "กำลังส่ง…"),
+    saved: p(
+      "We have your application and will contact you. You can also send this summary to us on LINE.",
+      "เราได้รับใบสมัครของคุณแล้วและจะติดต่อกลับ คุณสามารถส่งสรุปนี้ให้เราทาง LINE ได้อีกทาง",
+    ),
+    notSaved: p(
+      "We could not save your application. Please copy this summary and send it to us on LINE.",
+      "บันทึกใบสมัครไม่สำเร็จ กรุณาคัดลอกสรุปนี้แล้วส่งให้เราทาง LINE",
+    ),
+    rateLimited: p(
+      "Too many applications from this connection. Please try again later or send the summary on LINE.",
+      "ส่งใบสมัครจากการเชื่อมต่อนี้หลายครั้งเกินไป กรุณาลองใหม่ภายหลัง หรือส่งสรุปทาง LINE",
+    ),
     edit: p("Edit", "แก้ไข"),
     copy: p("Copy summary", "คัดลอกสรุป"),
     copied: p("Copied. Send it to us on LINE.", "คัดลอกแล้ว ส่งให้เราทาง LINE ได้เลย"),
