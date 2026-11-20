@@ -450,6 +450,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
             © {new Date().getFullYear()} Banyan Spa. {t.rights}
           </span>
           <span>{t.preview}</span>
+          <a href={`/${locale}/careers`}>
+            {locale === "th" ? "ร่วมงานกับเรา" : "Careers"}
+          </a>
           <a href={`/${locale}/login`}>{t.staff}</a>
         </div>
       </footer>
