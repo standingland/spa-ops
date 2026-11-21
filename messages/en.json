@@ -30,7 +30,8 @@
       "management": "Management"
     },
     "earnings": "Commissions",
-    "inventory": "Inventory"
+    "inventory": "Inventory",
+    "applications": "Applications"
   },
   "login": {
     "title": "Sign in",
@@ -735,7 +736,8 @@
       "notifications": "Messages sent to guests",
       "staff": "Staff accounts and roles",
       "settings": "Cancellation and no-show fees, payments, reports and data retention",
-      "guide": "How to set up the spa and handle bookings, payments and daily operations"
+      "guide": "How to set up the spa and handle bookings, payments and daily operations",
+      "applications": "Therapist applications from the careers page"
     }
   },
   "adminGuide": {
@@ -972,5 +974,44 @@
     "recordAdjustment": "Record adjustment applied",
     "payoutDate": "Payment / adjustment date and time (Bangkok)",
     "waitlistConsent": "I agree to receive appointment and waitlist messages via LINE."
+  },
+  "applications": {
+    "title": "Therapist applications",
+    "subtitle": "People who applied on the careers page, newest first.",
+    "filter": "Filter by status",
+    "all": "All applications ({count})",
+    "age": "Age",
+    "experience": "Experience",
+    "certificate": "Massage certificate",
+    "work": "Work type",
+    "skills": "Styles and languages",
+    "yes": "Yes",
+    "no": "No",
+    "statusLabel": "Status",
+    "note": "Correspondence",
+    "notePlaceholder": "Calls, messages and interview notes",
+    "save": "Save note",
+    "saved": "Saved",
+    "empty": "No applications yet. They appear here when someone applies on the careers page.",
+    "emptyFiltered": "No applications with this status.",
+    "status": {
+      "new": "New",
+      "contacted": "Contacted",
+      "interview": "Interview",
+      "trial": "Trial",
+      "hired": "Hired",
+      "declined": "Declined"
+    },
+    "experienceOptions": {
+      "none": "No experience",
+      "under_1": "Under 1 year",
+      "1_3": "1–3 years",
+      "3_5": "3–5 years",
+      "5_plus": "5+ years"
+    },
+    "workOptions": {
+      "full_time": "Full-time (5 days a week)",
+      "part_time": "Part-time (any hours)"
+    }
   }
 }
