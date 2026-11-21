@@ -5,7 +5,7 @@ export type NavId = 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' 
 export type IconName = NavId | 'menu' | 'close' | 'guide';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
-export type AdminTool = { id: 'adminRooms' | 'services' | 'notifications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
+export type AdminTool = { id: 'adminRooms' | 'services' | 'notifications' | 'applications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
 
 const ALL: Role[] = ['owner', 'manager', 'receptionist', 'therapist'];
 const FRONT: Role[] = ['owner', 'manager', 'receptionist'];
@@ -42,6 +42,7 @@ const ADMIN_TOOLS: AdminTool[] = [
   { id: 'adminRooms', href: '/admin/rooms', roles: MANAGEMENT },
   { id: 'services', href: '/admin/services', roles: MANAGEMENT },
   { id: 'notifications', href: '/admin/notifications', roles: MANAGEMENT },
+  { id: 'applications', href: '/admin/applications', roles: MANAGEMENT },
   { id: 'staff', href: '/admin/staff', roles: ['owner'] },
   { id: 'settings', href: '/admin/settings', roles: ['owner'] },
   { id: 'guide', href: '/admin/guide', roles: MANAGEMENT },
