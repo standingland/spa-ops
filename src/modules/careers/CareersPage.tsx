@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { careers as c, type Locale } from "./content";
+import { submitApplication } from "./actions";
 import styles from "./careers.module.css";
 
 function Arrow() {
@@ -17,6 +18,7 @@ function Arrow() {
 export function CareersPage({ locale }: { locale: Locale }) {
   const [review, setReview] = useState(false);
   const [status, setStatus] = useState("");
+  const [saveState, setSaveState] = useState<"idle" | "sending" | "saved" | "failed" | "limited">("idle");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [contact, setContact] = useState("");
@@ -25,6 +27,8 @@ export function CareersPage({ locale }: { locale: Locale }) {
   const [work, setWork] = useState("0");
   const [skills, setSkills] = useState("");
   const f = c.form;
+  const experienceCodes = ["none", "under_1", "1_3", "3_5", "5_plus"] as const;
+  const workCodes = ["full_time", "part_time"] as const;
 
   const summary = [
     `${f.summaryTitle[locale]}`,
@@ -37,9 +41,26 @@ export function CareersPage({ locale }: { locale: Locale }) {
     `${f.lines.skills[locale]}: ${skills.trim() || "-"}`,
   ].join("\n");
 
-  function reviewApplication(event: FormEvent<HTMLFormElement>) {
+  async function sendApplication(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saveState === "sending") return;
     setStatus("");
+    setSaveState("sending");
+    try {
+      const result = await submitApplication({
+        fullName: name,
+        age: Number(age),
+        contact,
+        experience: experienceCodes[Number(experience)],
+        hasCertificate: certificate === "1",
+        workType: workCodes[Number(work)],
+        skills,
+        locale,
+      });
+      setSaveState(result.ok ? "saved" : result.code === "RATE_LIMITED" ? "limited" : "failed");
+    } catch {
+      setSaveState("failed");
+    }
     setReview(true);
   }
 
@@ -155,7 +176,7 @@ export function CareersPage({ locale }: { locale: Locale }) {
           </div>
           <div className={styles.card}>
             {!review ? (
-              <form onSubmit={reviewApplication}>
+              <form onSubmit={sendApplication}>
                 <div className={styles.formRow}>
                   <label>
                     {f.name[locale]}
@@ -227,8 +248,8 @@ export function CareersPage({ locale }: { locale: Locale }) {
                     onChange={(e) => setSkills(e.target.value)}
                   />
                 </label>
-                <button type="submit" className={styles.primaryButton}>
-                  {f.submit[locale]}
+                <button type="submit" className={styles.primaryButton} disabled={saveState === "sending"}>
+                  {saveState === "sending" ? f.sending[locale] : f.submit[locale]}
                   <Arrow />
                 </button>
               </form>
@@ -236,7 +257,13 @@ export function CareersPage({ locale }: { locale: Locale }) {
               <div className={styles.summary}>
                 <h3>{f.summaryTitle[locale]}</h3>
                 <pre>{summary.split("\n").slice(1).join("\n")}</pre>
-                <p>{c.applyIntro[locale]}</p>
+                <p role="status">
+                  {saveState === "saved"
+                    ? f.saved[locale]
+                    : saveState === "limited"
+                      ? f.rateLimited[locale]
+                      : f.notSaved[locale]}
+                </p>
                 <button type="button" className={styles.primaryButton} onClick={copySummary}>
                   {f.copy[locale]}
                   <Arrow />
@@ -244,9 +271,18 @@ export function CareersPage({ locale }: { locale: Locale }) {
                 <p role="status" className={styles.status}>
                   {status}
                 </p>
-                <button type="button" className={styles.textLink} onClick={() => setReview(false)}>
-                  {f.edit[locale]}
-                </button>
+                {saveState !== "saved" && (
+                  <button
+                    type="button"
+                    className={styles.textLink}
+                    onClick={() => {
+                      setReview(false);
+                      setSaveState("idle");
+                    }}
+                  >
+                    {f.edit[locale]}
+                  </button>
+                )}
               </div>
             )}
           </div>
