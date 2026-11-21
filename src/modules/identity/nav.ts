@@ -1,11 +1,11 @@
 // Pure navigation model: no React, no server imports (type-only Role import is erased).
 import type { Role } from '@/modules/identity/session';
 
-export type NavId = 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist';
+export type NavId = 'staffHome' | 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist';
 export type IconName = NavId | 'menu' | 'close' | 'guide';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
-export type AdminTool = { id: 'adminRooms' | 'services' | 'notifications' | 'applications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
+export type AdminTool = { id: 'staffClockQr' | 'staffRequests' | 'adminRooms' | 'services' | 'notifications' | 'applications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
 
 const ALL: Role[] = ['owner', 'manager', 'receptionist', 'therapist'];
 const FRONT: Role[] = ['owner', 'manager', 'receptionist'];
@@ -15,6 +15,7 @@ const GROUPS: NavGroup[] = [
   {
     id: 'operate',
     items: [
+      { id: 'staffHome', href: '/staff', icon: 'staffHome', roles: ALL },
       { id: 'settings', href: '/admin', icon: 'reports', roles: MANAGEMENT },
       { id: 'today', href: '/today', icon: 'today', roles: ALL },
       { id: 'schedule', href: '/calendar', icon: 'schedule', roles: ALL },
@@ -39,6 +40,8 @@ const GROUPS: NavGroup[] = [
 ];
 
 const ADMIN_TOOLS: AdminTool[] = [
+  { id: 'staffRequests', href: '/admin/staff-requests', roles: MANAGEMENT },
+  { id: 'staffClockQr', href: '/admin/staff-clock', roles: MANAGEMENT },
   { id: 'adminRooms', href: '/admin/rooms', roles: MANAGEMENT },
   { id: 'services', href: '/admin/services', roles: MANAGEMENT },
   { id: 'notifications', href: '/admin/notifications', roles: MANAGEMENT },

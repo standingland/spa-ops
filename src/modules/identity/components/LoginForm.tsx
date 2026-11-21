@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { createClient } from '@/lib/supabase/browser';
 
-export function LoginForm() {
+export function LoginForm({ clockCode }: { clockCode?: string }) {
   const t = useTranslations('login');
   const router = useRouter();
   const [error, setError] = useState(false);
@@ -24,7 +24,7 @@ export function LoginForm() {
     });
     setBusy(false);
     if (err) { setError(true); return; }
-    router.replace('/today');
+    router.replace(clockCode ? { pathname: '/staff/clock', query: { code: clockCode } } : '/staff');
     router.refresh();
   }
 

@@ -13,6 +13,8 @@ import { StatusChip } from '@/components/ui/badge';
 import styles from './dashboard.module.css';
 
 const toolIcons: Record<AdminTool['id'], IconName> = {
+  staffRequests: 'schedule',
+  staffClockQr: 'today',
   adminRooms: 'rooms', services: 'bookings', notifications: 'bookings', applications: 'guests',
   staff: 'guests', settings: 'settings', guide: 'guide',
 };
