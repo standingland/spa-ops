@@ -12,7 +12,8 @@ import { Field, Select, Textarea } from '@/components/ui/field';
 import { PageHeader } from '@/components/ui/page-header';
 import { useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
-import { APPLICATION_STATUSES, updateApplication, type ApplicationRow, type ApplicationStatus } from '../adminActions';
+import { updateApplication } from '../adminActions';
+import { APPLICATION_STATUSES, type ApplicationRow, type ApplicationStatus } from '../application';
 
 function ApplicationCard({ a, onError }: { a: ApplicationRow; onError: (message: string | null) => void }) {
   const t = useTranslations('applications');
