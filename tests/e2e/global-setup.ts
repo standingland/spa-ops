@@ -17,7 +17,7 @@ export default async function globalSetup(config: FullConfig) {
       await page.getByTestId('login-email').fill(`${name}@spa.test`);
       await page.getByTestId('login-password').fill('local-dev-only');
       await page.getByTestId('login-submit').click();
-      await page.waitForURL(/\/th\/today/, { timeout: 60000 });
+      await page.waitForURL(/\/th\/staff$/, { timeout: 60000 });
       await context.storageState({ path: authFile(name) });
       await context.close();
     }

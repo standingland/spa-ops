@@ -1,0 +1,147 @@
+.home {
+  --forest: #233a30;
+  --linen: #faf7ee;
+  --paper: #fffefa;
+  --muted: #526159;
+  --line: #dce2d9;
+  --sage: #e7eee3;
+  max-width: 78rem;
+  margin-inline: auto;
+  color: var(--forest);
+}
+
+.welcome {
+  display: grid;
+  align-items: center;
+  min-height: 17rem;
+  border-radius: 1.4rem;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  background:
+    linear-gradient(90deg, var(--forest) 0%, var(--forest) 31%, #233a30f5 47%, #233a3070 75%, #233a3024 100%),
+    url('/images/banyan/banyan-suite.webp') right 58% / 78% auto no-repeat,
+    var(--forest);
+  color: var(--linen);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.3rem, 3vw, 2.5rem);
+  max-width: min(100%, 46rem);
+}
+
+.portrait {
+  flex: none;
+  padding: .45rem;
+  border: 1px solid #b4c3ae99;
+  border-radius: 50%;
+}
+
+.portrait .avatar {
+  display: flex;
+  width: clamp(5.5rem, 8.5vw, 8rem);
+  height: clamp(5.5rem, 8.5vw, 8rem);
+  background: var(--sage);
+  color: var(--forest);
+  font-family: var(--font-noto-serif), Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 3.25rem);
+}
+
+.avatar img { object-position: center top; }
+
+.intro { min-width: 0; }
+.intro time { font-size: .875rem; color: #e0e9db; }
+.intro h1 {
+  margin-block: .55rem .4rem;
+  font-family: var(--font-noto-serif), Georgia, serif;
+  font-size: clamp(1.7rem, 3.5vw, 3.3rem);
+  font-weight: 500;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.intro p { color: #e0e9db; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: 1.35rem;
+}
+
+.today, .guide {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  min-height: 2.75rem;
+  padding: .55rem .95rem;
+  border-radius: .5rem;
+  background: var(--linen);
+  color: var(--forest);
+  font-weight: 600;
+}
+.today:hover { background: var(--sage); }
+.guide {
+  border: 1px solid #c6d0bf;
+  background: var(--forest);
+  color: var(--linen);
+}
+.guide:hover { background: #354d40; }
+.today:focus-visible, .guide:focus-visible { outline-color: var(--linen); }
+
+.section { margin-top: 1.9rem; }
+.section h2 {
+  margin-bottom: .75rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+}
+.tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .9rem;
+  min-height: 5.25rem;
+  height: 100%;
+  padding: .85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: var(--paper);
+}
+.tile:hover { background: var(--sage); border-color: #b9c9b7; }
+.tile::after {
+  content: '';
+  width: .44rem;
+  height: .44rem;
+  border-block-start: 1.5px solid currentColor;
+  border-inline-end: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-inline: .15rem;
+}
+.tile strong { display: block; font-weight: 600; }
+.tile small { display: block; margin-top: .15rem; color: var(--muted); font-size: .875rem; }
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  aspect-ratio: 1;
+  border-radius: .6rem;
+  background: var(--sage);
+}
+
+@media (max-width: 40rem) {
+  .welcome {
+    min-height: auto;
+    background:
+      linear-gradient(12deg, var(--forest) 34%, #233a30ed 60%, #233a3094 100%),
+      url('/images/banyan/banyan-suite.webp') center top / cover no-repeat,
+      var(--forest);
+  }
+  .profile { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .menu { grid-template-columns: minmax(0, 1fr); }
+  .section { margin-top: 1.5rem; }
+}

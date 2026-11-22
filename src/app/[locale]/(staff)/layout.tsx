@@ -3,7 +3,8 @@ import { redirect } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getBrand } from '@/lib/brand';
 import { requireRole } from '@/modules/identity/session';
-import { visibleAdminTools, visibleNav } from '@/modules/identity/nav';
+import { visibleAdminTools } from '@/modules/identity/nav';
+import { getStaffNavigation } from '@/modules/identity/staffNavigation';
 import { LocaleSwitch } from '@/modules/identity/components/LocaleSwitch';
 import { LiveStatus } from '@/modules/identity/components/LiveStatus';
 import { ShellFrame } from '@/components/shell/ShellFrame';
@@ -14,16 +15,12 @@ import { Button } from '@/components/ui/button';
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await requireRole();
-  const t = await getTranslations('nav');
-  const care = await getTranslations('care');
-  const locale = await getLocale();
+  const [t, locale, groups] = await Promise.all([
+    getTranslations('nav'),
+    getLocale(),
+    getStaffNavigation(session.role),
+  ]);
   const brand = getBrand(process.env);
-  // The owner can switch reports off for managers; hide the link then (the database refuses either way).
-  let managerReports = true;
-  if (session.role === 'manager') {
-    const { data } = await (await createClient()).rpc('get_settings');
-    managerReports = (data as Record<string, unknown> | null)?.['reports.manager_can_view'] !== false;
-  }
 
   async function signOut() {
     'use server';
@@ -31,15 +28,12 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     redirect({ href: '/login', locale });
   }
 
-  const groups = visibleNav(session.role, { managerReports }).map((g) => ({
-    id: g.id,
-    label: t(`group.${g.id}`),
-    items: g.items.map((i) => ({ id: i.id, href: i.href, label: i.id === 'waitlist' ? care('waitlist') : t(i.id === 'settings' ? 'adminOverview' : i.id), icon: i.icon })),
-  }));
-
   const labels = Object.fromEntries([
     ...groups.flatMap((group) => group.items.map((item) => [item.href, item.label])),
     ...visibleAdminTools(session.role).map((tool) => [tool.href, t(tool.id === 'settings' ? 'policies' : tool.id)]),
+    ['/staff/requests', t('myStaffRequests')],
+    ['/staff/clock', t('staffClock')],
+    ['/staff/guide', t('staffGuide')],
     ['/account', t('account')],
   ]);
 

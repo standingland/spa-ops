@@ -1,6 +1,7 @@
 import type { IconName } from '@/modules/identity/nav';
 
 const PATHS: Record<IconName, React.ReactNode> = {
+  staffHome: (<path d="m3 11 9-7 9 7M5 10v10h5v-6h4v6h5V10" />),
   today: (<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>),
   schedule: (<><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></>),
   bookings: (<><path d="M8 4h8l3 3v13H5V4z" /><path d="M9 11h6M9 15h6" /></>),

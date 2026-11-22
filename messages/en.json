@@ -4,6 +4,12 @@
   },
   "nav": {
     "workspace": "Workspace",
+    "staffHome": "Staff home",
+    "myStaffRequests": "My requests",
+    "staffRequests": "Review staff requests",
+    "staffClock": "Clock in and out",
+    "staffClockQr": "Shop time clock QR",
+    "staffGuide": "Staff guide",
     "adminOverview": "Overview",
     "rooms": "Rooms",
     "services": "Services",
@@ -32,6 +38,156 @@
     "earnings": "Commissions",
     "inventory": "Inventory",
     "applications": "Applications"
+  },
+  "staffHome": {
+    "welcome": "Hello, {name}",
+    "openToday": "View today’s work",
+    "openGuide": "Staff guide",
+    "requests": "Shifts and time off",
+    "clock": {
+      "title": "Clock in and out",
+      "description": "See your times and who’s on shift",
+      "qrTitle": "Open the shop time clock QR",
+      "qrDescription": "Show the QR for staff to scan with a phone camera"
+    },
+    "request": {
+      "sick": { "title": "Report sick leave", "description": "Enter your leave dates and track the decision" },
+      "shift": { "title": "Request next month’s shifts", "description": "Choose the days and hours you can work" },
+      "review": { "title": "Review staff requests", "description": "Review sick leave and shift requests from the team", "pending": "{count} awaiting review" }
+    },
+    "menu": {
+      "schedule": "View the schedule and appointment times",
+      "rooms": "Check room availability and status",
+      "guests": "Find guest details and visit history",
+      "waitlist": "Track guests waiting for an appointment",
+      "settings": "Open the shop overview and admin tools",
+      "therapists": "Manage your team and shifts",
+      "payments": "Review payments and close the cash day",
+      "earnings": "Review and manage commissions",
+      "inventory": "Check stock and manage supplies",
+      "reports": "View sales and service reports"
+    }
+  },
+  "staffGuide": {
+    "title": "Staff guide",
+    "intro": "Sign in with the staff account from the shop. Choose a topic for the steps and a link to the screen you need.",
+    "contents": "Guide topics",
+    "clock": {
+      "title": "Clock in and out",
+      "open": "Open the time clock",
+      "steps": [
+        "Scan the QR at the shop with your phone camera. If prompted, sign in with your staff account.",
+        "Select “Confirm clock-in” when you arrive. Scan again and select “Confirm clock-out” before leaving. Check the recorded time under “My status”.",
+        "Check who has clocked in or out. If the QR expires, scan the code currently on the shop screen."
+      ]
+    },
+    "daily": {
+      "title": "Check appointments and rooms",
+      "open": "Open Today",
+      "steps": [
+        "Select “View today’s work” from Staff home to see appointments you can access and their status.",
+        "Use Schedule to look up a different date. Use Rooms to check room availability and status."
+      ]
+    },
+    "treatment": {
+      "title": "Start and finish a treatment",
+      "open": "Open my appointments for today",
+      "steps": [
+        "Once the front desk has checked in the guest, open your appointment in Today and select “Start treatment”.",
+        "Mark the appointment completed when you finish. After cleaning the room, mark it ready. Use the room issue button if something needs attention."
+      ]
+    },
+    "desk": {
+      "title": "Book and check in guests",
+      "open": "Open Schedule",
+      "steps": [
+        "Create a new booking in Schedule and pick the guest, service, therapist, room and time. For a guest who is already at the shop, choose the walk-in option.",
+        "When the guest arrives, open the confirmed appointment in Today and check them in so the therapist can start treatment.",
+        "If your account can record payments, use the pending payments section to record the amount and payment method after receiving the payment."
+      ]
+    },
+    "sick": {
+      "title": "Report sick leave",
+      "open": "Open the sick leave form",
+      "steps": [
+        "Enter your first and last day of leave. For one day, use the same date in both fields, then send the request.",
+        "Check the decision in Request history. You can withdraw a request that is still pending and submit a corrected one."
+      ]
+    },
+    "shifts": {
+      "title": "Request next month’s shifts",
+      "open": "Open next month’s calendar",
+      "steps": [
+        "Pick the days you can work. Select several days together if they use the same hours.",
+        "Enter the start and end times and send the request. Submit a separate request for days with different hours. An end time earlier than the start ends on the following day.",
+        "Check the decision in Request history. Approved requests for accounts linked to therapist profiles are added to the shop’s therapist roster."
+      ]
+    },
+    "management": {
+      "title": "Display the QR and review requests",
+      "open": "Open pending requests",
+      "openQr": "Open the QR display",
+      "adminGuide": "Shop management guide",
+      "steps": [
+        "Select “Open the shop time clock QR” from Staff home and leave it on the shop screen. The code updates automatically.",
+        "Open Review staff requests and check dates and times before approving. If sick leave affects appointments, open Today to reassign them."
+      ]
+    },
+    "account": {
+      "title": "Manage your account",
+      "open": "Open My account",
+      "steps": [
+        "Open My account to check your role or change your password. Contact your manager or the owner if you can’t sign in.",
+        "Sign out when you finish using a shared device."
+      ]
+    }
+  },
+  "staffClock": {
+    "title": "Clock in and out",
+    "you": "My status",
+    "coworkers": "On shift with me",
+    "started": "Clock-in time",
+    "ended": "Clock-out time",
+    "status": { "waiting": "Not clocked in", "working": "Clocked in", "finished": "Clocked out" },
+    "action": { "in": "Confirm clock-in", "out": "Confirm clock-out" },
+    "scan": "Scan the QR at the shop with your phone camera to record a clock-in or clock-out.",
+    "saved": "Time recorded",
+    "expired": "This QR has expired. Scan the current QR at the shop.",
+    "loadFailed": "Could not load shift status. Refresh the page to try again.",
+    "empty": "There are no coworkers on shift right now.",
+    "qrTitle": "Shop time clock QR",
+    "qrIntro": "Keep this page open at the shop. Staff scan with a phone camera and confirm their time. The QR updates automatically.",
+    "qrExpiry": "This code is valid until {time}, Bangkok time.",
+    "qrLoading": "Generating QR",
+    "qrFailed": "Could not update the QR. The system will try again automatically."
+  },
+  "staffRequests": {
+    "title": "My requests",
+    "reviewTitle": "Review staff requests",
+    "kind": { "sick": "Report sick leave", "shift": "Request next month’s shifts" },
+    "status": { "pending": "Pending", "approved": "Approved", "rejected": "Declined", "withdrawn": "Withdrawn" },
+    "sickIntro": "Choose the first and last day of sick leave. The request appears in the staff review queue for your manager or owner.",
+    "shiftIntro": "Choose one or more days next month, then enter the start and end times for the selected days.",
+    "firstDay": "First day of leave",
+    "lastDay": "Last day of leave",
+    "shiftStart": "Start time",
+    "shiftEnd": "End time",
+    "overnight": "If the end time is earlier than the start, the shift ends on the following day. All times are Bangkok time.",
+    "send": "Send request",
+    "sent": "Request sent. Check its status in the history below.",
+    "history": "Request history",
+    "approve": "Approve",
+    "reject": "Decline",
+    "withdraw": "Withdraw request",
+    "reviewed": "Processed",
+    "empty": "There are no requests here.",
+    "loadFailed": "Could not load requests. Refresh the page to try again.",
+    "previous": "Previous page",
+    "next": "Next page",
+    "overlap": "These hours overlap an existing request or shift. Check the selected days and times.",
+    "outOfWindow": "Choose dates in the next calendar month. Refresh the page if the month has just changed.",
+    "notLinked": "Link this account to an active therapist profile before approving.",
+    "affected": "View affected appointments ({count}) in Today"
   },
   "login": {
     "title": "Sign in",
@@ -731,6 +887,8 @@
     "activeWaitlist": "{count} awaiting a time or response",
     "subtitle": "Rooms, services, messages and house rules.",
     "desc": {
+      "staffRequests": "Review and approve sick leave and next month’s shifts",
+      "staffClockQr": "Display the QR for clocking in and out",
       "adminRooms": "Rooms, zones and categories",
       "services": "Treatments, prices and durations",
       "notifications": "Messages sent to guests",

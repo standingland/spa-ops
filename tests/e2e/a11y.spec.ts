@@ -4,6 +4,7 @@ import { signIn } from './helpers';
 
 const PAGES: { path: string; as: string | null }[] = [
   { path: '/th/login', as: null },
+  { path: '/th/staff', as: 'reception@spa.test' },
   { path: '/th/today', as: 'reception@spa.test' },
   { path: '/th/rooms', as: 'reception@spa.test' },
   { path: '/th/calendar', as: 'reception@spa.test' },

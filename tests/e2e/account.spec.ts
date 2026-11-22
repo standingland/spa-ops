@@ -40,7 +40,7 @@ test('the owner resets a password and the employee signs in with the new one onl
     await resetPassword(page, email, 'brand-new-pass-1');
     const p2 = await ctx.newPage();
     await signInFresh(p2, email, 'brand-new-pass-1');
-    await expect(p2).toHaveURL(/\/th\/today/);
+    await expect(p2).toHaveURL(/\/th\/staff$/);
     const p3 = await (await browser.newContext()).newPage();
     await p3.goto('/th/login');
     await p3.getByTestId('login-email').fill(email);

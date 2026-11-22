@@ -5,17 +5,17 @@ const ids = (role: Parameters<typeof visibleNav>[0], managerReports = true) =>
   visibleNav(role, { managerReports }).flatMap((g) => g.items.map((i) => i.id));
 
 describe('visibleNav', () => {
-  it('gives a therapist one operate group with today, schedule, rooms', () => {
+  it('gives a therapist one operate group with home, today, schedule, and rooms', () => {
     const groups = visibleNav('therapist', { managerReports: true });
     expect(groups).toHaveLength(1);
     expect(groups[0].id).toBe('operate');
-    expect(groups[0].items.map((i) => i.id)).toEqual(['today', 'schedule', 'rooms']);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['staffHome', 'today', 'schedule', 'rooms']);
   });
 
   it('adds guests for a receptionist', () => {
     const groups = visibleNav('receptionist', { managerReports: true });
     expect(groups.map((g) => g.id)).toEqual(['operate']);
-    expect(ids('receptionist')).toEqual(['today', 'schedule', 'guests', 'rooms', 'waitlist']);
+    expect(ids('receptionist')).toEqual(['staffHome', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
   });
 
   it('drops reports but keeps payments for a manager when managerReports is false', () => {
@@ -31,7 +31,7 @@ describe('visibleNav', () => {
     expect(list).not.toContain('bookings');
     const groups = visibleNav('owner', { managerReports: true });
     expect(groups.map((g) => g.id)).toEqual(['operate', 'management']);
-    expect(groups[0].items.map((i) => i.id)).toEqual(['settings', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['staffHome', 'settings', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
     expect(groups[1].items.map((i) => i.id)).toEqual(['therapists', 'payments', 'earnings', 'inventory', 'reports']);
   });
 });
@@ -52,10 +52,10 @@ describe('activeHref', () => {
 describe('visibleAdminTools', () => {
   it('excludes staff and settings for a manager', () => {
     const tools = visibleAdminTools('manager').map((t) => t.id);
-    expect(tools).toEqual(['adminRooms', 'services', 'notifications', 'applications', 'guide']);
+    expect(tools).toEqual(['staffRequests', 'staffClockQr', 'adminRooms', 'services', 'notifications', 'applications', 'guide']);
   });
   it('gives the owner everything', () => {
-    expect(visibleAdminTools('owner').map((t) => t.id)).toEqual(['adminRooms', 'services', 'notifications', 'applications', 'staff', 'settings', 'guide']);
+    expect(visibleAdminTools('owner').map((t) => t.id)).toEqual(['staffRequests', 'staffClockQr', 'adminRooms', 'services', 'notifications', 'applications', 'staff', 'settings', 'guide']);
   });
   it('gives others nothing', () => {
     expect(visibleAdminTools('therapist')).toEqual([]);

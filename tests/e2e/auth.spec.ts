@@ -1,9 +1,21 @@
 import { test, expect } from '@playwright/test';
-import { signIn } from './helpers';
+import { signIn, signInFresh } from './helpers';
 
 test('signed-out visitors are sent to the Thai login page', async ({ page }) => {
-  await page.goto('/th/calendar');
+  await page.goto('/th/staff');
   await expect(page).toHaveURL(/\/th\/login/);
+});
+
+test('signing in opens the staff profile and the role-specific menu', async ({ page }) => {
+  await signInFresh(page, 'therapist@spa.test');
+  await expect(page.getByRole('heading', { level: 1, name: /^สวัสดี / })).toBeVisible();
+  await expect(page.getByTestId('staff-home-portrait')).toBeVisible();
+  await expect(page.getByTestId('staff-home-schedule')).toBeVisible();
+  await expect(page.getByTestId('staff-home-rooms')).toBeVisible();
+  await expect(page.getByTestId('staff-home-guests')).toHaveCount(0);
+  await expect(page.getByTestId('staff-home-payments')).toHaveCount(0);
+  await page.getByTestId('staff-home-today').click();
+  await expect(page).toHaveURL(/\/th\/today$/);
 });
 test('a receptionist cannot open room administration', async ({ page }) => {
   await signIn(page, 'reception@spa.test');

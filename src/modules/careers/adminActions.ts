@@ -4,24 +4,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { done, fail, failFrom, type ActionResult } from '@/lib/action';
 import { roleOrNull } from '@/modules/identity/session';
-
-export const APPLICATION_STATUSES = ['new', 'contacted', 'interview', 'trial', 'hired', 'declined'] as const;
-export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
-
-export type ApplicationRow = {
-  id: string;
-  createdAt: string;
-  fullName: string;
-  age: number;
-  contact: string;
-  experience: string;
-  hasCertificate: boolean;
-  workType: string;
-  skills: string | null;
-  locale: string;
-  status: ApplicationStatus;
-  correspondence: string | null;
-};
+import { APPLICATION_STATUSES, type ApplicationRow, type ApplicationStatus } from './application';
 
 const UpdateInput = z.object({
   status: z.enum(APPLICATION_STATUSES),

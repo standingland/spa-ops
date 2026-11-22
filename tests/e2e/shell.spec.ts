@@ -17,11 +17,11 @@ test('reception sees the front-of-house links and none of the management ones', 
   await expect(page.getByTestId('management-menu')).toHaveCount(0);
 });
 
-test('a therapist sees only Today, Schedule and Rooms, and no management menu', async ({ page }) => {
+test('a therapist sees Staff home, Today, Schedule and Rooms, and no management menu', async ({ page }) => {
   await signIn(page, 'therapist@spa.test');
   await openMenuIfPhone(page);
-  await expect(page.locator('[data-testid^="nav-"]:not([data-testid="nav-account"])')).toHaveCount(3);
-  for (const id of ['today', 'schedule', 'rooms']) await expect(page.getByTestId(`nav-${id}`)).toBeVisible();
+  await expect(page.locator('[data-testid^="nav-"]:not([data-testid="nav-account"])')).toHaveCount(4);
+  for (const id of ['staffHome', 'today', 'schedule', 'rooms']) await expect(page.getByTestId(`nav-${id}`)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'งานประจำวัน', level: 2 })).toBeVisible();
   await expect(page.getByTestId('management-menu')).toHaveCount(0);
   await expect(page.getByTestId('nav-account')).toBeVisible();
