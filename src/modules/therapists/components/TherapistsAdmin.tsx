@@ -31,8 +31,8 @@ export type StaffOpt = { user_id: string; display_name: string };
 const local = (iso: string) => `${bangkokDay(iso)}T${formatTime(iso)}`;
 const toIso = (v: string) => (v ? new Date(`${v}:00+07:00`).toISOString() : '');
 
-export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, monday, photoUrls }: {
-  therapists: TherapistRow[]; shifts: ShiftRow[]; timeOff: TimeOffRow[]; services: ServiceOpt[]; staff: StaffOpt[]; monday: string; photoUrls: Record<string, string>;
+export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, monday, photoUrls, initiallyCreating = false }: {
+  therapists: TherapistRow[]; shifts: ShiftRow[]; timeOff: TimeOffRow[]; services: ServiceOpt[]; staff: StaffOpt[]; monday: string; photoUrls: Record<string, string>; initiallyCreating?: boolean;
 }) {
   const t = useTranslations('therapists');
   const c = useTranslations('common');
@@ -45,7 +45,9 @@ export function TherapistsAdmin({ therapists, shifts, timeOff, services, staff, 
   const [notice, setNotice] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const [type, setType] = useState('');
-  const [panel, setPanel] = useState<null | { kind: 'therapist'; row: TherapistRow | null } | { kind: 'shift'; row: ShiftRow | null } | { kind: 'timeoff'; row: TimeOffRow | null }>(null);
+  const [panel, setPanel] = useState<null | { kind: 'therapist'; row: TherapistRow | null } | { kind: 'shift'; row: ShiftRow | null } | { kind: 'timeoff'; row: TimeOffRow | null }>(
+    initiallyCreating ? { kind: 'therapist', row: null } : null,
+  );
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const weekdays = t.raw('weekdays') as string[];

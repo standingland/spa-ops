@@ -3,6 +3,7 @@ import { requireRole } from '@/modules/identity/session';
 import { createClient } from '@/lib/supabase/server';
 import { getOpenReports, getToday } from '@/modules/operations/actions';
 import { TodayBoard } from '@/modules/operations/components/TodayBoard';
+import { listDailyNotes } from '@/modules/daily-notes/actions';
 import { canRecordPayments, getPendingPayments, listPaymentMethods } from '@/modules/payments/actions';
 
 export default async function TodayPage() {
@@ -11,7 +12,7 @@ export default async function TodayPage() {
   const t = await getTranslations('today');
   const supabase = await createClient();
   const desk = session.role !== 'therapist';
-  const [today, reports, svcs, ths, rooms, pending, methods, canRecord] = await Promise.all([
+  const [today, reports, svcs, ths, rooms, pending, methods, canRecord, dailyNotes] = await Promise.all([
     getToday(),
     getOpenReports(),
     supabase.from('services').select('id, name_th, name_en'),
@@ -20,6 +21,7 @@ export default async function TodayPage() {
     desk ? getPendingPayments() : Promise.resolve(null),
     desk ? listPaymentMethods() : Promise.resolve(null),
     desk ? canRecordPayments(session.role) : Promise.resolve(false),
+    listDailyNotes(),
   ]);
   if (!today.ok) return <p role="alert" className="text-clay">{t('nothing')}</p>;
   const names = {
@@ -29,5 +31,6 @@ export default async function TodayPage() {
   };
   const roomZones: Record<string, string | null> = Object.fromEntries((rooms.data ?? []).map((r) => [r.id, r.zone]));
   return <TodayBoard model={today.model} role={session.role} names={names} roomZones={roomZones} reports={reports.ok ? reports.reports : []}
-    pending={pending?.ok ? pending.rows : []} methods={methods?.ok ? methods.methods : []} canRecord={canRecord} />;
+    pending={pending?.ok ? pending.rows : []} methods={methods?.ok ? methods.methods : []} canRecord={canRecord}
+    dailyNotes={dailyNotes.ok ? dailyNotes.notes : []} />;
 }

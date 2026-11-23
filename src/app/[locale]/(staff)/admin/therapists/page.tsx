@@ -10,9 +10,9 @@ import {
   TherapistsAdmin, type ServiceOpt, type ShiftRow, type StaffOpt, type TherapistRow, type TimeOffRow,
 } from '@/modules/therapists/components/TherapistsAdmin';
 
-export default async function TherapistsPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
+export default async function TherapistsPage({ searchParams }: { searchParams: Promise<{ week?: string; create?: string }> }) {
   await requireRole('owner', 'manager');
-  const { week } = await searchParams;
+  const { week, create } = await searchParams;
   const monday = mondayOf(week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? week : bangkokDay(new Date()));
   const range = `[${bangkokDayRange(monday).from},${bangkokDayRange(addDays(monday, 6)).to})`;
   const supabase = await createClient();
@@ -42,6 +42,7 @@ export default async function TherapistsPage({ searchParams }: { searchParams: P
       const th = therapistRows.find((x) => x.id === n.therapistId);
       return th?.active ? [{ therapistId: n.therapistId, name: th.display_name, photoUrl: th.photo_path ? (urls[th.photo_path] ?? null) : null, state: n.state, roomName: n.roomId ? (roomName.get(n.roomId) ?? null) : null }] : [];
     });
+  const initiallyCreating = create === '1';
   return (
     <>
     <NowStrip people={people} labels={{
@@ -50,6 +51,8 @@ export default async function TherapistsPage({ searchParams }: { searchParams: P
       inRoom: (room) => t('now.inRoom', { room }),
     }} />
     <TherapistsAdmin
+      key={initiallyCreating ? 'create' : 'browse'}
+      initiallyCreating={initiallyCreating}
       monday={monday}
       therapists={therapistRows}
       photoUrls={urls}

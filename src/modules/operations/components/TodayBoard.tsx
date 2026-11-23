@@ -26,6 +26,8 @@ import { RoomStatusPanel } from './RoomStatusPanel';
 import { TreatmentNote } from '@/modules/customers/components/TreatmentNote';
 import { PendingPayments } from '@/modules/payments/components/PendingPayments';
 import type { PaymentMethod, PendingPayment } from '@/modules/payments/schema';
+import { DailyNotesStrip } from '@/modules/daily-notes/components/DailyNotesStrip';
+import type { DailyNote } from '@/modules/daily-notes/schema';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
 const LIVE_TABLES = ['bookings', 'room_turnovers', 'room_blocks', 'room_reports', 'therapist_time_off', 'payments'] as const;
@@ -50,9 +52,9 @@ function useShared(): [boolean, (v: boolean) => void] {
   return [v, writeShared];
 }
 
-export function TodayBoard({ model, role, names, reports, roomZones = {}, pending = [], methods = [], canRecord = false }: {
+export function TodayBoard({ model, role, names, reports, roomZones = {}, pending = [], methods = [], canRecord = false, dailyNotes = [] }: {
   model: TodayModel; role: Role; names: Names; reports: OpenReport[]; roomZones?: Record<string, string | null>;
-  pending?: PendingPayment[]; methods?: PaymentMethod[]; canRecord?: boolean;
+  pending?: PendingPayment[]; methods?: PaymentMethod[]; canRecord?: boolean; dailyNotes?: DailyNote[];
 }) {
   const t = useTranslations('today');
   const s = useTranslations('status');
@@ -105,6 +107,8 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
         actions={<Button variant="secondary" size="sm" data-testid="shared-toggle" aria-pressed={shared} onClick={() => setShared(!shared)}>{shared ? t('sharedOn') : t('sharedOff')}</Button>} />
 
       {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
+
+      <DailyNotesStrip notes={dailyNotes} />
 
       <section aria-label={t('roomStatus')} className="today-stats grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4 xl:grid-cols-8">
         <Stat label={t('reservations')} value={model.counts.reservations} id="reservations" />

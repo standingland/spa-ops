@@ -7,6 +7,8 @@ import { visibleAdminTools, type AdminTool, type IconName } from '@/modules/iden
 import { getBoard } from '@/modules/booking/actions';
 import { RoomTimeline } from '@/modules/booking/components/RoomTimeline';
 import { getToday } from '@/modules/operations/actions';
+import { listDailyNotes } from '@/modules/daily-notes/actions';
+import { DailyNotesManager } from '@/modules/daily-notes/components/DailyNotesManager';
 import { Icon } from '@/components/shell/Icon';
 import { ROOM_STATUS_KEY } from '@/components/ui/status';
 import { StatusChip } from '@/components/ui/badge';
@@ -30,15 +32,17 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
   ]);
   const now = new Date();
   const day = bangkokDay(now);
-  const [operations, board, waitlist, rooms, services, therapists] = await Promise.all([
+  const [operations, board, waitlist, rooms, services, therapists, dailyNotes] = await Promise.all([
     getToday(), getBoard(day),
     supabase.from('waitlist_entries').select('id', { count: 'exact', head: true }).in('status', ['waiting', 'offered']),
     supabase.from('rooms').select('id, code, display_name, active, zone, room_positions(id, label, active)').order('sort_order'),
     supabase.from('services').select('id, name_th, name_en, duration_min'),
     supabase.from('therapists').select('id, display_name').eq('active', true).order('sort_order'),
+    listDailyNotes(day),
   ]);
 
   const model = operations.ok ? operations.model : null;
+  const notes = dailyNotes.ok ? dailyNotes.notes : [];
   const tools = visibleAdminTools(session.role);
   const roomCodes = new Map(rooms.data?.map((room) => [room.id, room.code]));
   const roomStates = new Map(model?.rooms.map((room) => [room.roomId, room.status]));
@@ -51,6 +55,38 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
     { label: t('roomsReady'), value: model.counts.available, total: model.rooms.length, href: '/rooms', icon: 'rooms' },
     { label: today('attention'), value: model.attention.length, href: '/today', icon: 'today' },
   ] as const : [];
+  const quickActions = [
+    {
+      id: 'newBooking',
+      label: t('quickAction.newBooking'),
+      description: t('quickAction.newBookingDesc'),
+      href: { pathname: '/calendar', query: { day, create: '1' } },
+      icon: 'schedule' as IconName,
+    },
+    {
+      id: 'newTherapist',
+      label: t('quickAction.newTherapist'),
+      description: t('quickAction.newTherapistDesc'),
+      href: { pathname: '/admin/therapists', query: { create: '1' } },
+      icon: 'therapists' as IconName,
+    },
+    {
+      id: 'viewWaitlist',
+      label: t('quickAction.viewWaitlist'),
+      description: waitlist.count && waitlist.count > 0
+        ? t('quickAction.viewWaitlistCount', { count: waitlist.count })
+        : t('quickAction.viewWaitlistDesc'),
+      href: '/waitlist',
+      icon: 'waitlist' as IconName,
+    },
+    {
+      id: 'roomBoard',
+      label: t('quickAction.roomBoard'),
+      description: t('quickAction.roomBoardDesc'),
+      href: '/rooms',
+      icon: 'rooms' as IconName,
+    },
+  ] as const;
 
   return (
     <div className={styles.dashboard}>
@@ -80,6 +116,25 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
           ))}
         </ul>
       ) : <p className={styles.notice} role="alert">{t('operationsFailed')}</p>}
+
+      <section className={styles.quickActions} aria-labelledby="admin-quick-actions" data-testid="admin-quick-actions">
+        <h2 id="admin-quick-actions">{t('quickActions')}</h2>
+        <ul className={styles.quickActionList}>
+          {quickActions.map((action) => (
+            <li key={action.id}>
+              <Link href={action.href} className={styles.quickAction} data-testid={`quick-action-${action.id}`}>
+                <Icon name={action.icon} />
+                <span>
+                  <strong>{action.label}</strong>
+                  <small>{action.description}</small>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <DailyNotesManager initialNotes={notes} canPost={session.role === 'owner'} />
 
       <div className={styles.workspace}>
         <section className={styles.panel} aria-labelledby="admin-schedule">

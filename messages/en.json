@@ -886,6 +886,18 @@
     "noRooms": "No active rooms.",
     "manageWaitlist": "Manage",
     "activeWaitlist": "{count} awaiting a time or response",
+    "quickActions": "Quick actions",
+    "quickAction": {
+      "newBooking": "New booking",
+      "newBookingDesc": "Schedule a guest appointment",
+      "newTherapist": "New therapist",
+      "newTherapistDesc": "Add a therapist profile and shifts",
+      "viewWaitlist": "View waitlist",
+      "viewWaitlistDesc": "Review and offer open times",
+      "viewWaitlistCount": "{count} waiting",
+      "roomBoard": "Room board",
+      "roomBoardDesc": "Update room readiness and turnover"
+    },
     "subtitle": "Rooms, services, messages and house rules.",
     "desc": {
       "staffRequests": "Review and approve sick leave and next month’s shifts",
@@ -898,6 +910,31 @@
       "guide": "How to set up the spa and handle bookings, payments and daily operations",
       "applications": "Therapist applications from the careers page"
     }
+  },
+  "dailyNotes": {
+    "title": "Staff daily notes",
+    "subtitleOwner": "Post sticky-note updates or alerts visible to all staff on today’s view.",
+    "subtitleReadOnly": "Today’s notes from the owner, visible to all staff on today’s view.",
+    "count": "{count} active today",
+    "viewOnToday": "View on Today",
+    "toneLabel": "Note style",
+    "tone": {
+      "note": "Update",
+      "alert": "Alert",
+      "reminder": "Reminder"
+    },
+    "placeholder": {
+      "note": "Share a shift update for the team (e.g. VIP guest arriving at 14:00)...",
+      "alert": "Post an urgent alert for today’s shift (e.g. Room 3 AC under maintenance)...",
+      "reminder": "Leave a gentle reminder for staff (e.g. Restock warm towels before 16:00)..."
+    },
+    "inputLabel": "Daily note message",
+    "visibilityHint": "Visible to owners, managers, receptionists and therapists on Today.",
+    "post": "Post note",
+    "posting": "Posting...",
+    "remove": "Remove note",
+    "emptyOwner": "No notes posted for today yet. Add a sticky note above to brief the team.",
+    "emptyStaff": "No daily notes posted for today."
   },
   "adminGuide": {
     "back": "Back to settings",
