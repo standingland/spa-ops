@@ -5,6 +5,7 @@ export type NoteTone = (typeof NOTE_TONES)[number];
 
 export const MAX_NOTE_LENGTH = 400;
 export const MAX_ACTIVE_NOTES = 20;
+export const MAX_REPLY_LENGTH = 400;
 
 export type DailyNote = {
   id: string;
@@ -14,6 +15,8 @@ export type DailyNote = {
   authorName: string;
   createdAt: string;
 };
+
+export type DailyNoteReply = Pick<DailyNote, 'id' | 'body' | 'authorName' | 'createdAt'>;
 
 export const createDailyNoteSchema = z.object({
   body: z
@@ -28,6 +31,13 @@ export const createDailyNoteSchema = z.object({
 export const removeDailyNoteSchema = z.object({
   id: z.string().uuid(),
 });
+
+export const replyToDailyNoteSchema = z.object({
+  noteId: z.string().uuid(),
+  body: z.string().trim().min(1).max(MAX_REPLY_LENGTH),
+});
+
+export type DailyNoteReplyInput = z.input<typeof replyToDailyNoteSchema>;
 
 export type CreateDailyNoteInput = {
   body: string;

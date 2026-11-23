@@ -219,6 +219,56 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
 }
 
+.threads {
+  display: grid;
+  gap: .85rem;
+}
+
+.thread {
+  margin-top: .2rem;
+  border-top: 1px solid rgba(41, 61, 52, .18);
+}
+
+.thread summary {
+  width: fit-content;
+  padding: .65rem 0 .15rem;
+  color: var(--banyan);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.replies {
+  max-height: 18rem;
+  overflow-y: auto;
+  margin-block: .75rem;
+  padding-inline-start: .7rem;
+  border-inline-start: 2px solid rgba(41, 61, 52, .18);
+  display: grid;
+  gap: .65rem;
+}
+
+.replies li {
+  padding: .45rem .65rem;
+  border-radius: .35rem;
+  background: rgba(255, 255, 255, .66);
+  overflow-wrap: anywhere;
+}
+
+.replyForm {
+  display: grid;
+  gap: .4rem;
+  margin-top: .65rem;
+  font-size: .85rem;
+}
+
+.replyActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .7rem;
+}
+
 .sticky {
   position: relative;
   display: flex;

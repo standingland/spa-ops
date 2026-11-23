@@ -193,7 +193,7 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
         </ul>
       ) : <p className={styles.notice} role="alert">{t('operationsFailed')}</p>}
 
-      <DailyNotesManager initialNotes={notes} canPost={session.role === 'owner'} />
+      <DailyNotesManager notes={notes} canPost={session.role === 'owner'} />
 
       <div className={styles.workspace}>
         <section className={styles.panel} aria-labelledby="admin-schedule">
