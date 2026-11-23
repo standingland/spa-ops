@@ -5,5 +5,5 @@ import { Alert } from '@/components/ui/alert';
 import { getTranslations } from 'next-intl/server';
 export default async function WaitlistPage() {
   await requireRole('owner', 'manager', 'receptionist'); const t = await getTranslations('care');
-  const r = await listWaitlist(); return r.ok ? <StaffWaitlist rows={r.rows} /> : <Alert tone="error">{t('loadFailed')}</Alert>;
+  const r = await listWaitlist(); return r.ok ? <StaffWaitlist rows={r.rows} counts={r.counts} /> : <Alert tone="error">{t('loadFailed')}</Alert>;
 }

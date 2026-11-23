@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
+import { WorkspaceHero } from '@/components/shell/WorkspaceHero';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
@@ -29,6 +30,8 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   therapists: TherapistOpt[]; rooms: RoomOpt[]; services: ServiceOpt[];
 }) {
   const t = useTranslations('booking');
+  const nav = useTranslations('nav');
+  const design = useTranslations('workspaceDesign');
   const c = useTranslations('common');
   const locale = useLocale();
   useLiveRefresh(LIVE_TABLES);
@@ -88,15 +91,15 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
   const posCode = (positionId: string) => rooms.find((x) => x.room_positions.some((p) => p.id === positionId))?.code ?? '';
 
   return (
-    <div className={`flex flex-col gap-3 ${open ? 'lg:pr-[29rem]' : ''}`}>
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="mr-2 text-2xl">{t('title')}</h1>
+    <div className={`flex min-w-0 flex-col gap-3 ${open ? 'lg:pr-[29rem]' : ''}`}>
+      <WorkspaceHero title={nav('schedule')} description={design('calendarDesc')} icon="today" />
+      <div className="workspace-surface workspace-toolbar">
         <Link href={q(addDays(day, -1))} className="underline" data-testid="day-prev">← {t('previousDay')}</Link>
         <span className="tnum font-semibold" data-testid="day-label">{day}</span>
         <Link href={q(addDays(day, 1))} className="underline" data-testid="day-next">{t('nextDay')} →</Link>
         <Link href={q(bangkokDay(new Date()))} className="underline">{t('today')}</Link>
         <Link href="/counter" className="min-h-11 rounded-lg border border-line px-3 py-2 text-sm">{locale === 'th' ? 'จอเคาน์เตอร์ ↗' : 'Counter display ↗'}</Link><span className="ml-auto"><SpanSwitch span="day" day={day} view={view} /></span>
-        <nav className="flex gap-2 text-sm" aria-label="view">
+        <nav className="workspace-segmented" aria-label={t('viewTimeline')}>
           <Link href={q(day, 'therapists')} data-testid="view-therapists" aria-current={view === 'therapists' ? 'true' : undefined} className={view === 'therapists' ? 'font-semibold underline' : ''}>{t('viewTherapists')}</Link>
           <Link href={q(day, 'rooms')} data-testid="view-rooms" aria-current={view === 'rooms' ? 'true' : undefined} className={view === 'rooms' ? 'font-semibold underline' : ''}>{t('viewRooms')}</Link>
           <Link href={q(day, 'timeline')} data-testid="view-timeline">{t('viewTimeline')}</Link>
@@ -124,7 +127,7 @@ export function BookingCalendar({ day, view, role, rows, therapists, rooms, serv
 
       {rows.length === 0 && <p className="text-stone-dark" data-testid="calendar-empty">{t('noBookings')}</p>}
 
-      <div tabIndex={0} className="overflow-x-auto rounded border border-stone bg-white" data-testid="calendar-scroll">
+      <div tabIndex={0} className="workspace-surface workspace-scroll" data-testid="calendar-scroll">
         <div className="flex min-w-max">
           <div className="sticky left-0 z-20 w-14 shrink-0 border-r border-stone bg-ivory" aria-hidden data-testid="time-axis">
             <div className="h-10 border-b border-stone" />

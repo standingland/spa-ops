@@ -11,14 +11,14 @@ type Group = { id: string; label: string; items: Item[] };
 export function NavList({ groups }: { groups: Group[] }) {
   const pathname = usePathname();
   const active = activeHref(pathname, groups.flatMap((g) => g.items.map((i) => i.href)));
-  const links = (items: Item[]) => (
+  const links = (items: Item[], nested = false) => (
     <ul className="flex flex-col gap-1">
       {items.map((i) => {
         const current = i.href === active;
         return (
           <li key={i.id}>
             <Link
-              href={i.href}
+              href={i.id === 'schedule' ? { pathname: i.href, query: { view: 'timeline' } } : i.href}
               data-testid={`nav-${i.id}`}
               aria-current={current ? 'page' : undefined}
               className={cn(
@@ -26,7 +26,7 @@ export function NavList({ groups }: { groups: Group[] }) {
                 current ? 'bg-tint-available font-semibold' : 'hover:bg-surface-muted',
               )}
             >
-              <Icon name={i.icon} className="shrink-0" />
+              {nested ? <span className="staff-nav-bullet" aria-hidden="true" /> : <Icon name={i.icon} className="shrink-0" />}
               <span className="truncate">{i.label}</span>
             </Link>
           </li>
@@ -36,17 +36,17 @@ export function NavList({ groups }: { groups: Group[] }) {
   );
 
   return (
-    <nav className="flex flex-col gap-4">
+    <nav className="staff-navigation flex flex-col gap-3">
       {groups.map((g) => g.id === 'management' ? (
         <details
           key={`${g.id}:${pathname}`}
           open={g.items.some((i) => i.href === active)}
-          className="group border-t border-line pt-3"
+          className="staff-management group border-t border-line pt-2"
           data-testid="management-menu"
         >
           <summary
             data-testid="management-toggle"
-            className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-[var(--radius)] border-l-4 border-transparent px-3 text-body text-ink hover:bg-surface-muted [&::-webkit-details-marker]:hidden"
+            className="staff-management-toggle flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-[var(--radius)] px-3 text-body text-ink hover:bg-surface-muted [&::-webkit-details-marker]:hidden"
           >
             <Icon name="settings" className="shrink-0" />
             <span className="min-w-0 flex-1 truncate">{g.label}</span>
@@ -54,7 +54,7 @@ export function NavList({ groups }: { groups: Group[] }) {
               <path d="m5 7.5 5 5 5-5" />
             </svg>
           </summary>
-          <div className="mt-1 pl-3">{links(g.items)}</div>
+          <div className="staff-subnav">{links(g.items, true)}</div>
         </details>
       ) : (
         <div key={g.id}>

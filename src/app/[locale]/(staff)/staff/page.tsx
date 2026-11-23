@@ -19,7 +19,7 @@ const TONES: Record<string, string> = {
   rooms: 'room',
   payments: 'money', earnings: 'money',
   inventory: 'stock',
-  therapists: 'people', reports: 'people', settings: 'review',
+  therapists: 'people', overview: 'review', reports: 'people', settings: 'review',
 };
 
 export default async function StaffHomePage() {
@@ -62,7 +62,8 @@ export default async function StaffHomePage() {
       <ul className={styles.menu}>
         {group.items.filter(({ id }) => id !== 'staffHome' && id !== 'today').map((item) => (
           <li key={item.id}>
-            <Link href={item.href} className={styles.tile} data-tone={TONES[item.id] ?? 'time'} data-testid={`staff-home-${item.id}`}>
+            <Link href={item.id === 'schedule' ? { pathname: item.href, query: { view: 'timeline' } } : item.href}
+              className={styles.tile} data-tone={TONES[item.id] ?? 'time'} data-testid={`staff-home-${item.id}`}>
               <span className={styles.icon}><Icon name={item.icon} /></span>
               <span>
                 <strong>{item.label}</strong>

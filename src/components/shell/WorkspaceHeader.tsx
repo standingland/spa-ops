@@ -30,6 +30,7 @@ export function WorkspaceHeader({ workspace, account, name, notifications, label
         <Link href="/account" data-testid="nav-account" className="workspace-account">
           <span aria-hidden="true"><Avatar name={name} size="sm" className="workspace-avatar" /></span>
           <span>{account}</span>
+          <Icon name="chevron" className="workspace-account-chevron" />
         </Link>
       </div>
     </header>

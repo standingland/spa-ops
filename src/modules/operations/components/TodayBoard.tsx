@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useSyncExternalStore } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { ErrorText } from '@/components/ErrorText';
+import { WorkspaceHero } from '@/components/shell/WorkspaceHero';
+import { Icon } from '@/components/shell/Icon';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { PageHeader } from '@/components/ui/page-header';
-import { StatusDot } from '@/components/ui/badge';
+import { Input } from '@/components/ui/field';
+import { StatusChip, StatusDot } from '@/components/ui/badge';
 import { ROOM_STATUS_KEY } from '@/components/ui/status';
-import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { errorText, uiErrorKey } from '@/lib/errors';
 import { formatTime } from '@/lib/time';
@@ -30,10 +32,10 @@ import { DailyNotesStrip } from '@/modules/daily-notes/components/DailyNotesStri
 import type { DailyNote } from '@/modules/daily-notes/schema';
 
 type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
+type Filter = 'all' | 'scheduled' | 'inTreatment' | 'completed' | 'cancellations';
 const LIVE_TABLES = ['bookings', 'room_turnovers', 'room_blocks', 'room_reports', 'therapist_time_off', 'payments'] as const;
 const STATUSES: RoomStatus[] = ['available', 'reserved', 'occupied', 'cleaning', 'out_of_service'];
 
-// "Shared screen" is remembered per device; storage can be unavailable, and until it is read the names stay hidden.
 const SHARED_KEY = 'spa.sharedScreen';
 const listeners = new Set<() => void>();
 function readShared(): boolean {
@@ -43,14 +45,17 @@ function writeShared(v: boolean) {
   try { localStorage.setItem(SHARED_KEY, v ? '1' : '0'); } catch { /* storage unavailable */ }
   listeners.forEach((l) => l());
 }
-function useShared(): [boolean, (v: boolean) => void] {
-  const v = useSyncExternalStore(
-    (cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; },
-    readShared,
-    () => true,
-  );
-  return [v, writeShared];
+function subscribeShared(callback: () => void) {
+  listeners.add(callback);
+  return () => { listeners.delete(callback); };
 }
+
+const categoryOf = (status: BoardRow['status']): Exclude<Filter, 'all'> => {
+  if (status === 'in_treatment') return 'inTreatment';
+  if (status === 'completed') return 'completed';
+  if (status === 'cancelled' || status === 'no_show') return 'cancellations';
+  return 'scheduled';
+};
 
 export function TodayBoard({ model, role, names, reports, roomZones = {}, pending = [], methods = [], canRecord = false, dailyNotes = [] }: {
   model: TodayModel; role: Role; names: Names; reports: OpenReport[]; roomZones?: Record<string, string | null>;
@@ -59,25 +64,36 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   const t = useTranslations('today');
   const s = useTranslations('status');
   const b = useTranslations('booking');
+  const design = useTranslations('workspaceDesign');
   const te = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
-  const [shared, setShared] = useShared();
+  const shared = useSyncExternalStore(subscribeShared, readShared, () => true);
   useLiveRefresh(LIVE_TABLES);
   const [error, setError] = useState<string | null>(null);
   const [reportRoom, setReportRoom] = useState<string | null>(null);
   const [reassign, setReassign] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
-  const all = [...model.arrivals, ...model.waiting, ...model.inTreatment];
+  const [filter, setFilter] = useState<Filter>('all');
+  const [search, setSearch] = useState('');
+  const active = [...model.arrivals, ...model.waiting, ...model.inTreatment];
+  const arrivals = new Set(model.arrivals.map((row) => row.bookingId));
+  const byId = new Map([...model.bookings, ...active].map((row) => [row.bookingId, row]));
+  const bookings = [...byId.values()].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+  const detailsRow = detailsId && !shared ? byId.get(detailsId) : undefined;
 
-  const who = (r: BoardRow) => (shared ? names.services[r.serviceId] : r.customerDisplayName);
-  const line = (r: BoardRow) => (
-    <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-      <span className="tnum font-semibold">{formatTime(r.startsAt)}–{formatTime(r.endsAt)}</span>
-      <span className="min-w-0 break-words">{who(r)}</span>
-      <span className="min-w-0 break-words text-ink-muted">{names.therapists[r.therapistId]} · {names.rooms[r.roomId]}</span>
-      {!shared && <TreatmentNote bookingId={r.bookingId} />}
-    </span>
-  );
+  const term = search.trim().toLocaleLowerCase(locale);
+  const counts: Record<Filter, number> = { all: bookings.length, scheduled: 0, inTreatment: 0, completed: 0, cancellations: 0 };
+  for (const row of bookings) counts[categoryOf(row.status)]++;
+  const visible = bookings.filter((row) => {
+    if (filter !== 'all' && categoryOf(row.status) !== filter) return false;
+    return !term || [names.services[row.serviceId], names.therapists[row.therapistId], names.rooms[row.roomId], shared ? '' : row.customerDisplayName]
+      .some((value) => value?.toLocaleLowerCase(locale).includes(term));
+  });
+  const filters = [
+    ['all', design('allBookings')], ['scheduled', design('scheduled')], ['inTreatment', t('inTreatment')],
+    ['completed', design('completed')], ['cancellations', t('cancellations')],
+  ] as const;
 
   async function ready(roomId: string) {
     setError(null);
@@ -87,126 +103,153 @@ export function TodayBoard({ model, role, names, reports, roomZones = {}, pendin
   }
 
   const section = (title: string, children: React.ReactNode) => (
-    <Card className="today-section flex min-w-0 flex-col gap-3"><h2 className="font-serif text-heading text-ink">{title}</h2>{children}</Card>
+    <Card className="today-section flex min-w-0 flex-col gap-3"><h2>{title}</h2>{children}</Card>
   );
   const empty = <EmptyState>{t('nothing')}</EmptyState>;
-  const rowBox = 'flex min-w-0 flex-wrap items-center gap-3 rounded-[var(--radius)] border border-line bg-surface p-3';
-  const actions = (r: BoardRow) => (
-    <span className="ml-auto flex flex-wrap items-center gap-2">
-      {!shared && <Button size="sm" variant="secondary" data-testid="open-details" onClick={() => setDetailsId(r.bookingId)}>{b('openDetails')}</Button>}
-      <BookingActions row={r} role={role} onError={setError} />
-    </span>
-  );
-  // Customer names never show on a shared screen: turning it on closes any open panel (render-time reset, no stale id).
-  if (shared && detailsId) setDetailsId(null);
-  const detailsRow = detailsId && !shared ? all.find((r) => r.bookingId === detailsId) : undefined;
+  const date = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeZone: 'Asia/Bangkok' }).format(new Date(`${model.day}T12:00:00+07:00`));
+  const tasks = [
+    { label: t('upcomingArrivals'), count: model.arrivals.length, href: '#today-bookings-title', focus: 'scheduled' },
+    { label: t('waiting'), count: model.waiting.length, href: '#today-bookings-title', focus: 'scheduled' },
+    { label: t('awaitingCleaning'), count: model.awaitingCleaning.length, href: '#today-room-turnovers' },
+  ] as const;
 
   return (
-    <div className={`flex min-w-0 flex-col gap-6 ${detailsRow ? 'lg:pr-[29rem]' : ''}`}>
-      <PageHeader title={t('title')} subtitle={model.day}
-        actions={<Button variant="secondary" size="sm" data-testid="shared-toggle" aria-pressed={shared} onClick={() => setShared(!shared)}>{shared ? t('sharedOn') : t('sharedOff')}</Button>} />
+    <div className="today-board" data-details-open={!!detailsRow}>
+      <WorkspaceHero title={t('title')} description={design('todayDesc')} icon="today" detail={<time dateTime={model.day}>{date}</time>}
+        actions={<Button variant="secondary" size="sm" data-testid="shared-toggle" aria-pressed={shared} onClick={() => {
+          if (!shared) { setDetailsId(null); setSearch(''); }
+          writeShared(!shared);
+        }}>{shared ? t('sharedOn') : t('sharedOff')}</Button>} />
 
       {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
 
-      <DailyNotesStrip notes={dailyNotes} />
+      <div className="today-main-grid">
+        <section aria-label={t('roomStatus')} className="today-metrics">
+          <Stat label={t('reservations')} value={model.counts.reservations} id="reservations" icon="today" />
+          <Stat label={t('therapistsOnShift')} value={model.therapists.length} id="therapists" icon="guests" />
+          <Stat label={s(ROOM_STATUS_KEY.available)} value={model.counts.available} id="available" icon="rooms" />
+          <Stat label={t('attention')} value={model.attention.length} id="attention" icon="checklist" />
+        </section>
 
-      <section aria-label={t('roomStatus')} className="today-stats grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4 xl:grid-cols-8">
-        <Stat label={t('reservations')} value={model.counts.reservations} id="reservations" />
-        <Stat label={t('cancelled')} value={model.counts.cancelled} id="cancelled" />
-        <Stat label={t('noShow')} value={model.counts.noShow} id="noshow" />
-        {STATUSES.map((k) => <Stat key={k} label={s(ROOM_STATUS_KEY[k])} value={model.counts[k]} id={k} dot={k} />)}
-      </section>
+        <section className="workspace-surface today-bookings" aria-labelledby="today-bookings-title">
+          <header>
+            <h2 id="today-bookings-title" className="workspace-section-title">{t('reservations')} <small>({bookings.length})</small></h2>
+            <label className="today-search"><Icon name="search" /><Input type="search" value={search} onChange={(event) => setSearch(event.target.value)}
+              aria-label={design('searchBookings')} placeholder={design('searchBookings')} /></label>
+          </header>
+          <div className="workspace-segmented today-filters">
+            {filters.map(([id, label]) => <button type="button" key={id} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}<span>{counts[id]}</span></button>)}
+          </div>
+          <div className="workspace-scroll" role="region" tabIndex={0} aria-labelledby="today-bookings-title">
+            <table className="workspace-table today-table">
+              <thead><tr>
+                <th scope="col">{b('start')}</th>{!shared && <th scope="col">{b('customer')}</th>}
+                <th scope="col">{b('service')}</th><th scope="col">{b('therapist')}</th>
+                <th scope="col">{te('nav.rooms')}</th><th scope="col">{design('status')}</th>
+                <th scope="col"><span className="sr-only">{b('openDetails')}</span></th>
+              </tr></thead>
+              <tbody>{visible.map((row) => {
+                const rowTestId = row.status === 'checked_in' ? 'waiting-row' : row.status === 'in_treatment' ? 'treatment-row'
+                  : categoryOf(row.status) === 'cancellations' ? 'cancellation-row' : arrivals.has(row.bookingId) ? 'arrival-row' : 'today-booking-row';
+                return (
+                  <tr key={row.bookingId} data-testid={rowTestId}>
+                    <td className="tnum font-semibold" data-label={b('start')}>{formatTime(row.startsAt)}<small>{formatTime(row.endsAt)}</small></td>
+                    {!shared && <td className="today-guest" data-label={b('customer')}><strong>{row.customerDisplayName}</strong><TreatmentNote bookingId={row.bookingId} /></td>}
+                    <td data-label={b('service')}>{names.services[row.serviceId] || '—'}</td>
+                    <td data-label={b('therapist')}>{names.therapists[row.therapistId] || '—'}</td>
+                    <td data-label={te('nav.rooms')}>{names.rooms[row.roomId] || '—'}</td>
+                    <td data-label={design('status')}>
+                      <StatusChip kind="booking" status={row.status} label={b(`status.${row.status}`)} />
+                      {row.status === 'in_treatment' && row.expectedEnd && <small>{t('expectedEnd')} {formatTime(row.expectedEnd)}</small>}
+                      {model.endingSoon.some((item) => item.bookingId === row.bookingId) && <small data-testid="ending-soon">{t('endingSoon')}</small>}
+                    </td>
+                    <td className="workspace-entry-actions"><div className="today-row-actions">
+                      {!shared && <Button size="sm" variant="secondary" data-testid="open-details" onClick={() => setDetailsId(row.bookingId)}>{b('openDetails')}</Button>}
+                      <BookingActions row={row} role={role} onError={setError} />
+                    </div></td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          </div>
+          {!visible.length && <p className="overview-empty">{bookings.length ? design('noMatches') : t('nothing')}</p>}
+        </section>
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-2">
-        <RoomStatusPanel model={model} names={names} roomZones={roomZones} shared={shared} role={role} onError={setError} />
-        <div className="flex min-w-0 flex-col gap-6">
-          {section(t('upcomingArrivals'), model.arrivals.length === 0 ? empty : (
-            <ul className="flex flex-col gap-2">{model.arrivals.map((r) => (
-              <li key={r.bookingId} data-testid="arrival-row" className={rowBox}>{line(r)}{actions(r)}</li>
-            ))}</ul>
-          ))}
+        <aside className="today-side">
           {section(t('attention'), (
             <>
-              <AttentionList items={model.attention} rows={[...all, ...model.attentionRows]} names={names} reports={reports} shared={shared}
-                onOpen={role === 'therapist' ? undefined : (a) => a.bookingId && setReassign(a.bookingId)}
+              <AttentionList items={model.attention} rows={[...active, ...model.attentionRows]} names={names} reports={reports} shared={shared}
+                onOpen={role === 'therapist' ? undefined : (item) => item.bookingId && setReassign(item.bookingId)}
                 onResolve={role === 'therapist' ? undefined : async (id) => {
                   setError(null);
-                  const r = await resolveRoomReport(id);
-                  if (!r.ok) { setError(errorText(te(uiErrorKey(r.code)), r)); return; }
+                  const result = await resolveRoomReport(id);
+                  if (!result.ok) { setError(errorText(te(uiErrorKey(result.code)), result)); return; }
                   router.refresh();
                 }} />
               {reassign && <ReassignDialog bookingId={reassign} names={names} onClose={() => setReassign(null)} />}
             </>
           ))}
+          <DailyNotesStrip notes={dailyNotes} />
+          <section className="workspace-surface today-checklist" aria-labelledby="today-work">
+            <h2 className="workspace-section-title" id="today-work">{te('nav.group.operate')}</h2>
+            <ul>{tasks.map((task) => (
+              <li key={task.label}>
+                <a href={task.href} onClick={'focus' in task ? () => { setFilter(task.focus); setSearch(''); } : undefined}>
+                  <Icon name={task.count ? 'schedule' : 'checklist'} />
+                  <span>{task.label}</span><strong className="tnum">{task.count}</strong>
+                </a>
+              </li>
+            ))}</ul>
+          </section>
+          {section(t('therapistsOnShift'), model.therapists.length === 0 ? empty : (
+            <ul className="today-team">{model.therapists.map((person) => (
+              <li key={person.therapistId} data-testid="therapist-state" data-state={person.state}>
+                <Icon name="therapists" /><span>{names.therapists[person.therapistId]}<small>{t(`therapistState.${person.state}`)}</small></span>
+              </li>
+            ))}</ul>
+          ))}
+        </aside>
+      </div>
+
+      <div className="today-lower">
+        <RoomStatusPanel model={model} names={names} roomZones={roomZones} shared={shared} role={role} onError={setError} />
+        <div className="today-side" id="today-room-turnovers">
+          {section(t('awaitingCleaning'), model.awaitingCleaning.length === 0 ? empty : (
+            <ul className="grid gap-2">{model.awaitingCleaning.map((room) => (
+              <li key={room.roomId} data-testid="cleaning-row" className="flex flex-wrap items-center gap-2 border-b border-line pb-2">
+                <strong>{names.rooms[room.roomId]}</strong>
+                <span className="tnum text-caption text-ink-muted">{t('due')} {room.turnoverDueAt ? formatTime(room.turnoverDueAt) : '—'}</span>
+                <Button size="sm" variant="secondary" data-testid="act-ready" onClick={() => ready(room.roomId)}>{t('ready')}</Button>
+                <Button size="sm" variant="link" onClick={() => setReportRoom(room.roomId)}>{t('report')}</Button>
+              </li>
+            ))}</ul>
+          ))}
+          {role !== 'therapist' && section(t('pendingPayments'), <PendingPayments rows={pending} methods={methods} canRecord={canRecord} shared={shared} />)}
         </div>
       </div>
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-2">
-        {section(t('waiting'), model.waiting.length === 0 ? empty : (
-          <ul className="flex flex-col gap-2">{model.waiting.map((r) => (
-            <li key={r.bookingId} data-testid="waiting-row" className={rowBox}>{line(r)}{actions(r)}</li>
-          ))}</ul>
+      <section aria-label={t('roomStatus')} className="today-secondary-counts">
+        {STATUSES.filter((key) => key !== 'available').map((key) => (
+          <span key={key}><StatusDot status={key} />{s(ROOM_STATUS_KEY[key])} <strong data-testid={`count-${key}`}>{model.counts[key]}</strong></span>
         ))}
-
-        {section(t('inTreatment'), model.inTreatment.length === 0 ? empty : (
-          <ul className="flex flex-col gap-2">{model.inTreatment.map((r) => {
-            const soon = model.endingSoon.some((x) => x.bookingId === r.bookingId);
-            return (
-              <li key={r.bookingId} data-testid="treatment-row" className={rowBox}>
-                {line(r)}
-                <span className="tnum text-caption">{t('expectedEnd')} {r.expectedEnd ? formatTime(r.expectedEnd) : '—'}</span>
-                {soon && <span data-testid="ending-soon" className="rounded-full bg-tint-reserved px-2 py-0.5 text-caption text-ink">{t('endingSoon')}</span>}
-                {actions(r)}
-              </li>
-            );
-          })}</ul>
-        ))}
-
-        {section(t('awaitingCleaning'), model.awaitingCleaning.length === 0 ? empty : (
-          <ul className="flex flex-col gap-2">{model.awaitingCleaning.map((r) => (
-            <li key={r.roomId} data-testid="cleaning-row" className={rowBox}>
-              <span className="min-w-0 break-words font-semibold">{names.rooms[r.roomId]}</span>
-              <span className="tnum text-caption text-ink-muted">{t('due')} {r.turnoverDueAt ? formatTime(r.turnoverDueAt) : '—'}</span>
-              <span className="ml-auto flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="secondary" data-testid="act-ready" onClick={() => ready(r.roomId)}>{t('ready')}</Button>
-                <Button size="sm" variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" onClick={() => setReportRoom(r.roomId)}>{t('report')}</Button>
-              </span>
-            </li>
-          ))}</ul>
-        ))}
-
-        {role !== 'therapist' && section(t('pendingPayments'), <PendingPayments rows={pending} methods={methods} canRecord={canRecord} shared={shared} />)}
-
-        {section(t('therapistsOnShift'), model.therapists.length === 0 ? empty : (
-          <ul className="flex flex-wrap gap-2">{model.therapists.map((x) => (
-            <li key={x.therapistId} data-testid="therapist-state" data-state={x.state} className="min-w-0 break-words rounded-[var(--radius)] border border-line bg-surface px-3 py-1.5 text-caption">
-              {names.therapists[x.therapistId]} · {t(`therapistState.${x.state}`)}
-            </li>
-          ))}</ul>
-        ))}
-
-        {section(t('cancellations'), model.cancellations.length === 0 ? empty : (
-          <ul className="flex flex-col gap-2">{model.cancellations.map((r) => (
-            <li key={r.bookingId} data-testid="cancellation-row" className={`${rowBox} opacity-70`}>{line(r)}</li>
-          ))}</ul>
-        ))}
-      </div>
+        <span>{t('cancelled')} <strong data-testid="count-cancelled">{model.counts.cancelled}</strong></span>
+        <span>{t('noShow')} <strong data-testid="count-noshow">{model.counts.noShow}</strong></span>
+      </section>
 
       {detailsRow && (
         <BookingDetails key={detailsRow.bookingId + detailsRow.version} row={detailsRow} role={role} onClose={() => setDetailsId(null)}
           labels={{ service: names.services[detailsRow.serviceId], therapist: names.therapists[detailsRow.therapistId], room: names.rooms[detailsRow.roomId] }} />
       )}
-
       {reportRoom && <ReportForm roomId={reportRoom} room={names.rooms[reportRoom]} onDone={() => setReportRoom(null)} onError={setError} />}
     </div>
   );
 }
 
-function Stat({ label, value, id, dot }: { label: string; value: number; id: string; dot?: RoomStatus }) {
+function Stat({ label, value, id, icon }: { label: string; value: number; id: string; icon: 'today' | 'guests' | 'rooms' | 'checklist' }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 bg-surface px-4 py-4">
-      <span className="flex items-center gap-1.5 text-caption text-ink-muted">{dot && <StatusDot status={dot} />}{label}</span>
-      <span className="tnum text-2xl font-semibold leading-none text-ink" data-testid={`count-${id}`}>{value}</span>
+    <div className="workspace-surface today-metric">
+      <span><Icon name={icon} /></span>
+      <div><h2>{label}</h2><strong className="tnum" data-testid={`count-${id}`}>{value}</strong></div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
 import { Alert } from '@/components/ui/alert';
 import { Badge, StatusChip } from '@/components/ui/badge';
+import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -64,9 +65,12 @@ export function CustomerProfile({ customer: c, role, names, preferences = {} }: 
   const h2 = 'font-serif text-heading text-ink';
 
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <h1 className="min-w-0 break-words font-serif text-title text-ink" data-testid="customer-name">{c.displayName}</h1>
+    <div className="customer-profile flex min-w-0 flex-col gap-3">
+      <header className="workspace-surface flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span aria-hidden="true"><Avatar name={c.displayName} /></span>
+          <h2 className="min-w-0 break-words" data-testid="customer-name">{c.displayName}</h2>
+        </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           {gone && <Badge data-testid="anonymised-badge">{t('removed')}</Badge>}
           <Link href="/customers" className="inline-flex min-h-11 items-center px-2 text-primary underline pointer-fine:min-h-0">← {t('title')}</Link>
@@ -75,12 +79,12 @@ export function CustomerProfile({ customer: c, role, names, preferences = {} }: 
       {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
       {notice && <Alert tone="info">{notice}</Alert>}
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label={t('summary')}>
+      <section className="grid grid-cols-2 gap-2 xl:grid-cols-4" aria-label={t('summary')}>
         {stat('visits', t('visits'), c.summary.visits)}
         {stat('cancelled', t('cancelled'), c.summary.cancelled)}
         {stat('no-shows', t('noShows'), c.summary.noShows)}
         {stat('upcoming', t('upcoming'), c.summary.upcoming)}
-        <Card className="p-3 text-body text-ink-muted sm:col-span-4">
+        <Card className="col-span-full p-3 text-body text-ink-muted">
           <span className="tnum">{t('firstVisit')}: {c.summary.firstVisit ? bangkokDay(c.summary.firstVisit) : '—'}</span>{' · '}
           <span className="tnum">{t('lastVisit')}: {c.summary.lastVisit ? bangkokDay(c.summary.lastVisit) : '—'}</span>{' · '}
           <span className="tnum">{t('avgDays')}: {c.summary.avgDaysBetween ?? '—'}</span>{' · '}
@@ -90,7 +94,7 @@ export function CustomerProfile({ customer: c, role, names, preferences = {} }: 
 
       <Card>
         <form onSubmit={save} className="grid gap-3 sm:grid-cols-2" aria-label={t('details')}>
-          <h2 className={`${h2} sm:col-span-2`}>{t('details')}</h2>
+          <h3 className={`${h2} sm:col-span-2`}>{t('details')}</h3>
           <Field label={t('displayName')}><Input data-testid="f-display-name" value={f.displayName} onChange={set('displayName')} disabled={gone} /></Field>
           <Field label={t('fullName')}><Input value={f.fullName} onChange={set('fullName')} disabled={gone} /></Field>
           <Field label={t('phone')}><Input data-testid="f-phone" value={f.phone} onChange={set('phone')} disabled={gone} inputMode="tel" /></Field>

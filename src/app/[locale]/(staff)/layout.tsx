@@ -13,6 +13,7 @@ import { WorkspaceHeader } from '@/components/shell/WorkspaceHeader';
 import { Wordmark } from '@/components/shell/Wordmark';
 import { BanyanMark } from '@/components/shell/BanyanMark';
 import { Button } from '@/components/ui/button';
+import './workspace.css';
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await requireRole();
@@ -33,6 +34,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   const labels = Object.fromEntries([
     ...groups.flatMap((group) => group.items.map((item) => [item.href, item.label])),
+    ...(tools.length ? [['/admin', t('group.management')]] : []),
     ...tools.map((tool) => [tool.href, t(tool.id === 'settings' ? 'policies' : tool.id)]),
     ['/staff/requests', t('myStaffRequests')],
     ['/staff/clock', t('staffClock')],
@@ -59,7 +61,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           notifications={tools.some((tool) => tool.id === 'notifications') ? t('notifications') : undefined}
           labels={labels}
         />
-        <main className="staff-main p-4 sm:p-6 xl:px-10 xl:py-8">{children}</main>
+        <main className="staff-main">{children}</main>
       </div>
     </div>
   );

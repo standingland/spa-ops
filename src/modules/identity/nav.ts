@@ -1,8 +1,8 @@
 // Pure navigation model: no React, no server imports (type-only Role import is erased).
 import type { Role } from '@/modules/identity/session';
 
-export type NavId = 'staffHome' | 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist';
-export type IconName = NavId | 'menu' | 'close' | 'guide' | 'bell' | 'checklist';
+export type NavId = 'staffHome' | 'overview' | 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist';
+export type IconName = NavId | 'menu' | 'close' | 'guide' | 'bell' | 'checklist' | 'chevron' | 'search' | 'grid' | 'list' | 'refresh';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
 export type AdminTool = { id: 'staffClockQr' | 'staffRequests' | 'adminRooms' | 'services' | 'notifications' | 'applications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
@@ -16,7 +16,7 @@ const GROUPS: NavGroup[] = [
     id: 'operate',
     items: [
       { id: 'staffHome', href: '/staff', icon: 'staffHome', roles: ALL },
-      { id: 'settings', href: '/admin', icon: 'reports', roles: MANAGEMENT },
+      { id: 'overview', href: '/overview', icon: 'overview', roles: MANAGEMENT },
       { id: 'today', href: '/today', icon: 'today', roles: ALL },
       { id: 'schedule', href: '/calendar', icon: 'schedule', roles: ALL },
       // Not rendered until sub-project 4.
@@ -29,6 +29,7 @@ const GROUPS: NavGroup[] = [
   {
     id: 'management',
     items: [
+      { id: 'settings', href: '/admin', icon: 'settings', roles: MANAGEMENT },
       { id: 'therapists', href: '/admin/therapists', icon: 'therapists', roles: MANAGEMENT },
       { id: 'payments', href: '/payments', icon: 'payments', roles: MANAGEMENT },
       { id: 'earnings', href: '/earnings', icon: 'earnings', roles: MANAGEMENT },
@@ -55,7 +56,8 @@ export function visibleNav(role: Role, opts: { managerReports: boolean }): NavGr
   return GROUPS.map((g) => ({
     id: g.id,
     items: g.items.filter(
-      (i) => !i.hidden && i.roles.includes(role) && !(i.id === 'reports' && role === 'manager' && !opts.managerReports),
+      (i) => !i.hidden && i.roles.includes(role) &&
+        !((i.id === 'reports' || i.id === 'overview') && role === 'manager' && !opts.managerReports),
     ),
   })).filter((g) => g.items.length > 0);
 }

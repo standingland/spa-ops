@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { Icon } from '@/components/shell/Icon';
 
 export type Span = 'day' | 'week' | 'month';
 
@@ -9,10 +10,10 @@ export type Span = 'day' | 'week' | 'month';
 export function SpanSwitch({ span, day, view }: { span: Span; day: string; view: string }) {
   const t = useTranslations('span');
   return (
-    <nav aria-label={t('label')} className="flex gap-3 text-sm">
+    <nav aria-label={t('label')} className="workspace-segmented">
       {(['day', 'week', 'month'] as const).map((s) => (
         <Link key={s} href={`/calendar?span=${s}&day=${day}&view=${view}`} data-testid={`span-${s}`}
-          aria-current={s === span ? 'true' : undefined} className={s === span ? 'font-semibold underline' : ''}>{t(s)}</Link>
+          aria-current={s === span ? 'true' : undefined}><Icon name="today" />{t(s)}</Link>
       ))}
     </nav>
   );

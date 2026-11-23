@@ -68,14 +68,37 @@ export async function acceptWaitlist(id: string): Promise<{ ok: true; cancelToke
   const b = (data as { booking_id: string; starts_at: string }[])[0];
   return b ? { ok: true, cancelToken: signCancelToken(b.booking_id, cancelTtlSec(b.starts_at)) } : fail('UNKNOWN');
 }
-export async function listWaitlist(): Promise<{ ok: true; rows: WaitlistEntry[] } | { ok: false; code: string }> {
+export async function listWaitlist(): Promise<{
+  ok: true; rows: WaitlistEntry[]; counts: Record<'waiting' | 'offered' | 'closed', number>;
+} | { ok: false; code: string }> {
   if (!(await desk())) return fail('NOT_AUTHORIZED');
-  const { data, error } = await (await createClient()).from('waitlist_entries').select('id,status,starts_window,offered_start,offer_expires_at,customers(display_name),therapists(display_name),services(name_th,name_en)').in('status', ['waiting', 'offered']).order('created_at').limit(200);
-  if (error) return failFrom(error);
+  const supabase = await createClient();
+  const fields = 'id,status,starts_window,offered_start,offer_expires_at,customers(display_name),therapists(display_name),services(name_th,name_en)';
+  const query = () => supabase.from('waitlist_entries').select(fields, { count: 'exact' }).limit(200);
+  const [waiting, offered, closed] = await Promise.all([
+    query().eq('status', 'waiting').order('created_at').order('id'),
+    query().eq('status', 'offered').order('created_at').order('id'),
+    query().in('status', ['accepted', 'expired', 'cancelled']).order('created_at', { ascending: false }).order('id'),
+  ]);
+  for (const result of [waiting, offered, closed]) if (result.error) return failFrom(result.error);
   // Supabase returns joined many-to-one records as objects. Normalise its inferred relation type here.
   const { parseRange } = await import('@/lib/time');
-  const rows = (data ?? []) as unknown as { id: string; status: string; starts_window: string; offered_start: string | null; offer_expires_at: string | null; customers: { display_name: string }; therapists: { display_name: string }; services: { name_th: string; name_en: string | null } }[];
-  return { ok: true, rows: rows.map((r) => { const range = parseRange(r.starts_window); return { id: r.id, status: r.status, window_from: range.start, window_to: new Date(Date.parse(range.end) - 1000).toISOString(), offered_start: r.offered_start, offer_expires_at: r.offer_expires_at, customer_name: r.customers.display_name, therapist_name: r.therapists.display_name, service_name_th: r.services.name_th, service_name_en: r.services.name_en }; }) };
+  const rows = [...(waiting.data ?? []), ...(offered.data ?? []), ...(closed.data ?? [])] as unknown as {
+    id: string; status: string; starts_window: string; offered_start: string | null; offer_expires_at: string | null;
+    customers: { display_name: string } | null; therapists: { display_name: string } | null; services: { name_th: string; name_en: string | null } | null;
+  }[];
+  return {
+    ok: true, counts: { waiting: waiting.count ?? 0, offered: offered.count ?? 0, closed: closed.count ?? 0 },
+    rows: rows.map((row) => {
+      const range = parseRange(row.starts_window);
+      return {
+        id: row.id, status: row.status, window_from: range.start, window_to: new Date(Date.parse(range.end) - 1000).toISOString(),
+        offered_start: row.offered_start, offer_expires_at: row.offer_expires_at,
+        customer_name: row.customers?.display_name, therapist_name: row.therapists?.display_name ?? '',
+        service_name_th: row.services?.name_th ?? '', service_name_en: row.services?.name_en ?? null,
+      };
+    }),
+  };
 }
 export async function staffCancelWaitlist(id: string): Promise<ActionResult> {
   if (!(await desk())) return fail('NOT_AUTHORIZED');
