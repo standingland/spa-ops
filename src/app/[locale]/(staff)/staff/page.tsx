@@ -10,11 +10,21 @@ import { getStaffNavigation } from '@/modules/identity/staffNavigation';
 import { PHOTO_BUCKET } from '@/modules/therapists/photo';
 import styles from './staff-home.module.css';
 
+/** Tile colour by kind of work: time & schedule, guests, rooms, money, stock, people. */
+const TONES: Record<string, string> = {
+  schedule: 'time', today: 'time',
+  guests: 'guest', waitlist: 'guest', bookings: 'guest',
+  rooms: 'room',
+  payments: 'money', earnings: 'money',
+  inventory: 'stock',
+  therapists: 'people', reports: 'people', settings: 'review',
+};
+
 export default async function StaffHomePage() {
   const session = await requireRole();
   const supabase = await createClient();
   const canReview = session.role === 'manager' || session.role === 'owner';
-  const [t, roles, locale, groups, staff, therapist, pending] = await Promise.all([
+  const [t, roles, locale, groups, staff, therapist, pending, nav, hubDesc] = await Promise.all([
     getTranslations('staffHome'),
     getTranslations('staff.roles'),
     getLocale(),
@@ -22,6 +32,8 @@ export default async function StaffHomePage() {
     supabase.from('staff').select('display_name').eq('user_id', session.userId).maybeSingle(),
     supabase.from('therapists').select('photo_path').eq('staff_user_id', session.userId).maybeSingle(),
     canReview ? supabase.from('staff_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending') : null,
+    getTranslations('nav'),
+    getTranslations('adminHub.desc'),
   ]);
 
   const role = roles(session.role);
@@ -36,7 +48,7 @@ export default async function StaffHomePage() {
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeZone: 'Asia/Bangkok' }).format(now);
 
   return (
-    <div className={styles.home}>
+    <div className={styles.home} data-layout={canReview ? 'manager' : undefined}>
       <header className={styles.welcome}>
         <div className={styles.profile}>
           <div className={styles.portrait} aria-hidden="true" data-testid="staff-home-portrait">
@@ -60,11 +72,11 @@ export default async function StaffHomePage() {
         </div>
       </header>
 
-      <section aria-labelledby="staff-home-requests" className={styles.section}>
+      <section aria-labelledby="staff-home-requests" className={styles.section} data-section="requests">
         <h2 id="staff-home-requests">{t('requests')}</h2>
         <ul className={styles.menu}>
           <li>
-            <Link href="/staff/clock" className={styles.tile}>
+            <Link href="/staff/clock" className={styles.tile} data-tone="time">
               <span className={styles.icon}><Icon name="today" /></span>
               <span>
                 <strong>{t('clock.title')}</strong>
@@ -74,7 +86,7 @@ export default async function StaffHomePage() {
           </li>
           {(['sick', 'shift'] as const).map((type) => (
             <li key={type}>
-              <Link href={{ pathname: '/staff/requests', query: { type } }} className={styles.tile}>
+              <Link href={{ pathname: '/staff/requests', query: { type } }} className={styles.tile} data-tone={type === 'sick' ? 'leave' : 'swap'}>
                 <span className={styles.icon}><Icon name={type === 'sick' ? 'bookings' : 'schedule'} /></span>
                 <span>
                   <strong>{t(`request.${type}.title`)}</strong>
@@ -84,7 +96,7 @@ export default async function StaffHomePage() {
             </li>
           ))}
           {canReview && <li>
-            <Link href="/admin/staff-requests" className={styles.tile}>
+            <Link href="/admin/staff-requests" className={styles.tile} data-tone="review">
               <span className={styles.icon}><Icon name="guests" /></span>
               <span>
                 <strong>{t('request.review.title')}</strong>
@@ -93,7 +105,7 @@ export default async function StaffHomePage() {
             </Link>
           </li>}
           {canReview && <li>
-            <Link href="/admin/staff-clock" className={styles.tile}>
+            <Link href="/admin/staff-clock" className={styles.tile} data-tone="review">
               <span className={styles.icon}><Icon name="today" /></span>
               <span>
                 <strong>{t('clock.qrTitle')}</strong>
@@ -104,13 +116,37 @@ export default async function StaffHomePage() {
         </ul>
       </section>
 
+      <section aria-labelledby="staff-home-account" className={styles.section} data-section="account">
+        <h2 id="staff-home-account">{t('account.heading')}</h2>
+        <ul className={styles.menu}>
+          <li>
+            <Link href="/account" className={styles.tile} data-tone="neutral" data-testid="staff-home-account">
+              <span className={styles.icon}><Icon name="settings" /></span>
+              <span>
+                <strong>{t('account.title')}</strong>
+                <small>{t('account.description')}</small>
+              </span>
+            </Link>
+          </li>
+          {canReview && <li>
+            <Link href="/admin/guide" className={styles.tile} data-tone="guide" data-testid="staff-home-system-guide">
+              <span className={styles.icon}><Icon name="guide" /></span>
+              <span>
+                <strong>{nav('guide')}</strong>
+                <small>{hubDesc('guide')}</small>
+              </span>
+            </Link>
+          </li>}
+        </ul>
+      </section>
+
       {groups.map((group) => (
-        <section key={group.id} aria-labelledby={`staff-home-${group.id}`} className={styles.section}>
+        <section key={group.id} aria-labelledby={`staff-home-${group.id}`} className={styles.section} data-section={group.id}>
           <h2 id={`staff-home-${group.id}`}>{group.label}</h2>
           <ul className={styles.menu}>
             {group.items.filter(({ id }) => id !== 'staffHome' && id !== 'today').map((item) => (
               <li key={item.id}>
-                <Link href={item.href} className={styles.tile} data-testid={`staff-home-${item.id}`}>
+                <Link href={item.href} className={styles.tile} data-tone={TONES[item.id] ?? 'time'} data-testid={`staff-home-${item.id}`}>
                   <span className={styles.icon}><Icon name={item.icon} /></span>
                   <span>
                     <strong>{item.label}</strong>

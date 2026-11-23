@@ -44,6 +44,7 @@
     "openToday": "View today’s work",
     "openGuide": "Staff guide",
     "requests": "Shifts and time off",
+    "account": { "heading": "My account", "title": "Settings", "description": "Change your password and view your account" },
     "clock": {
       "title": "Clock in and out",
       "description": "See your times and who’s on shift",
