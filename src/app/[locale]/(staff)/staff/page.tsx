@@ -6,7 +6,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { bangkokDay } from '@/lib/time';
 import { requireRole } from '@/modules/identity/session';
+import type { IconName } from '@/modules/identity/nav';
 import { getStaffNavigation } from '@/modules/identity/staffNavigation';
+import { getToday } from '@/modules/operations/actions';
 import { PHOTO_BUCKET } from '@/modules/therapists/photo';
 import styles from './staff-home.module.css';
 
@@ -24,31 +26,57 @@ export default async function StaffHomePage() {
   const session = await requireRole();
   const supabase = await createClient();
   const canReview = session.role === 'manager' || session.role === 'owner';
-  const [t, roles, locale, groups, staff, therapist, pending, nav, hubDesc] = await Promise.all([
+  const [t, roles, locale, groups, therapist, pending, nav, today, hubDesc, operations] = await Promise.all([
     getTranslations('staffHome'),
     getTranslations('staff.roles'),
     getLocale(),
     getStaffNavigation(session.role),
-    supabase.from('staff').select('display_name').eq('user_id', session.userId).maybeSingle(),
     supabase.from('therapists').select('photo_path').eq('staff_user_id', session.userId).maybeSingle(),
     canReview ? supabase.from('staff_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending') : null,
     getTranslations('nav'),
+    getTranslations('today'),
     getTranslations('adminHub.desc'),
+    getToday(),
   ]);
 
   const role = roles(session.role);
-  const name = staff.data?.display_name?.trim() || role;
+  const name = session.displayName || role;
   const photoPath = therapist.data?.photo_path;
   // The staff session selects only its linked portrait. The private bucket's
   // general read policy stays limited to management.
   const photo = photoPath
     ? await createAdminClient().storage.from(PHOTO_BUCKET).createSignedUrl(photoPath, 3600)
     : null;
-  const now = new Date();
+  const now = operations.ok ? new Date(operations.now) : new Date();
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeZone: 'Asia/Bangkok' }).format(now);
+  const model = operations.ok ? operations.model : null;
+  const metrics: { id: 'bookings' | 'rooms' | 'therapists' | 'attention'; label: string; value: number; total?: number; href: string; icon: IconName }[] = model ? [
+    { id: 'bookings', label: today('reservations'), value: model.counts.reservations, href: '/today', icon: 'today' },
+    { id: 'rooms', label: t('summary.availableRooms'), value: model.counts.available, total: model.rooms.length, href: '/rooms', icon: 'rooms' },
+    { id: 'therapists', label: today('therapistsOnShift'), value: model.therapists.length, href: canReview ? '/admin/therapists' : '/today', icon: 'therapists' },
+    { id: 'attention', label: t('summary.attention'), value: model.attention.length, href: '/today', icon: 'checklist' },
+  ] : [];
+  const navigation = groups.map((group) => (
+    <section key={group.id} aria-labelledby={`staff-home-${group.id}`} className={styles.section}>
+      <h2 id={`staff-home-${group.id}`}>{group.label}</h2>
+      <ul className={styles.menu}>
+        {group.items.filter(({ id }) => id !== 'staffHome' && id !== 'today').map((item) => (
+          <li key={item.id}>
+            <Link href={item.href} className={styles.tile} data-tone={TONES[item.id] ?? 'time'} data-testid={`staff-home-${item.id}`}>
+              <span className={styles.icon}><Icon name={item.icon} /></span>
+              <span>
+                <strong>{item.label}</strong>
+                <small>{t(`menu.${item.id}`)}</small>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ));
 
   return (
-    <div className={styles.home} data-layout={canReview ? 'manager' : undefined}>
+    <div className={styles.home} data-staff-home="">
       <header className={styles.welcome}>
         <div className={styles.profile}>
           <div className={styles.portrait} aria-hidden="true" data-testid="staff-home-portrait">
@@ -72,11 +100,33 @@ export default async function StaffHomePage() {
         </div>
       </header>
 
-      <section aria-labelledby="staff-home-requests" className={styles.section} data-section="requests">
+      {model ? (
+        <ul aria-label={t('summary.label')} className={styles.metrics}>
+          {metrics.map(({ id, label, value, total, href, icon }) => (
+            <li key={id}>
+              <Link href={href} className={styles.metric}>
+                <Icon name={icon} />
+                <span className={styles.metricContent}>
+                  <span className={styles.metricLabel}>{label}</span>
+                  <span className={styles.metricDetails}>
+                    <span>{t.rich(`summary.units.${id}`, { count: value, value: (text) => <strong>{text}</strong> })}</span>
+                    {total !== undefined && <small>{t('summary.roomTotal', { count: total })}</small>}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className={styles.notice} role="status">{t('summary.unavailable')}</p>
+      )}
+
+      {canReview && navigation}
+      <section aria-labelledby="staff-home-requests" className={styles.section}>
         <h2 id="staff-home-requests">{t('requests')}</h2>
         <ul className={styles.menu}>
           <li>
-            <Link href="/staff/clock" className={styles.tile} data-tone="time">
+            <Link href="/staff/clock" className={styles.tile} data-tone="money">
               <span className={styles.icon}><Icon name="today" /></span>
               <span>
                 <strong>{t('clock.title')}</strong>
@@ -116,9 +166,9 @@ export default async function StaffHomePage() {
         </ul>
       </section>
 
-      <section aria-labelledby="staff-home-account" className={styles.section} data-section="account">
+      <section aria-labelledby="staff-home-account" className={styles.section}>
         <h2 id="staff-home-account">{t('account.heading')}</h2>
-        <ul className={styles.menu}>
+        <ul className={`${styles.menu} ${styles.accountMenu}`}>
           <li>
             <Link href="/account" className={styles.tile} data-tone="neutral" data-testid="staff-home-account">
               <span className={styles.icon}><Icon name="settings" /></span>
@@ -140,24 +190,7 @@ export default async function StaffHomePage() {
         </ul>
       </section>
 
-      {groups.map((group) => (
-        <section key={group.id} aria-labelledby={`staff-home-${group.id}`} className={styles.section} data-section={group.id}>
-          <h2 id={`staff-home-${group.id}`}>{group.label}</h2>
-          <ul className={styles.menu}>
-            {group.items.filter(({ id }) => id !== 'staffHome' && id !== 'today').map((item) => (
-              <li key={item.id}>
-                <Link href={item.href} className={styles.tile} data-tone={TONES[item.id] ?? 'time'} data-testid={`staff-home-${item.id}`}>
-                  <span className={styles.icon}><Icon name={item.icon} /></span>
-                  <span>
-                    <strong>{item.label}</strong>
-                    <small>{t(`menu.${item.id}`)}</small>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {!canReview && navigation}
     </div>
   );
 }

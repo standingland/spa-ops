@@ -4,16 +4,16 @@ import { redirect } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 
 export type Role = 'owner' | 'manager' | 'receptionist' | 'therapist';
-export type Session = { userId: string; role: Role };
+export type Session = { userId: string; role: Role; displayName: string };
 
 /** The signed-in active staff member, or null. */
 export async function getSession(): Promise<Session | null> {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) return null;
-  const { data: staff } = await supabase.from('staff').select('role, active').eq('user_id', data.user.id).maybeSingle();
+  const { data: staff } = await supabase.from('staff').select('role, active, display_name').eq('user_id', data.user.id).maybeSingle();
   if (!staff || !staff.active) return null;
-  return { userId: data.user.id, role: staff.role as Role };
+  return { userId: data.user.id, role: staff.role as Role, displayName: staff.display_name?.trim() ?? '' };
 }
 
 /** Every staff page and server action starts with this. No roles listed = any active staff member. */

@@ -17,6 +17,8 @@ const PATHS: Record<IconName, React.ReactNode> = {
   menu: (<path d="M4 7h16M4 12h16M4 17h16" />),
   guide: (<path d="M12 6.5c-2.5-2-5.5-2-9-1v13c3.5-1 6.5-1 9 1 2.5-2 5.5-2 9-1v-13c-3.5-1-6.5-1-9 1zm0 0v13" />),
   close: (<path d="M6 6l12 12M18 6L6 18" />),
+  bell: (<path d="M9.5 20a2.8 2.8 0 0 0 5 0M12 3v2m-6 6a6 6 0 1 1 12 0c0 4 1 5 2 6H4c1-1 2-2 2-6Z" />),
+  checklist: (<><rect x="3" y="3" width="18" height="18" rx="2" /><path d="m7.5 12 3 3 6-6" /></>),
 };
 
 export function Icon({ name, className }: { name: IconName; className?: string }) {

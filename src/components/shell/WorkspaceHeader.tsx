@@ -2,11 +2,14 @@
 
 import { Link, usePathname } from '@/i18n/navigation';
 import { activeHref } from '@/modules/identity/nav';
+import { Avatar } from '@/components/ui/avatar';
 import { Icon } from './Icon';
 
-export function WorkspaceHeader({ workspace, account, labels }: {
+export function WorkspaceHeader({ workspace, account, name, notifications, labels }: {
   workspace: string;
   account: string;
+  name: string;
+  notifications?: string;
   labels: Record<string, string>;
 }) {
   const pathname = usePathname();
@@ -18,10 +21,17 @@ export function WorkspaceHeader({ workspace, account, labels }: {
         <span>{workspace}</span>
         {active && <><span aria-hidden="true">/</span><strong>{labels[active]}</strong></>}
       </div>
-      <Link href="/account" data-testid="nav-account" className="workspace-account">
-        <Icon name="therapists" />
-        <span>{account}</span>
-      </Link>
+      <div className="workspace-controls">
+        {notifications && (
+          <Link href="/admin/notifications" className="workspace-notifications" aria-label={notifications} title={notifications}>
+            <Icon name="bell" />
+          </Link>
+        )}
+        <Link href="/account" data-testid="nav-account" className="workspace-account">
+          <span aria-hidden="true"><Avatar name={name} size="sm" className="workspace-avatar" /></span>
+          <span>{account}</span>
+        </Link>
+      </div>
     </header>
   );
 }

@@ -40,6 +40,19 @@
     "applications": "Applications"
   },
   "staffHome": {
+    "summary": {
+      "label": "Today’s operations",
+      "availableRooms": "Available rooms",
+      "attention": "Tasks needing attention",
+      "roomTotal": "of {count, number}",
+      "unavailable": "Today’s summary is unavailable. Refresh to try again.",
+      "units": {
+        "bookings": "{count, plural, one {<value>#</value> booking} other {<value>#</value> bookings}}",
+        "rooms": "{count, plural, one {<value>#</value> room} other {<value>#</value> rooms}}",
+        "therapists": "{count, plural, one {<value>#</value> person} other {<value>#</value> people}}",
+        "attention": "{count, plural, one {<value>#</value> item} other {<value>#</value> items}}"
+      }
+    },
     "welcome": "Hello, {name}",
     "openToday": "View today’s work",
     "openGuide": "Staff guide",

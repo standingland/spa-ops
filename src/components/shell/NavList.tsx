@@ -22,7 +22,7 @@ export function NavList({ groups }: { groups: Group[] }) {
               data-testid={`nav-${i.id}`}
               aria-current={current ? 'page' : undefined}
               className={cn(
-                'flex min-h-11 items-center gap-3 rounded-md px-3 text-body text-ink transition-colors',
+                'staff-nav-link flex min-h-11 items-center gap-3 rounded-md px-3 text-body text-ink transition-colors',
                 current ? 'bg-tint-available font-semibold' : 'hover:bg-surface-muted',
               )}
             >
@@ -57,8 +57,8 @@ export function NavList({ groups }: { groups: Group[] }) {
           <div className="mt-1 pl-3">{links(g.items)}</div>
         </details>
       ) : (
-        <div key={g.id} className="flex flex-col gap-1">
-          <h2 className="px-4 pb-2 text-caption font-medium text-ink-muted">{g.label}</h2>
+        <div key={g.id}>
+          <h2 className="sr-only">{g.label}</h2>
           {links(g.items)}
         </div>
       ))}

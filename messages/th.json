@@ -40,6 +40,19 @@
     "applications": "ใบสมัครงาน"
   },
   "staffHome": {
+    "summary": {
+      "label": "สรุปการดำเนินงานวันนี้",
+      "availableRooms": "ห้องว่าง",
+      "attention": "งานที่ต้องดูแล",
+      "roomTotal": "จาก {count, number} ห้อง",
+      "unavailable": "โหลดสรุปวันนี้ไม่ได้ กรุณารีเฟรชเพื่อลองอีกครั้ง",
+      "units": {
+        "bookings": "<value>{count, number}</value> นัด",
+        "rooms": "<value>{count, number}</value> ห้อง",
+        "therapists": "<value>{count, number}</value> คน",
+        "attention": "<value>{count, number}</value> รายการ"
+      }
+    },
     "welcome": "สวัสดี {name}",
     "openToday": "ดูงานวันนี้",
     "openGuide": "คู่มือพนักงาน",
