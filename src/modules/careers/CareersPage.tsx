@@ -2,305 +2,440 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { careers as c, type Locale } from "./content";
 import { submitApplication } from "./actions";
 import styles from "./careers.module.css";
 
-function Arrow() {
+type ExperienceCode = (typeof c.experienceOptions)[number]["code"];
+
+function BrandMark({ href }: { href: string }) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-      <path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="1.3" />
-    </svg>
+    <a href={href} className={styles.brand} aria-label={c.brand}>
+      <span className={styles.monogram} aria-hidden="true">
+        {c.monogram}
+      </span>
+      <span>{c.brand}</span>
+    </a>
   );
 }
 
 export function CareersPage({ locale }: { locale: Locale }) {
-  const [review, setReview] = useState(false);
-  const [status, setStatus] = useState("");
-  const [saveState, setSaveState] = useState<"idle" | "sending" | "saved" | "failed" | "limited">("idle");
+  const [submitted, setSubmitted] = useState(false);
+  const [saveState, setSaveState] = useState<
+    "idle" | "sending" | "saved" | "failed" | "limited"
+  >("idle");
+  const [copyStatus, setCopyStatus] = useState("");
   const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [contact, setContact] = useState("");
-  const [experience, setExperience] = useState("2");
-  const [certificate, setCertificate] = useState("0");
-  const [work, setWork] = useState("0");
-  const [skills, setSkills] = useState("");
+  const [phone, setPhone] = useState("");
+  const [lineId, setLineId] = useState("");
+  const [experience, setExperience] = useState<ExperienceCode | "">("");
+  const [notes, setNotes] = useState("");
+  const [consent, setConsent] = useState(false);
+
   const f = c.form;
-  const experienceCodes = ["none", "under_1", "1_3", "3_5", "5_plus"] as const;
-  const workCodes = ["full_time", "part_time"] as const;
+  const selectedExperienceLabel =
+    c.experienceOptions.find((item) => item.code === experience)?.label[locale] ?? "-";
 
-  const summary = [
-    `${f.summaryTitle[locale]}`,
+  const summaryLines = [
     `${f.lines.name[locale]}: ${name.trim()}`,
-    `${f.lines.age[locale]}: ${age.trim()}`,
-    `${f.lines.contact[locale]}: ${contact.trim()}`,
-    `${f.lines.experience[locale]}: ${c.experienceOptions[Number(experience)][locale]}`,
-    `${f.lines.certificate[locale]}: ${c.certificateOptions[Number(certificate)][locale]}`,
-    `${f.lines.work[locale]}: ${c.workOptions[Number(work)][locale]}`,
-    `${f.lines.skills[locale]}: ${skills.trim() || "-"}`,
-  ].join("\n");
+    `${f.lines.phone[locale]}: ${phone.trim()}`,
+    ...(lineId.trim() ? [`${f.lines.lineId[locale]}: ${lineId.trim()}`] : []),
+    `${f.lines.experience[locale]}: ${selectedExperienceLabel}`,
+    ...(notes.trim() ? [`${f.lines.notes[locale]}: ${notes.trim()}`] : []),
+  ];
+  const summaryText = `${f.summaryTitle[locale]}\n${summaryLines.join("\n")}`;
 
-  async function sendApplication(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (saveState === "sending") return;
-    setStatus("");
+    if (saveState === "sending" || !experience || !consent) return;
+
+    setCopyStatus("");
     setSaveState("sending");
+
+    const combinedContact = lineId.trim()
+      ? `${phone.trim()} (LINE: ${lineId.trim()})`.slice(0, 120)
+      : phone.trim().slice(0, 120);
+
     try {
       const result = await submitApplication({
-        fullName: name,
-        age: Number(age),
-        contact,
-        experience: experienceCodes[Number(experience)],
-        hasCertificate: certificate === "1",
-        workType: workCodes[Number(work)],
-        skills,
+        fullName: name.trim(),
+        age: 25,
+        contact: combinedContact,
+        experience,
+        hasCertificate: false,
+        workType: "full_time",
+        skills: notes.trim(),
         locale,
       });
-      setSaveState(result.ok ? "saved" : result.code === "RATE_LIMITED" ? "limited" : "failed");
+      setSaveState(
+        result.ok
+          ? "saved"
+          : result.code === "RATE_LIMITED"
+            ? "limited"
+            : "failed",
+      );
     } catch {
       setSaveState("failed");
     }
-    setReview(true);
+
+    setSubmitted(true);
   }
 
-  async function copySummary() {
+  async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(summary);
-      setStatus(f.copied[locale]);
+      await navigator.clipboard.writeText(summaryText);
+      setCopyStatus(f.copied[locale]);
     } catch {
-      setStatus(f.copyFailed[locale]);
+      setCopyStatus(f.copyFailed[locale]);
     }
   }
 
-  const other: Locale = locale === "th" ? "en" : "th";
+  function handleReset() {
+    setSubmitted(false);
+    setSaveState("idle");
+    setCopyStatus("");
+    setName("");
+    setPhone("");
+    setLineId("");
+    setExperience("");
+    setNotes("");
+    setConsent(false);
+  }
 
   return (
-    <div className={`${styles.site} ${locale === "th" ? styles.thai : ""}`}>
-      <a className={styles.skip} href="#main">
-        {locale === "th" ? "ข้ามไปยังเนื้อหา" : "Skip to content"}
+    <div id="top" className={styles.site}>
+      <a href="#main" className={styles.skip}>
+        {c.skip[locale]}
       </a>
-      <header className={styles.header}>
-        <a className={styles.logo} href={`/${locale}`} aria-label="Banyan Spa">
-          BANYAN<span>SPA</span>
-        </a>
-        <div className={styles.headerActions}>
-          <a className={styles.back} href={`/${locale}`}>
-            {c.nav.back[locale]}
-          </a>
-          <div className={styles.languages} aria-label="Language">
-            <Link
-              href="/en/careers"
-              prefetch={false}
-              lang="en"
-              aria-current={locale === "en" ? "page" : undefined}
-            >
-              EN
-            </Link>
-            <span>/</span>
-            <Link
-              href="/th/careers"
-              prefetch={false}
-              lang="th"
-              aria-current={locale === "th" ? "page" : undefined}
-            >
-              ไทย
-            </Link>
-          </div>
-        </div>
-      </header>
+
+      <div className={styles.headerWrap}>
+        <header className={styles.header}>
+          <BrandMark href={`/${locale}`} />
+          <nav className={styles.headerNav} aria-label={c.nav.details[locale]}>
+            <a href="#details" className={styles.navLink}>
+              {c.nav.details[locale]}
+            </a>
+            <a href="#apply" className={styles.headerCta}>
+              {c.nav.apply[locale]}
+            </a>
+          </nav>
+        </header>
+      </div>
 
       <main id="main">
-        <section className={styles.hero} aria-labelledby="careers-title">
-          <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>
-              <span />
-              {c.eyebrow[locale]}
-            </span>
-            <h1 id="careers-title">{c.title[locale]}</h1>
-            <p>{c.intro[locale]}</p>
-            <a className={styles.primary} href="#apply">
-              {c.apply[locale]}
-              <Arrow />
-            </a>
-          </div>
-          <figure className={styles.heroImage}>
-            <Image
-              src="/images/banyan/banyan-suite.webp"
-              alt={c.imageAlt[locale]}
-              fill
-              priority
-              sizes="(max-width: 860px) 100vw, 52vw"
-            />
-            <figcaption>
-              <span>Banyan Spa</span>
-              <span>{c.concept[locale]}</span>
-            </figcaption>
-          </figure>
-        </section>
+        <section className={styles.heroSection} aria-labelledby="careers-title">
+          <div className={styles.container}>
+            <div className={styles.heroGrid}>
+              <div className={styles.heroCopy}>
+                <p className={styles.eyebrow}>{c.hero.eyebrow[locale]}</p>
+                <h1 id="careers-title" className={styles.heroTitle}>
+                  {c.hero.titleLine1}
+                  <br />
+                  <em>{c.hero.titleLine2}</em>
+                </h1>
+                <p className={styles.heroSubtitle}>{c.hero.subtitle[locale]}</p>
+                <p className={styles.heroIntro}>{c.hero.intro[locale]}</p>
+                <p className={styles.heroLocation}>{c.hero.location[locale]}</p>
+                <div className={styles.heroActions}>
+                  <a href="#apply" className={styles.primaryButton}>
+                    {c.hero.primaryCta[locale]}
+                  </a>
+                  <a href="#details" className={styles.secondaryLink}>
+                    {c.hero.secondaryCta[locale]}
+                  </a>
+                </div>
+              </div>
 
-        <section className={styles.facts} aria-label={c.eyebrow[locale]}>
-          {c.facts.map((fact) => (
-            <div key={fact.label.en}>
-              <strong>{fact.value[locale]}</strong>
-              <span>{fact.label[locale]}</span>
+              <figure className={styles.heroFigure}>
+                <Image
+                  src="/images/careers/therapist-linen.jpg"
+                  alt={c.hero.imageAlt[locale]}
+                  fill
+                  priority
+                  referrerPolicy="no-referrer"
+                  sizes="(max-width: 960px) 100vw, 560px"
+                />
+              </figure>
             </div>
-          ))}
-        </section>
-
-        <section className={styles.columns}>
-          <div>
-            <h2>{c.requirementsTitle[locale]}</h2>
-            <ul>
-              {c.requirements.map((item) => (
-                <li key={item.en}>{item[locale]}</li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.offer}>
-            <h2>{c.offerTitle[locale]}</h2>
-            <ul>
-              {c.offers.map((item) => (
-                <li key={item.en}>{item[locale]}</li>
-              ))}
-            </ul>
-            <p className={styles.note}>{c.offerNote[locale]}</p>
           </div>
         </section>
 
-        <section id="apply" className={styles.apply} aria-labelledby="apply-title">
-          <div className={styles.applyCopy}>
-            <h2 id="apply-title">{c.applyTitle[locale]}</h2>
-            <p>{c.applyIntro[locale]}</p>
-            <p className={styles.note}>{c.contactNote[locale]}</p>
-          </div>
-          <div className={styles.card}>
-            {!review ? (
-              <form onSubmit={sendApplication}>
-                <div className={styles.formRow}>
-                  <label>
-                    {f.name[locale]}
-                    <input
-                      required
-                      autoComplete="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </label>
-                  <label>
-                    {f.age[locale]}
-                    <input
-                      required
-                      type="number"
-                      inputMode="numeric"
-                      min={20}
-                      max={65}
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                    />
-                  </label>
-                </div>
-                <label>
-                  {f.contact[locale]}
-                  <input
-                    required
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                  />
-                </label>
-                <div className={styles.formRow}>
-                  <label>
-                    {f.experience[locale]}
-                    <select value={experience} onChange={(e) => setExperience(e.target.value)}>
-                      {c.experienceOptions.map((o, i) => (
-                        <option key={o.en} value={i}>
-                          {o[locale]}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    {f.certificate[locale]}
-                    <select value={certificate} onChange={(e) => setCertificate(e.target.value)}>
-                      {c.certificateOptions.map((o, i) => (
-                        <option key={o.en} value={i}>
-                          {o[locale]}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-                <label>
-                  {f.work[locale]}
-                  <select value={work} onChange={(e) => setWork(e.target.value)}>
-                    {c.workOptions.map((o, i) => (
-                      <option key={o.en} value={i}>
-                        {o[locale]}
-                      </option>
+        <section
+          id="details"
+          className={styles.twoColSection}
+          aria-labelledby="details-title"
+        >
+          <div className={styles.container}>
+            <div className={styles.twoColGrid}>
+              <div>
+                <p className={styles.eyebrow}>{c.details.eyebrow[locale]}</p>
+                <h2 id="details-title" className={styles.sectionHeading}>
+                  {c.details.title[locale]}
+                </h2>
+                <p className={styles.sectionIntro}>{c.details.intro[locale]}</p>
+              </div>
+
+              <div>
+                <div className={styles.detailGroup}>
+                  <h3 className={styles.groupTitle}>
+                    {c.details.responsibilitiesTitle[locale]}
+                  </h3>
+                  <ul className={styles.bulletList}>
+                    {c.details.responsibilities.map((item) => (
+                      <li key={item.en}>{item[locale]}</li>
                     ))}
-                  </select>
-                </label>
-                <label>
-                  {f.skills[locale]}
-                  <textarea
-                    rows={3}
-                    value={skills}
-                    onChange={(e) => setSkills(e.target.value)}
-                  />
-                </label>
-                <button type="submit" className={styles.primaryButton} disabled={saveState === "sending"}>
-                  {saveState === "sending" ? f.sending[locale] : f.submit[locale]}
-                  <Arrow />
-                </button>
-              </form>
-            ) : (
-              <div className={styles.summary}>
-                <h3>{f.summaryTitle[locale]}</h3>
-                <pre>{summary.split("\n").slice(1).join("\n")}</pre>
-                <p role="status">
-                  {saveState === "saved"
-                    ? f.saved[locale]
-                    : saveState === "limited"
-                      ? f.rateLimited[locale]
-                      : f.notSaved[locale]}
-                </p>
-                <button type="button" className={styles.primaryButton} onClick={copySummary}>
-                  {f.copy[locale]}
-                  <Arrow />
-                </button>
-                <p role="status" className={styles.status}>
-                  {status}
-                </p>
-                {saveState !== "saved" && (
-                  <button
-                    type="button"
-                    className={styles.textLink}
-                    onClick={() => {
-                      setReview(false);
-                      setSaveState("idle");
-                    }}
-                  >
-                    {f.edit[locale]}
-                  </button>
+                  </ul>
+                </div>
+
+                <div className={styles.detailGroup}>
+                  <h3 className={styles.groupTitle}>
+                    {c.details.qualificationsTitle[locale]}
+                  </h3>
+                  <ul className={styles.bulletList}>
+                    {c.details.qualifications.map((item) => (
+                      <li key={item.en}>{item[locale]}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          className={styles.sageSection}
+          aria-labelledby="working-title"
+        >
+          <div className={styles.container}>
+            <div className={styles.twoColGrid}>
+              <div>
+                <p className={styles.eyebrow}>{c.working.eyebrow[locale]}</p>
+                <h2 id="working-title" className={styles.sectionHeading}>
+                  {c.working.title[locale]}
+                </h2>
+                <p className={styles.sectionIntro}>{c.working.intro[locale]}</p>
+              </div>
+
+              <ul className={styles.valueList}>
+                {c.working.items.map((item) => (
+                  <li key={item.title.en}>
+                    <h3>{item.title[locale]}</h3>
+                    <p>{item.body[locale]}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="apply"
+          className={styles.applySection}
+          aria-labelledby="apply-title"
+        >
+          <div className={styles.container}>
+            <div className={styles.twoColGrid}>
+              <div>
+                <p className={styles.eyebrow}>{c.apply.eyebrow[locale]}</p>
+                <h2 id="apply-title" className={styles.sectionHeading}>
+                  {c.apply.title[locale]}
+                </h2>
+                <p className={styles.sectionIntro}>{c.apply.intro[locale]}</p>
+              </div>
+
+              <div>
+                {!submitted ? (
+                  <form className={styles.form} onSubmit={handleSubmit}>
+                    <div className={styles.formRow}>
+                      <label className={styles.field}>
+                        <span className={styles.fieldLabel}>
+                          {f.name[locale]}
+                          <span className={styles.requiredMark} aria-hidden="true">
+                            *
+                          </span>
+                        </span>
+                        <input
+                          type="text"
+                          required
+                          maxLength={120}
+                          autoComplete="name"
+                          className={styles.input}
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                        />
+                      </label>
+
+                      <label className={styles.field}>
+                        <span className={styles.fieldLabel}>
+                          {f.phone[locale]}
+                          <span className={styles.requiredMark} aria-hidden="true">
+                            *
+                          </span>
+                        </span>
+                        <input
+                          type="tel"
+                          required
+                          maxLength={60}
+                          autoComplete="tel"
+                          className={styles.input}
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                        />
+                      </label>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <label className={styles.field}>
+                        <span className={styles.fieldLabel}>
+                          {f.lineId[locale]}
+                          <span className={styles.optionalMark}>
+                            {f.optional[locale]}
+                          </span>
+                        </span>
+                        <input
+                          type="text"
+                          maxLength={60}
+                          className={styles.input}
+                          value={lineId}
+                          onChange={(e) => setLineId(e.target.value)}
+                        />
+                      </label>
+
+                      <label className={styles.field}>
+                        <span className={styles.fieldLabel}>
+                          {f.experience[locale]}
+                          <span className={styles.requiredMark} aria-hidden="true">
+                            *
+                          </span>
+                        </span>
+                        <div className={styles.selectWrap}>
+                          <select
+                            required
+                            className={`${styles.select} ${!experience ? styles.selectEmpty : ""}`}
+                            value={experience}
+                            onChange={(e) =>
+                              setExperience(e.target.value as ExperienceCode | "")
+                            }
+                          >
+                            <option value="" disabled>
+                              {f.experiencePlaceholder[locale]}
+                            </option>
+                            {c.experienceOptions.map((opt) => (
+                              <option key={opt.code} value={opt.code}>
+                                {opt.label[locale]}
+                              </option>
+                            ))}
+                          </select>
+                          <span className={styles.selectChevron} aria-hidden="true" />
+                        </div>
+                      </label>
+                    </div>
+
+                    <label className={styles.field}>
+                      <span className={styles.fieldLabel}>
+                        {f.notes[locale]}
+                        <span className={styles.optionalMark}>
+                          {f.optional[locale]}
+                        </span>
+                      </span>
+                      <textarea
+                        rows={4}
+                        maxLength={1000}
+                        placeholder={f.notesPlaceholder[locale]}
+                        className={styles.textarea}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                      />
+                    </label>
+
+                    <p className={styles.privacyNote}>
+                      {f.privacyNotice[locale]}
+                    </p>
+
+                    <label className={styles.consentLabel}>
+                      <input
+                        type="checkbox"
+                        required
+                        className={styles.checkbox}
+                        checked={consent}
+                        onChange={(e) => setConsent(e.target.checked)}
+                      />
+                      <span>{f.consent[locale]}</span>
+                    </label>
+
+                    <div className={styles.submitRow}>
+                      <button
+                        type="submit"
+                        className={`${styles.primaryButton} ${styles.submitButton}`}
+                        disabled={saveState === "sending"}
+                      >
+                        {saveState === "sending"
+                          ? f.sending[locale]
+                          : f.submit[locale]}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className={styles.summaryPanel} role="status">
+                    <h3 className={styles.summaryTitle}>
+                      {f.summaryTitle[locale]}
+                    </h3>
+                    <p className={styles.summaryMessage}>
+                      {saveState === "saved"
+                        ? f.saved[locale]
+                        : saveState === "limited"
+                          ? f.rateLimited[locale]
+                          : f.notSaved[locale]}
+                    </p>
+                    <pre className={styles.summaryBox}>
+                      {summaryLines.join("\n")}
+                    </pre>
+                    <div className={styles.summaryActions}>
+                      <button
+                        type="button"
+                        className={styles.primaryButton}
+                        onClick={handleCopy}
+                      >
+                        {f.copy[locale]}
+                      </button>
+                      {saveState === "saved" ? (
+                        <button
+                          type="button"
+                          className={styles.textAction}
+                          onClick={handleReset}
+                        >
+                          {f.newApplication[locale]}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className={styles.textAction}
+                          onClick={() => {
+                            setSubmitted(false);
+                            setSaveState("idle");
+                          }}
+                        >
+                          {f.edit[locale]}
+                        </button>
+                      )}
+                    </div>
+                    {copyStatus && (
+                      <p className={styles.copyFeedback}>{copyStatus}</p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className={styles.footer}>
-        <a href={`/${locale}`} className={styles.logo}>
-          BANYAN<span>SPA</span>
-        </a>
-        <p>{c.footerLine[locale]}</p>
-        <span>
-          © {new Date().getFullYear()} Banyan Spa. {c.rights[locale]}
-        </span>
-        <Link href={`/${other}/careers`} prefetch={false} lang={other}>
-          {other === "th" ? "ไทย" : "English"}
-        </Link>
-      </footer>
+      <div className={styles.footerWrap}>
+        <footer className={styles.footer}>
+          <BrandMark href={`/${locale}`} />
+          <p className={styles.footerMeta}>{c.footer.department[locale]}</p>
+        </footer>
+      </div>
     </div>
   );
 }

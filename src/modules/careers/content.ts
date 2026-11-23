@@ -5,110 +5,166 @@ type Pair = Record<Locale, string>;
 const p = (en: string, th: string): Pair => ({ en, th });
 
 export const careers = {
-  nav: { back: p("Back to Banyan Spa", "กลับไปหน้าแรก") },
-  eyebrow: p("Careers", "ร่วมงานกับเรา"),
-  title: p("Hiring male therapists", "รับสมัคร เทอราปิสชาย"),
-  intro: p(
-    "Full-time works 5 days a week. Part-time, come in whenever suits you. Any experience level.",
-    "เต็มเวลา ทำงาน 5 วันต่อสัปดาห์ · พาร์ทไทม์ เข้างานเวลาไหนก็ได้ · ไม่จำกัดประสบการณ์",
-  ),
-  apply: p("Apply now", "สมัครเลย"),
-  imageAlt: p(
-    "Concept of a private treatment suite opening onto a lush banyan courtyard",
-    "ภาพแนวคิดห้องทรีตเมนต์ส่วนตัว พร้อมเตียงนวดและสวนต้นไทร",
-  ),
-  concept: p("Concept image", "ภาพประกอบแนวคิด"),
-  facts: [
-    { value: p("5", "5"), label: p("days a week for full-time", "วันต่อสัปดาห์ สำหรับพนักงานเต็มเวลา") },
-    { value: p("Flexible", "ยืดหยุ่น"), label: p("part-time, any hours", "พาร์ทไทม์ เข้างานเวลาไหนก็ได้") },
-    { value: p("0", "0"), label: p("years of experience required", "ปีประสบการณ์ที่ต้องมี") },
-  ],
-  requirementsTitle: p("Requirements", "คุณสมบัติ"),
-  requirements: [
-    p("Male, 20 years or older", "เพศชาย อายุ 20 ปีขึ้นไป"),
-    p("No experience limit: beginners are welcome", "ไม่จำกัดประสบการณ์ ผู้เริ่มต้นสมัครได้"),
-    p(
-      "No massage certificate required, but having one is considered favorably",
-      "ไม่จำเป็นต้องมีใบรับรองการนวด แต่ถ้ามีจะพิจารณาเป็นพิเศษ",
+  brand: "Banyan Spa",
+  monogram: "b",
+  skip: p("Skip to content", "ข้ามไปยังเนื้อหา"),
+  nav: {
+    details: p("Job Details", "รายละเอียดงาน"),
+    apply: p("Apply", "สมัครงาน"),
+  },
+  hero: {
+    eyebrow: p("Careers at Banyan Spa", "ร่วมงานกับ Banyan Spa"),
+    titleLine1: "Join Our",
+    titleLine2: "Team",
+    subtitle: p("Hiring Male Therapists", "รับสมัครเทอราปิสชาย"),
+    intro: p(
+      "Care for one guest at a time in a private space that values craft, discretion, and genuine rest.",
+      "มาร่วมดูแลลูกค้าทีละคน ในพื้นที่ที่ให้ความสำคัญกับฝีมือ ความเป็นส่วนตัว และเวลาที่ลูกค้าได้พักจริง ๆ",
     ),
-    p("Clean, professional and respectful with every guest", "บุคลิกสะอาด เป็นมืออาชีพ และสุภาพกับแขกทุกคน"),
-    p("Reliable on shifts and on time", "ตรงต่อเวลาและรับผิดชอบกะงาน"),
-  ],
-  offerTitle: p("What we offer", "สิ่งที่คุณจะได้รับ"),
-  offers: [
-    p("Full-time staff: salary with a guaranteed minimum income", "พนักงานประจำ: เงินเดือน พร้อมประกันมือขั้นต่ำ"),
-    p(
-      "Commission per treatment plus tips, paid on fixed dates",
-      "ค่าคอมมิชชันต่อการนวดหนึ่งครั้ง บวกทิป จ่ายตรงวันที่กำหนด",
+    location: p("Location · Nonthaburi", "สถานที่ทำงาน · นนทบุรี"),
+    primaryCta: p("Fill Application", "กรอกใบสมัคร"),
+    secondaryCta: p("View Job Details", "ดูรายละเอียดงาน"),
+    imageAlt: p(
+      "Male spa therapist in a dark olive linen uniform neatly folding a natural cream towel on a stone table",
+      "เทอราปิสชายในชุดยูนิฟอร์มสีเขียวเข้มกำลังพับผ้าลินินสีครีมบนโต๊ะอย่างประณีต",
     ),
-    p(
-      "Training if you have no experience, and senior therapists to guide you in your first week",
-      "มีการอบรมหากไม่มีประสบการณ์ และมีรุ่นพี่คอยแนะนำในช่วงสัปดาห์แรก",
+  },
+  details: {
+    eyebrow: p("Job Details", "รายละเอียดงาน"),
+    title: p("Male Therapist Role", "งานเทอราปิสชาย"),
+    intro: p(
+      "You will care for each guest from listening to their preferences before starting through the end of the session, in a private setting that gives every guest unhurried attention.",
+      "คุณจะดูแลลูกค้าตั้งแต่รับฟังความต้องการก่อนเริ่ม ไปจนถึงส่งท้ายการบริการ ในบรรยากาศส่วนตัวที่ให้เวลากับลูกค้าแต่ละคน",
     ),
-    p(
-      "Clean rooms, laundered uniforms, drinking water and a rest area",
-      "ห้องสะอาด ซักชุดยูนิฟอร์มให้ มีน้ำดื่ม และพื้นที่พัก",
+    responsibilitiesTitle: p("Responsibilities", "หน้าที่รับผิดชอบ"),
+    responsibilities: [
+      p(
+        "Consult with guests on their preferences and adjust massage pressure accordingly",
+        "สอบถามความต้องการและปรับแรงนวดให้เหมาะกับลูกค้า",
+      ),
+      p(
+        "Deliver treatments to studio standards while upholding guest privacy",
+        "ให้บริการนวดตามมาตรฐานของร้านและรักษาความเป็นส่วนตัวของลูกค้า",
+      ),
+      p(
+        "Prepare and maintain cleanliness of the treatment room and equipment before and after each session",
+        "เตรียมและดูแลความสะอาดของพื้นที่และอุปกรณ์ก่อนและหลังให้บริการ",
+      ),
+    ],
+    qualificationsTitle: p("Qualifications", "คุณสมบัติ"),
+    qualifications: [
+      p(
+        "Male therapist with massage fundamentals and a genuine interest in hospitality",
+        "เป็นเทอราปิสชาย มีพื้นฐานการนวดและสนใจงานบริการ",
+      ),
+      p(
+        "Polite communication, punctual, and attentive to personal hygiene",
+        "สื่อสารสุภาพ ตรงต่อเวลา และใส่ใจสุขอนามัย",
+      ),
+      p(
+        "Please include any massage experience or training courses in your application, if applicable",
+        "แจ้งประสบการณ์หรือหลักสูตรนวดที่เคยเรียนในใบสมัคร หากมี",
+      ),
+    ],
+  },
+  working: {
+    eyebrow: p("Working Together", "การทำงานร่วมกัน"),
+    title: p("What You Will Gain", "สิ่งที่คุณจะได้จากงานนี้"),
+    intro: p(
+      "For therapists who take pride in their craft and care deeply about looking after every individual guest.",
+      "สำหรับคนที่อยากใช้ฝีมือและใส่ใจกับการดูแลลูกค้าแต่ละคน",
     ),
-  ],
-  offerNote: p(
-    "Commission rate, social security and leave terms are confirmed at your interview.",
-    "อัตราคอมมิชชัน ประกันสังคม และวันลา จะแจ้งให้ทราบในวันสัมภาษณ์",
-  ),
-  applyTitle: p("Apply", "สมัครงาน"),
-  applyIntro: p(
-    "Fill in the form, then copy your summary and send it to us on LINE.",
-    "กรอกแบบฟอร์ม แล้วคัดลอกสรุปใบสมัครส่งให้เราทาง LINE",
-  ),
-  contactNote: p("LINE ID and phone number to be announced.", "LINE ID และเบอร์โทรจะแจ้งให้ทราบ"),
+    items: [
+      {
+        title: p("Dedicated One-on-One Guest Time", "เวลาดูแลลูกค้าเป็นรายบุคคล"),
+        body: p(
+          "Working in a private space gives you time to listen and tailor every massage to each individual guest.",
+          "บริการในพื้นที่ส่วนตัว คุณจึงมีเวลารับฟังและปรับการนวดให้เหมาะกับลูกค้าแต่ละคน",
+        ),
+      },
+      {
+        title: p("Room to Practice Your Strengths", "โอกาสใช้ทักษะที่ถนัด"),
+        body: p(
+          "Tell us which massage styles you excel at and which skills you would like to develop further.",
+          "บอกเราได้ว่าคุณถนัดการนวดแบบไหนและอยากพัฒนาทักษะด้านใด",
+        ),
+      },
+      {
+        title: p("Clear Terms Discussed Before Starting", "พูดคุยเงื่อนไขก่อนเริ่มงาน"),
+        body: p(
+          "Discuss work arrangements, schedules, and compensation openly during your conversation with our team.",
+          "สอบถามรูปแบบงาน ตาราง และค่าตอบแทนได้ระหว่างการพูดคุยกับทีม",
+        ),
+      },
+    ],
+  },
+  apply: {
+    eyebrow: p("Application Form", "ใบสมัครงาน"),
+    title: p("Submit Application", "ส่งใบสมัคร"),
+    intro: p(
+      "Share your contact details and a brief overview of your experience. Our team will review your application and contact shortlisted candidates.",
+      "กรอกข้อมูลติดต่อและเล่าประสบการณ์ของคุณสั้น ๆ ทีมจะใช้ข้อมูลนี้พิจารณาใบสมัครและติดต่อผู้ที่ผ่านการคัดเลือกเบื้องต้น",
+    ),
+  },
   form: {
-    name: p("Full name", "ชื่อ-นามสกุล"),
-    age: p("Age", "อายุ"),
-    contact: p("Phone or LINE ID", "เบอร์โทรหรือ LINE ID"),
+    name: p("Full Name", "ชื่อ–นามสกุล"),
+    phone: p("Phone Number", "เบอร์โทรศัพท์"),
+    lineId: p("LINE ID", "LINE ID"),
+    optional: p("(Optional)", "(ไม่บังคับ)"),
     experience: p("Experience", "ประสบการณ์"),
-    certificate: p("Massage certificate", "ใบรับรองการนวด"),
-    work: p("Preferred work", "รูปแบบงานที่ต้องการ"),
-    skills: p("Massage styles and languages (optional)", "สายนวดและภาษาที่ใช้ได้ (ถ้ามี)"),
-    submit: p("Submit application", "ส่งใบสมัคร"),
-    sending: p("Sending…", "กำลังส่ง…"),
+    experiencePlaceholder: p("Select experience", "เลือกประสบการณ์"),
+    notes: p("Additional Details", "ข้อมูลเพิ่มเติม"),
+    notesPlaceholder: p(
+      "e.g., preferred massage styles or earliest start date",
+      "เช่น รูปแบบการนวดที่ถนัด หรือวันที่พร้อมเริ่มงาน",
+    ),
+    privacyNotice: p(
+      "Banyan Spa uses the information in this form to evaluate applications and contact candidates regarding this position. Please omit health details and national ID numbers.",
+      "Banyan Spa ใช้ข้อมูลในแบบฟอร์มเพื่อพิจารณาใบสมัครและติดต่อเรื่องตำแหน่งนี้ กรุณาเว้นข้อมูลสุขภาพและเลขบัตรประชาชน",
+    ),
+    consent: p(
+      "I consent to the use of my information to review this application and contact me.",
+      "ยินยอมให้ใช้ข้อมูลเพื่อพิจารณาใบสมัครและติดต่อกลับ",
+    ),
+    submit: p("Submit Application", "ส่งใบสมัคร"),
+    sending: p("Submitting…", "กำลังส่ง…"),
     saved: p(
-      "We have your application and will contact you. You can also send this summary to us on LINE.",
-      "เราได้รับใบสมัครของคุณแล้วและจะติดต่อกลับ คุณสามารถส่งสรุปนี้ให้เราทาง LINE ได้อีกทาง",
+      "Thank you. We have received your application and will contact shortlisted candidates shortly.",
+      "ขอบคุณครับ เราได้รับใบสมัครของคุณเรียบร้อยแล้ว ทีมงานจะพิจารณาและติดต่อกลับผู้ที่ผ่านการคัดเลือกเบื้องต้น",
     ),
     notSaved: p(
-      "We could not save your application. Please copy this summary and send it to us on LINE.",
-      "บันทึกใบสมัครไม่สำเร็จ กรุณาคัดลอกสรุปนี้แล้วส่งให้เราทาง LINE",
+      "We could not save your application right now. You can copy your summary below and send it directly to our recruitment team.",
+      "ยังไม่สามารถบันทึกใบสมัครในขณะนี้ คุณสามารถคัดลอกสรุปข้อมูลด้านล่างเพื่อส่งให้ทีมรับสมัครได้โดยตรง",
     ),
     rateLimited: p(
-      "Too many applications from this connection. Please try again later or send the summary on LINE.",
-      "ส่งใบสมัครจากการเชื่อมต่อนี้หลายครั้งเกินไป กรุณาลองใหม่ภายหลัง หรือส่งสรุปทาง LINE",
+      "Too many applications were sent from this connection. Please try again later or copy your summary below.",
+      "มีการส่งใบสมัครจากเครือข่ายนี้หลายครั้งเกินไป กรุณาลองใหม่ภายหลัง หรือคัดลอกสรุปด้านล่าง",
     ),
-    edit: p("Edit", "แก้ไข"),
-    copy: p("Copy summary", "คัดลอกสรุป"),
-    copied: p("Copied. Send it to us on LINE.", "คัดลอกแล้ว ส่งให้เราทาง LINE ได้เลย"),
-    copyFailed: p("Could not copy. Select the text and copy it yourself.", "คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วคัดลอกเอง"),
-    summaryTitle: p("Therapist application", "ใบสมัครเทอราปิสชาย"),
+    summaryTitle: p("Application Summary", "สรุปข้อมูลใบสมัคร"),
+    copy: p("Copy Summary", "คัดลอกสรุปใบสมัคร"),
+    copied: p("Copied to clipboard.", "คัดลอกข้อมูลเรียบร้อยแล้ว"),
+    copyFailed: p(
+      "Could not copy automatically. Please select and copy the text above.",
+      "คัดลอกไม่สำเร็จ กรุณาเลือกข้อความด้านบนแล้วคัดลอกด้วยตนเอง",
+    ),
+    edit: p("Edit Application", "แก้ไขข้อมูล"),
+    newApplication: p("Submit Another Application", "กรอกใบสมัครใหม่"),
     lines: {
-      name: p("Name", "ชื่อ"),
-      age: p("Age", "อายุ"),
-      contact: p("Contact", "ติดต่อ"),
+      name: p("Full Name", "ชื่อ–นามสกุล"),
+      phone: p("Phone", "เบอร์โทรศัพท์"),
+      lineId: p("LINE ID", "LINE ID"),
       experience: p("Experience", "ประสบการณ์"),
-      certificate: p("Certificate", "ใบรับรอง"),
-      work: p("Work type", "รูปแบบงาน"),
-      skills: p("Styles/languages", "สายนวด/ภาษา"),
+      notes: p("Additional Details", "ข้อมูลเพิ่มเติม"),
     },
   },
   experienceOptions: [
-    p("No experience", "ไม่มีประสบการณ์"),
-    p("Under 1 year", "น้อยกว่า 1 ปี"),
-    p("1–3 years", "1–3 ปี"),
-    p("3–5 years", "3–5 ปี"),
-    p("5+ years", "5 ปีขึ้นไป"),
+    { code: "none" as const, label: p("No prior experience", "ไม่มีประสบการณ์") },
+    { code: "under_1" as const, label: p("Under 1 year", "น้อยกว่า 1 ปี") },
+    { code: "1_3" as const, label: p("1–3 years", "1–3 ปี") },
+    { code: "3_5" as const, label: p("3–5 years", "3–5 ปี") },
+    { code: "5_plus" as const, label: p("5+ years", "5 ปีขึ้นไป") },
   ],
-  certificateOptions: [p("No", "ไม่มี"), p("Yes", "มี")],
-  workOptions: [
-    p("Full-time (5 days a week)", "เต็มเวลา (5 วันต่อสัปดาห์)"),
-    p("Part-time (any hours)", "พาร์ทไทม์ (เข้างานเวลาไหนก็ได้)"),
-  ],
-  footerLine: p("A quieter kind of luxury.", "ความหรูหรา ในความสงบเรียบง่าย"),
-  rights: p("All rights reserved.", "สงวนลิขสิทธิ์"),
+  footer: {
+    department: p("Recruitment · Banyan Spa", "ฝ่ายรับสมัครงาน · Banyan Spa"),
+  },
 } as const;

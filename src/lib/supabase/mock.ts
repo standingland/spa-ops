@@ -1,5 +1,28 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+/** Strips whitespace/surrounding quotes and accepts bare *.supabase.co hostnames; returns null if not a valid http(s) URL. */
+export function normalizeSupabaseUrl(raw: string | undefined): string | null {
+  if (!raw) return null;
+  let v = raw.trim().replace(/^['"]|['"]$/g, '').trim();
+  if (!v) return null;
+  if (!/^https?:\/\//i.test(v) && /^[a-z0-9-]+\.supabase\.(co|in|net)(\/.*)?$/i.test(v)) {
+    v = `https://${v}`;
+  }
+  try {
+    const u = new URL(v);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    return u.origin;
+  } catch {
+    return null;
+  }
+}
+
+export function normalizeSupabaseKey(raw: string | undefined): string | null {
+  if (!raw) return null;
+  const v = raw.trim().replace(/^['"]|['"]$/g, '').trim();
+  return v || null;
+}
+
 const NOT_CONFIGURED_ERROR = {
   message: 'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_KEY, and SUPABASE_SERVICE_KEY.',
   code: 'SUPABASE_NOT_CONFIGURED',
