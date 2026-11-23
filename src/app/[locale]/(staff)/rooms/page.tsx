@@ -14,11 +14,19 @@ export default async function RoomsPage({ searchParams }: { searchParams: Promis
   const supabase = await createClient();
   const [states, rooms, cats, ths] = await Promise.all([
     getRoomStates(),
-    supabase.from('rooms').select('id, code, display_name, zone, floor, category_id, notes').eq('active', true),
+    supabase.from('rooms').select('id, code, display_name, zone, floor, category_id, notes').eq('active', true).order('sort_order'),
     supabase.from('room_categories').select('id, name_th, name_en').order('sort_order'),
     supabase.from('therapists').select('id, display_name'),
   ]);
   if (!states.ok) return <p role="alert">{states.code}</p>;
+  const nextIds = states.rooms.flatMap((room) => room.nextBookingId ? [room.nextBookingId] : []);
+  const nextBookings = nextIds.length
+    ? await supabase.from('bookings').select('id, services(name_th, name_en)').in('id', nextIds)
+    : { data: [] };
+  const nextServices = Object.fromEntries((nextBookings.data ?? []).flatMap((row) => {
+    const service = Array.isArray(row.services) ? row.services[0] : row.services;
+    return service ? [[row.id, (locale === 'en' && service.name_en) || service.name_th]] : [];
+  }));
   const showNotes = session.role !== 'therapist';
   const info = new Map((rooms.data ?? []).map((r) => [r.id, r]));
   const tiles: RoomTile[] = states.rooms.flatMap((s) => {
@@ -31,6 +39,7 @@ export default async function RoomsPage({ searchParams }: { searchParams: Promis
       tiles={tiles}
       categories={(cats.data ?? []).map((c) => ({ id: c.id, name: locale === 'en' && c.name_en ? c.name_en : c.name_th }))}
       therapists={Object.fromEntries((ths.data ?? []).map((x) => [x.id, x.display_name]))}
+      nextServices={nextServices}
       initial={{ q: sp.q ?? '', status: sp.status ?? '', category: sp.category ?? '', zone: sp.zone ?? '', compact: sp.compact === '1' }}
       showNotes={showNotes}
     />

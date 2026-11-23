@@ -6,9 +6,10 @@ import type { Role } from './session';
 
 export const getStaffNavigation = cache(async (role: Role) => {
   // Managers see Reports only when the owner's policy allows it.
-  const [nav, care, settings] = await Promise.all([
+  const [nav, care, design, settings] = await Promise.all([
     getTranslations('nav'),
     getTranslations('care'),
+    getTranslations('workspaceDesign'),
     role === 'manager' ? (await createClient()).rpc('get_settings') : null,
   ]);
   const managerReports = (settings?.data as Record<string, unknown> | null)?.['reports.manager_can_view'] !== false;
@@ -20,7 +21,7 @@ export const getStaffNavigation = cache(async (role: Role) => {
       id,
       href,
       icon,
-      label: id === 'waitlist' ? care('waitlist') : nav(id === 'settings' ? 'adminOverview' : id),
+      label: id === 'waitlist' ? care('waitlist') : id === 'settings' ? design('managementHome') : nav(id === 'overview' ? 'adminOverview' : id),
     })),
   }));
 });

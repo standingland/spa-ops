@@ -4,12 +4,14 @@ import { createClient } from '@/lib/supabase/server';
 import { bangkokDay } from '@/lib/time';
 import { requireRole } from '@/modules/identity/session';
 import { visibleAdminTools, type AdminTool, type IconName } from '@/modules/identity/nav';
+import { getStaffNavigation } from '@/modules/identity/staffNavigation';
 import { getBoard } from '@/modules/booking/actions';
 import { RoomTimeline } from '@/modules/booking/components/RoomTimeline';
 import { getToday } from '@/modules/operations/actions';
 import { listDailyNotes } from '@/modules/daily-notes/actions';
 import { DailyNotesManager } from '@/modules/daily-notes/components/DailyNotesManager';
 import { Icon } from '@/components/shell/Icon';
+import { WorkspaceHero } from '@/components/shell/WorkspaceHero';
 import { ROOM_STATUS_KEY } from '@/components/ui/status';
 import { StatusChip } from '@/components/ui/badge';
 import styles from './dashboard.module.css';
@@ -25,20 +27,21 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
   const session = await requireRole('owner', 'manager');
   const { by } = await searchParams;
   const timelineBy = by === 'therapist' ? 'therapist' : 'room';
-  const [locale, nav, t, today, booking, care, status, supabase] = await Promise.all([
+  const [locale, nav, t, today, booking, care, status, supabase, design, groups] = await Promise.all([
     getLocale(), getTranslations('nav'), getTranslations('adminHub'),
     getTranslations('today'), getTranslations('booking'), getTranslations('care'),
-    getTranslations('status'), createClient(),
+    getTranslations('status'), createClient(), getTranslations('workspaceDesign'), getStaffNavigation(session.role),
   ]);
   const now = new Date();
   const day = bangkokDay(now);
-  const [operations, board, waitlist, rooms, services, therapists, dailyNotes] = await Promise.all([
+  const [operations, board, waitlist, rooms, services, therapists, dailyNotes, staffRequests] = await Promise.all([
     getToday(), getBoard(day),
     supabase.from('waitlist_entries').select('id', { count: 'exact', head: true }).in('status', ['waiting', 'offered']),
     supabase.from('rooms').select('id, code, display_name, active, zone, room_positions(id, label, active)').order('sort_order'),
     supabase.from('services').select('id, name_th, name_en, duration_min'),
     supabase.from('therapists').select('id, display_name').eq('active', true).order('sort_order'),
     listDailyNotes(day),
+    supabase.from('staff_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
   ]);
 
   const model = operations.ok ? operations.model : null;
@@ -48,7 +51,16 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
   const roomStates = new Map(model?.rooms.map((room) => [room.roomId, room.status]));
   const number = new Intl.NumberFormat(locale);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeZone: 'Asia/Bangkok' });
+  const clock = new Intl.DateTimeFormat(locale, { timeStyle: 'short', timeZone: 'Asia/Bangkok' });
   const calendar = { pathname: '/calendar', query: { day } };
+  const management = groups.find((group) => group.id === 'management')?.items.filter((item) => item.id !== 'settings') ?? [];
+  const tileDescriptions = {
+    therapists: design('therapistManagement'),
+    payments: design('financeManagement'),
+    earnings: design('commissionManagement'),
+    inventory: design('inventoryManagement'),
+    reports: design('reportsManagement'),
+  };
   const metrics = model ? [
     { label: today('reservations'), value: model.counts.reservations, href: calendar, icon: 'schedule' },
     { label: today('therapistsOnShift'), value: model.therapists.length, href: '/admin/therapists', icon: 'therapists' },
@@ -86,22 +98,86 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
       href: '/rooms',
       icon: 'rooms' as IconName,
     },
+    {
+      id: 'inventory',
+      label: nav('inventory'),
+      description: design('inventoryManagement'),
+      href: '/inventory',
+      icon: 'inventory' as IconName,
+    },
+    {
+      id: 'payments',
+      label: nav('payments'),
+      description: design('financeManagement'),
+      href: '/payments',
+      icon: 'payments' as IconName,
+    },
   ] as const;
 
   return (
     <div className={styles.dashboard}>
-      <header className={styles.intro}>
-        <div>
-          <h1>{t('title')}</h1>
-          <p><time dateTime={day}>{date.format(now)}</time> · {t('bangkokTime')}</p>
+      <div className={styles.landing}>
+        <div className={styles.features}>
+          <WorkspaceHero title={design('managementTitle')} description={design('managementDesc')} />
+          <ul className={styles.featureList}>
+            {management.map((item) => (
+              <li key={item.id} data-feature={item.id}>
+                <Link href={item.href} className={styles.feature}>
+                  <span className={styles.featureIcon}><Icon name={item.icon} /></span>
+                  <Icon name="chevron" className={styles.featureArrow} />
+                  <strong>{item.label}</strong>
+                  <p>{tileDescriptions[item.id as keyof typeof tileDescriptions]}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className={styles.actions}>
-          <Link className={styles.secondary} href={{ pathname: '/calendar', query: { day, view: 'timeline' } }}>
-            {booking('viewTimeline')}
-          </Link>
-          <Link className={styles.primary} href={{ pathname: '/calendar', query: { day, create: '1' } }}>{booking('new')}</Link>
+        <div className={styles.side}>
+          <section id="admin-attention" className={styles.panel} aria-labelledby="admin-attention-title">
+            <div className={styles.panelHead}>
+              <h2 id="admin-attention-title"><Icon name="bell" />{today('attention')}</h2>
+              <Link href="/today">{nav('today')} <Icon name="chevron" /></Link>
+            </div>
+            {!model ? <p className={styles.empty}>{t('operationsFailed')}</p>
+              : model.attention.length ? (
+                <ul className={styles.issues}>
+                  {model.attention.slice(0, 5).map((issue) => (
+                    <li key={[issue.kind, issue.roomId, issue.bookingId].join(':')}>
+                      <strong>{today(`kind.${issue.kind}`)}{issue.roomId && roomCodes.has(issue.roomId) && <small>{roomCodes.get(issue.roomId)}</small>}</strong>
+                      <time dateTime={issue.since}>{clock.format(new Date(issue.since))}</time>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className={styles.empty}>{t('noIssues')}</p>}
+          </section>
+          <section className={styles.panel} aria-labelledby="admin-pending">
+            <div className={styles.panelHead}><h2 id="admin-pending">{design('operatingStatus')}</h2></div>
+            <ul className={styles.pending}>
+              {([
+                { href: '/admin/staff-requests', label: nav('staffRequests'), value: staffRequests.count, icon: 'guests' },
+                { href: '/waitlist', label: care('waitlist'), value: waitlist.count, icon: 'waitlist' },
+                { href: '/rooms', label: t('roomsReady'), value: model?.counts.available, icon: 'rooms' },
+              ] as const).map(({ href, label, value, icon }) => (
+                <li key={href}><Link href={href}><Icon name={icon} /><span>{label}</span><strong>{value == null ? '—' : number.format(value)}</strong><Icon name="chevron" /></Link></li>
+              ))}
+            </ul>
+          </section>
+          <section className={styles.panel} aria-labelledby="admin-quick-actions" data-testid="admin-quick-actions">
+            <div className={styles.panelHead}><h2 id="admin-quick-actions">{t('quickActions')}</h2></div>
+            <ul className={styles.quickActionList}>
+              {quickActions.map((action) => (
+                <li key={action.id}>
+                  <Link href={action.href} className={styles.quickAction} data-testid={`quick-action-${action.id}`} title={action.description}>
+                    <Icon name={action.icon} /><span>{action.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
-      </header>
+      </div>
+
+      <h2 className={styles.operatingTitle}>{today('title')} <small><time dateTime={day}>{date.format(now)}</time> · {t('bangkokTime')}</small></h2>
 
       {model ? (
         <ul className={styles.metrics}>
@@ -117,30 +193,13 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
         </ul>
       ) : <p className={styles.notice} role="alert">{t('operationsFailed')}</p>}
 
-      <section className={styles.quickActions} aria-labelledby="admin-quick-actions" data-testid="admin-quick-actions">
-        <h2 id="admin-quick-actions">{t('quickActions')}</h2>
-        <ul className={styles.quickActionList}>
-          {quickActions.map((action) => (
-            <li key={action.id}>
-              <Link href={action.href} className={styles.quickAction} data-testid={`quick-action-${action.id}`}>
-                <Icon name={action.icon} />
-                <span>
-                  <strong>{action.label}</strong>
-                  <small>{action.description}</small>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <DailyNotesManager initialNotes={notes} canPost={session.role === 'owner'} />
 
       <div className={styles.workspace}>
         <section className={styles.panel} aria-labelledby="admin-schedule">
           <div className={styles.panelHead}>
             <h2 id="admin-schedule">{t('schedule')}</h2>
-            <Link href={calendar}>{t('openCalendar')}</Link>
+            <Link href={{ pathname: '/calendar', query: { day, view: 'timeline' } }}>{t('openCalendar')}</Link>
           </div>
           <div className={styles.timelineViews}>
             <Link href="/admin" aria-current={timelineBy === 'room' ? 'true' : undefined}>{booking('viewRooms')}</Link>
@@ -154,24 +213,6 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
         </section>
 
         <div className={styles.side}>
-          <section id="admin-attention" className={styles.panel} aria-labelledby="admin-attention-title">
-            <div className={styles.panelHead}>
-              <h2 id="admin-attention-title">{today('attention')}</h2>
-              <Link href="/today">{nav('today')}</Link>
-            </div>
-            {!model ? <p className={styles.empty}>{t('operationsFailed')}</p>
-              : model.attention.length ? (
-                <ul className={styles.issues}>
-                  {model.attention.slice(0, 5).map((issue) => (
-                    <li key={[issue.kind, issue.roomId, issue.bookingId].join(':')}>
-                      <strong>{today(`kind.${issue.kind}`)}</strong>
-                      {issue.roomId && roomCodes.has(issue.roomId) && <span>{roomCodes.get(issue.roomId)}</span>}
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className={styles.empty}>{t('noIssues')}</p>}
-          </section>
-
           <section className={styles.panel} aria-labelledby="admin-room-status">
             <div className={styles.panelHead}>
               <h2 id="admin-room-status">{today('roomStatus')}</h2>

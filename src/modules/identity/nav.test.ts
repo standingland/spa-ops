@@ -21,6 +21,7 @@ describe('visibleNav', () => {
   it('drops reports but keeps payments for a manager when managerReports is false', () => {
     const list = ids('manager', false);
     expect(list).not.toContain('reports');
+    expect(list).not.toContain('overview');
     expect(list).toContain('payments');
     expect(ids('manager', true)).toContain('reports');
   });
@@ -31,8 +32,8 @@ describe('visibleNav', () => {
     expect(list).not.toContain('bookings');
     const groups = visibleNav('owner', { managerReports: true });
     expect(groups.map((g) => g.id)).toEqual(['operate', 'management']);
-    expect(groups[0].items.map((i) => i.id)).toEqual(['staffHome', 'settings', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
-    expect(groups[1].items.map((i) => i.id)).toEqual(['therapists', 'payments', 'earnings', 'inventory', 'reports']);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['staffHome', 'overview', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
+    expect(groups[1].items.map((i) => i.id)).toEqual(['settings', 'therapists', 'payments', 'earnings', 'inventory', 'reports']);
   });
 });
 

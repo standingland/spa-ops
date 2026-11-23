@@ -216,7 +216,7 @@
 .grid {
   display: grid;
   gap: .85rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
 }
 
 .sticky {
@@ -367,18 +367,6 @@
 .stripSub {
   font-size: var(--text-caption, .8125rem);
   color: var(--ink-muted, #6b645a);
-}
-
-@media (max-width: 64rem) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 40rem) {
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

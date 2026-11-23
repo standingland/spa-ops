@@ -18,6 +18,7 @@ export type AttentionKind = 'needs_reassignment' | 'overrunning' | 'room_not_rea
 export type Attention = { kind: AttentionKind; bookingId?: string; roomId?: string; since: string };
 export type TodayModel = {
   day: string;
+  bookings: BoardRow[];
   counts: { reservations: number; cancelled: number; noShow: number } & Record<RoomStatus, number>;
   arrivals: BoardRow[]; waiting: BoardRow[]; inTreatment: BoardRow[]; endingSoon: BoardRow[];
   awaitingCleaning: RoomState[]; cancellations: BoardRow[];
@@ -81,6 +82,7 @@ export function buildToday(input: {
 
   return {
     day,
+    bookings: [...today].sort(byStart),
     counts: {
       reservations: today.filter((r) => r.status !== 'cancelled' && r.status !== 'no_show').length,
       cancelled: today.filter((r) => r.status === 'cancelled').length,
