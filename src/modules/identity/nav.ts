@@ -2,7 +2,7 @@
 import type { Role } from '@/modules/identity/session';
 
 export type NavId = 'staffHome' | 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist';
-export type IconName = NavId | 'menu' | 'close' | 'guide';
+export type IconName = NavId | 'menu' | 'close' | 'guide' | 'bell' | 'checklist';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
 export type AdminTool = { id: 'staffClockQr' | 'staffRequests' | 'adminRooms' | 'services' | 'notifications' | 'applications' | 'staff' | 'settings' | 'guide'; href: string; roles: Role[] };
