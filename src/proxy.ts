@@ -19,10 +19,13 @@ export async function proxy(original: NextRequest) {
   response.headers.set('Content-Security-Policy', csp);
   // The public landing and careers pages do not need a staff session or a database connection.
   if (/^\/(?:(?:th|en)\/?)?(?:careers\/?)?$/.test(request.nextUrl.pathname)) return response;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY?.trim();
+  if (!supabaseUrl || !supabaseKey) return response;
   // Refresh the Supabase session cookies on every page request.
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),

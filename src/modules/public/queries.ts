@@ -12,7 +12,11 @@ export type PublicBooking = { startsAt: string; endsAt: string; status: string; 
 
 /** The page is open only when every LINE variable is set AND the owner has turned online booking on. */
 export async function isOpen(): Promise<boolean> {
-  if (!parseEnv(process.env).line) return false;
+  try {
+    if (!parseEnv(process.env).line) return false;
+  } catch {
+    return false;
+  }
   const { data } = await publicDb().from('app_settings').select('value').eq('key', 'online.enabled').maybeSingle();
   return data?.value === true;
 }

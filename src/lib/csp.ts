@@ -19,7 +19,6 @@ export function buildCsp(nonce: string, supabaseUrl: string, dev: boolean): stri
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
   ].join('; ');
 }
 
