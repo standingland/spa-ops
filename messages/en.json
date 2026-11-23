@@ -981,8 +981,8 @@
   },
   "dailyNotes": {
     "title": "Staff daily notes",
-    "subtitleOwner": "Post sticky-note updates or alerts visible to all staff on today’s view.",
-    "subtitleReadOnly": "Today’s notes from the owner, visible to all staff on today’s view.",
+    "subtitleOwner": "Post updates or alerts for all staff on Staff Home and Today.",
+    "subtitleReadOnly": "Today’s notes from the owner appear on Staff Home and Today.",
     "count": "{count} active today",
     "viewOnToday": "View on Today",
     "toneLabel": "Note style",
@@ -997,12 +997,22 @@
       "reminder": "Leave a gentle reminder for staff (e.g. Restock warm towels before 16:00)..."
     },
     "inputLabel": "Daily note message",
-    "visibilityHint": "Visible to owners, managers, receptionists and therapists on Today.",
+    "visibilityHint": "Visible to all staff on Staff Home and Today.",
     "post": "Post note",
     "posting": "Posting...",
     "remove": "Remove note",
     "emptyOwner": "No notes posted for today yet. Add a sticky note above to brief the team.",
-    "emptyStaff": "No daily notes posted for today."
+    "emptyStaff": "No daily notes posted for today.",
+    "discussion": {
+      "subtitle": "Read today’s updates and reply to the team under each note.",
+      "toggle": "{count, plural, =0 {Write a reply} one {# reply · Open discussion} other {# replies · Open discussion}}",
+      "replyLabel": "Write a reply",
+      "send": "Send reply",
+      "sending": "Sending…",
+      "sent": "Reply sent",
+      "notesUnavailable": "Daily notes could not be loaded right now.",
+      "repliesUnavailable": "Replies are temporarily unavailable. You can still read today’s notes."
+    }
   },
   "adminGuide": {
     "back": "Back to settings",

@@ -5,6 +5,8 @@ import { Link } from '@/i18n/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { bangkokDay } from '@/lib/time';
+import { listDailyNoteBoard } from '@/modules/daily-notes/actions';
+import { DailyNotesManager } from '@/modules/daily-notes/components/DailyNotesManager';
 import { requireRole } from '@/modules/identity/session';
 import type { IconName } from '@/modules/identity/nav';
 import { getStaffNavigation } from '@/modules/identity/staffNavigation';
@@ -26,7 +28,7 @@ export default async function StaffHomePage() {
   const session = await requireRole();
   const supabase = await createClient();
   const canReview = session.role === 'manager' || session.role === 'owner';
-  const [t, roles, locale, groups, therapist, pending, nav, today, hubDesc, operations] = await Promise.all([
+  const [t, roles, locale, groups, therapist, pending, nav, today, hubDesc, operations, board] = await Promise.all([
     getTranslations('staffHome'),
     getTranslations('staff.roles'),
     getLocale(),
@@ -37,6 +39,7 @@ export default async function StaffHomePage() {
     getTranslations('today'),
     getTranslations('adminHub.desc'),
     getToday(),
+    listDailyNoteBoard(),
   ]);
 
   const role = roles(session.role);
@@ -121,6 +124,12 @@ export default async function StaffHomePage() {
       ) : (
         <p className={styles.notice} role="status">{t('summary.unavailable')}</p>
       )}
+
+      <DailyNotesManager
+        notes={board.ok ? board.notes : null}
+        canPost={session.role === 'owner'}
+        discussion={board.ok ? board.replies : null}
+      />
 
       {canReview && navigation}
       <section aria-labelledby="staff-home-requests" className={styles.section}>

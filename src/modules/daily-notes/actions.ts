@@ -10,8 +10,11 @@ import {
   isMissingDailyNotesTable,
   MAX_ACTIVE_NOTES,
   removeDailyNoteSchema,
+  replyToDailyNoteSchema,
   type CreateDailyNoteInput,
   type DailyNote,
+  type DailyNoteReply,
+  type DailyNoteReplyInput,
   type NoteTone,
 } from './schema';
 import { addFallbackNote, listFallbackNotes, removeFallbackNote } from './fallbackStore';
@@ -40,6 +43,7 @@ function mapRow(row: DailyNoteRow): DailyNote {
 function revalidateDailyViews() {
   revalidatePath('/[locale]/admin', 'page');
   revalidatePath('/[locale]/today', 'page');
+  revalidatePath('/[locale]/staff', 'page');
 }
 
 /** Any active staff role can read today's posted notes. */
@@ -71,6 +75,59 @@ export async function listDailyNotes(day?: string): Promise<
     day: targetDay,
     notes: ((data ?? []) as DailyNoteRow[]).map(mapRow),
   };
+}
+
+export async function listDailyNoteBoard(): Promise<
+  { ok: true; notes: DailyNote[]; replies: Record<string, DailyNoteReply[]> | null } | Failure
+> {
+  const result = await listDailyNotes();
+  if (!result.ok) return result;
+
+  const { notes } = result;
+  const replies: Record<string, DailyNoteReply[]> = {};
+  if (notes.length === 0) return { ok: true, notes, replies };
+
+  const supabase = await createClient();
+  const noteIds = notes.map(({ id }) => id);
+  const pageSize = 200;
+
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await supabase
+      .from('staff_daily_note_replies')
+      .select('id, note_id, body, author_name, created_at')
+      .in('note_id', noteIds)
+      .order('created_at')
+      .order('id')
+      .range(offset, offset + pageSize - 1);
+
+    if (error) return { ok: true, notes, replies: null };
+    for (const row of data) {
+      (replies[row.note_id] ??= []).push({
+        id: row.id,
+        body: row.body,
+        authorName: row.author_name,
+        createdAt: row.created_at,
+      });
+    }
+    if (data.length < pageSize) return { ok: true, notes, replies };
+  }
+}
+
+export async function replyToDailyNote(input: DailyNoteReplyInput): Promise<{ ok: true } | Failure> {
+  if (!(await roleOrNull())) return fail('NOT_AUTHORIZED');
+
+  const parsed = replyToDailyNoteSchema.safeParse(input);
+  if (!parsed.success) return fail('INVALID_INPUT');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('staff_daily_note_replies')
+    .insert({ note_id: parsed.data.noteId, body: parsed.data.body });
+
+  if (error) return failFrom(error);
+
+  revalidatePath('/[locale]/staff', 'page');
+  return { ok: true };
 }
 
 /** Owner only: post a sticky-note update or alert for today's shift. */
