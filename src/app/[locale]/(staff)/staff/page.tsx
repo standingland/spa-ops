@@ -12,6 +12,10 @@ import type { IconName } from '@/modules/identity/nav';
 import { getStaffNavigation } from '@/modules/identity/staffNavigation';
 import { getToday } from '@/modules/operations/actions';
 import { PHOTO_BUCKET } from '@/modules/therapists/photo';
+import { listHandovers } from '@/modules/handover/actions';
+import { HandoverPanel } from '@/modules/handover/components/HandoverPanel';
+import { ShiftRoster } from '@/modules/staff-clock/components/ShiftRoster';
+import type { ClockSnapshot } from '@/modules/staff-clock/model';
 import styles from './staff-home.module.css';
 
 /** Tile colour by kind of work: time & schedule, guests, rooms, money, stock, people. */
@@ -19,7 +23,7 @@ const TONES: Record<string, string> = {
   schedule: 'time', today: 'time',
   guests: 'guest', waitlist: 'guest', bookings: 'guest',
   rooms: 'room',
-  payments: 'money', earnings: 'money',
+  payments: 'money', earnings: 'money', checkout: 'money',
   inventory: 'stock',
   therapists: 'people', overview: 'review', reports: 'people', settings: 'review',
 };
@@ -28,7 +32,7 @@ export default async function StaffHomePage() {
   const session = await requireRole();
   const supabase = await createClient();
   const canReview = session.role === 'manager' || session.role === 'owner';
-  const [t, roles, locale, groups, therapist, pending, nav, today, hubDesc, operations, board] = await Promise.all([
+  const [t, roles, locale, groups, therapist, pending, nav, today, hubDesc, operations, board, rosterRpc, handovers] =await Promise.all([
     getTranslations('staffHome'),
     getTranslations('staff.roles'),
     getLocale(),
@@ -40,7 +44,10 @@ export default async function StaffHomePage() {
     getTranslations('adminHub.desc'),
     getToday(),
     listDailyNoteBoard(),
+    session.role === 'therapist' ? null : supabase.rpc('read_staff_clock'),
+    session.role === 'therapist' ? null : listHandovers(),
   ]);
+  const roster = rosterRpc && !rosterRpc.error ? (rosterRpc.data as ClockSnapshot).coworkers : null;
 
   const role = roles(session.role);
   const name = session.displayName || role;
@@ -59,7 +66,8 @@ export default async function StaffHomePage() {
     { id: 'therapists', label: today('therapistsOnShift'), value: model.therapists.length, href: canReview ? '/admin/therapists' : '/today', icon: 'therapists' },
     { id: 'attention', label: t('summary.attention'), value: model.attention.length, href: '/today', icon: 'checklist' },
   ] : [];
-  const navigation = groups.map((group) => (
+  const receptionist = session.role === 'receptionist';
+  const navigation = groups.filter((group) => !receptionist || group.id === 'operate').map((group) => (
     <section key={group.id} aria-labelledby={`staff-home-${group.id}`} className={styles.section}>
       <h2 id={`staff-home-${group.id}`}>{group.label}</h2>
       <ul className={styles.menu}>
@@ -131,7 +139,15 @@ export default async function StaffHomePage() {
         discussion={board.ok ? board.replies : null}
       />
 
-      {canReview && navigation}
+      {session.role !== 'therapist' && (
+        <ShiftRoster people={roster} className={styles.section} />
+      )}
+
+      {session.role !== 'therapist' && (
+        <HandoverPanel items={handovers} className={styles.section} />
+      )}
+
+      {(canReview || receptionist) && navigation}
       <section aria-labelledby="staff-home-requests" className={styles.section}>
         <h2 id="staff-home-requests">{t('requests')}</h2>
         <ul className={styles.menu}>
@@ -176,7 +192,7 @@ export default async function StaffHomePage() {
         </ul>
       </section>
 
-      <section aria-labelledby="staff-home-account" className={styles.section}>
+      {!receptionist && <section aria-labelledby="staff-home-account" className={styles.section}>
         <h2 id="staff-home-account">{t('account.heading')}</h2>
         <ul className={`${styles.menu} ${styles.accountMenu}`}>
           <li>
@@ -198,9 +214,9 @@ export default async function StaffHomePage() {
             </Link>
           </li>}
         </ul>
-      </section>
+      </section>}
 
-      {!canReview && navigation}
+      {!canReview && !receptionist && navigation}
     </div>
   );
 }

@@ -14,8 +14,8 @@ describe('visibleNav', () => {
 
   it('adds guests for a receptionist', () => {
     const groups = visibleNav('receptionist', { managerReports: true });
-    expect(groups.map((g) => g.id)).toEqual(['operate']);
-    expect(ids('receptionist')).toEqual(['staffHome', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
+    expect(groups.map((g) => g.id)).toEqual(['operate', 'management']);
+    expect(ids('receptionist')).toEqual(['staffHome', 'today', 'schedule', 'guests', 'rooms', 'waitlist', 'checkout', 'settings']);
   });
 
   it('drops reports but keeps payments for a manager when managerReports is false', () => {
@@ -32,7 +32,7 @@ describe('visibleNav', () => {
     expect(list).not.toContain('bookings');
     const groups = visibleNav('owner', { managerReports: true });
     expect(groups.map((g) => g.id)).toEqual(['operate', 'management']);
-    expect(groups[0].items.map((i) => i.id)).toEqual(['staffHome', 'overview', 'today', 'schedule', 'guests', 'rooms', 'waitlist']);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['staffHome', 'overview', 'today', 'schedule', 'guests', 'rooms', 'waitlist', 'checkout']);
     expect(groups[1].items.map((i) => i.id)).toEqual(['settings', 'therapists', 'payments', 'earnings', 'inventory', 'reports']);
   });
 });

@@ -19,12 +19,15 @@ export function LoginForm({ clockCode }: { clockCode?: string }) {
     const f = new FormData(e.currentTarget);
     setBusy(true);
     setError(false);
-    const { error: err } = await createClient().auth.signInWithPassword({
+    const supabase = createClient();
+    const { data, error: err } = await supabase.auth.signInWithPassword({
       email: String(f.get('email')), password: String(f.get('password')),
     });
+    if (err) { setBusy(false); setError(true); return; }
+    const { data: staff } = await supabase.from('staff').select('role').eq('user_id', data.user.id).maybeSingle();
     setBusy(false);
-    if (err) { setError(true); return; }
-    router.replace(clockCode ? { pathname: '/staff/clock', query: { code: clockCode } } : '/staff');
+    router.replace(clockCode ? { pathname: '/staff/clock', query: { code: clockCode } }
+      : staff?.role === 'receptionist' ? '/admin' : '/staff');
     router.refresh();
   }
 

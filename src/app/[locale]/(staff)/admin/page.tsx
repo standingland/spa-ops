@@ -24,7 +24,7 @@ const toolIcons: Record<AdminTool['id'], IconName> = {
 };
 
 export default async function AdminHubPage({ searchParams }: { searchParams: Promise<{ by?: string }> }) {
-  const session = await requireRole('owner', 'manager');
+  const session = await requireRole('owner', 'manager', 'receptionist');
   const { by } = await searchParams;
   const timelineBy = by === 'therapist' ? 'therapist' : 'room';
   const [locale, nav, t, today, booking, care, status, supabase, design, groups] = await Promise.all([
@@ -67,7 +67,7 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
     { label: t('roomsReady'), value: model.counts.available, total: model.rooms.length, href: '/rooms', icon: 'rooms' },
     { label: today('attention'), value: model.attention.length, href: '/today', icon: 'today' },
   ] as const : [];
-  const quickActions = [
+  const quickActions = ([
     {
       id: 'newBooking',
       label: t('quickAction.newBooking'),
@@ -112,7 +112,8 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
       href: '/payments',
       icon: 'payments' as IconName,
     },
-  ] as const;
+  ] as const).filter((action) => session.role !== 'receptionist'
+    || !['newTherapist', 'inventory', 'payments'].includes(action.id));
 
   return (
     <div className={styles.dashboard}>
@@ -246,7 +247,7 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
         </div>
       </div>
 
-      <section className={styles.settings} aria-labelledby="admin-settings">
+      {tools.length > 0 && <section className={styles.settings} aria-labelledby="admin-settings">
         <h2 id="admin-settings">{nav('settings')}</h2>
         <ul className={styles.tools}>
           {tools.map((tool) => (
@@ -261,7 +262,7 @@ export default async function AdminHubPage({ searchParams }: { searchParams: Pro
             </li>
           ))}
         </ul>
-      </section>
+      </section>}
     </div>
   );
 }

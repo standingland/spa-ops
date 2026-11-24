@@ -1,7 +1,7 @@
 // Pure navigation model: no React, no server imports (type-only Role import is erased).
 import type { Role } from '@/modules/identity/session';
 
-export type NavId = 'staffHome' | 'overview' | 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist';
+export type NavId = 'staffHome' | 'overview' | 'today' | 'schedule' | 'bookings' | 'guests' | 'therapists' | 'rooms' | 'payments' | 'reports' | 'earnings' | 'inventory' | 'settings' | 'waitlist' | 'checkout';
 export type IconName = NavId | 'menu' | 'close' | 'guide' | 'bell' | 'checklist' | 'chevron' | 'search' | 'grid' | 'list' | 'refresh';
 export type NavItem = { id: NavId; href: string; icon: IconName; roles: Role[]; hidden?: boolean };
 export type NavGroup = { id: 'operate' | 'management'; items: NavItem[] };
@@ -24,12 +24,13 @@ const GROUPS: NavGroup[] = [
       { id: 'guests', href: '/customers', icon: 'guests', roles: FRONT },
       { id: 'rooms', href: '/rooms', icon: 'rooms', roles: ALL },
       { id: 'waitlist', href: '/waitlist', icon: 'waitlist', roles: FRONT },
+      { id: 'checkout', href: '/checkout', icon: 'payments', roles: FRONT },
     ],
   },
   {
     id: 'management',
     items: [
-      { id: 'settings', href: '/admin', icon: 'settings', roles: MANAGEMENT },
+      { id: 'settings', href: '/admin', icon: 'settings', roles: FRONT },
       { id: 'therapists', href: '/admin/therapists', icon: 'therapists', roles: MANAGEMENT },
       { id: 'payments', href: '/payments', icon: 'payments', roles: MANAGEMENT },
       { id: 'earnings', href: '/earnings', icon: 'earnings', roles: MANAGEMENT },

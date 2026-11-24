@@ -77,6 +77,7 @@
     "notifications": "Customer messages",
     "settings": "Settings",
     "payments": "Payments",
+    "checkout": "Take payment",
     "reports": "Reports",
     "account": "My account",
     "schedule": "Schedule",
@@ -128,6 +129,7 @@
       "rooms": "Check room availability and status",
       "guests": "Find guest details and visit history",
       "waitlist": "Track guests waiting for an appointment",
+      "checkout": "Take payment from guests who have finished",
       "overview": "Review bookings, revenue and room usage",
       "settings": "Open the shop overview and admin tools",
       "therapists": "Manage your team and shifts",
@@ -210,6 +212,14 @@
         "Sign out when you finish using a shared device."
       ]
     }
+  },
+  "handover": {
+    "title": "Shift handover",
+    "label": "Closing summary",
+    "placeholder": "e.g. guests to follow up, room problems, cash counted, supplies to order",
+    "submit": "Save handover",
+    "empty": "No handovers yet",
+    "unavailable": "Handovers could not be loaded. Check that the database has been updated."
   },
   "staffClock": {
     "title": "Clock in and out",
@@ -732,6 +742,9 @@
     "reason": "Reason",
     "adjustHint": "Leave a field empty to keep it as it is",
     "nonePending": "Nothing is waiting for payment",
+    "checkoutDesc": "Guests who have finished and still owe a payment. Press Pay to record it.",
+    "recordingOff": "Recording payments is switched off for the front desk. Please ask a manager.",
+    "loadFailed": "Could not load pending payments. Please try again.",
     "refundOwed": "Refund owed",
     "awaitingVerification": "Awaiting verification",
     "charge": "Charge",

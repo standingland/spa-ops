@@ -9,6 +9,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
   therapists: (<><circle cx="12" cy="8" r="3.5" /><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" /></>),
   rooms: (<><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5" /><circle cx="7" cy="11" r="1.5" /></>),
   payments: (<><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6.5 9.5v.01M17.5 14.5v.01" /></>),
+  checkout: (<><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18M7 15h4" /></>),
   reports: (<><path d="M5 20V10M12 20V4M19 20v-7" /></>),
   overview: (<path d="M5 20V10M12 20V4M19 20v-7" />),
   earnings: (<><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a6 6 0 0112 0v2M17 8h4M19 6v4M17 15h4M17 19h4" /></>),
