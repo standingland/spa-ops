@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { createClient } from '@/lib/supabase/browser';
+import { queueDailyNotesPopup } from '@/modules/daily-notes/loginPopup';
 
 export function LoginForm({ clockCode }: { clockCode?: string }) {
   const t = useTranslations('login');
@@ -25,6 +26,7 @@ export function LoginForm({ clockCode }: { clockCode?: string }) {
     });
     if (err) { setBusy(false); setError(true); return; }
     const { data: staff } = await supabase.from('staff').select('role').eq('user_id', data.user.id).maybeSingle();
+    queueDailyNotesPopup(data.user.id);
     setBusy(false);
     router.replace(clockCode ? { pathname: '/staff/clock', query: { code: clockCode } }
       : staff?.role === 'receptionist' ? '/admin' : '/staff');

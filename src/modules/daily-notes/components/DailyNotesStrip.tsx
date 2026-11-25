@@ -9,18 +9,18 @@ import styles from '../daily-notes.module.css';
  * Sticky-note daily updates posted by owners, visible to all active staff members
  * at the top of their daily view (/today). Renders nothing when no notes are active.
  */
-export function DailyNotesStrip({ notes }: { notes: DailyNote[] }) {
+export function DailyNotesStrip({ notes, titleId = 'today-daily-notes-title' }: { notes: DailyNote[]; titleId?: string }) {
   const t = useTranslations('dailyNotes');
   if (notes.length === 0) return null;
 
   return (
     <section
       className={styles.strip}
-      aria-labelledby="today-daily-notes-title"
+      aria-labelledby={titleId}
       data-testid="today-daily-notes"
     >
       <div className={styles.stripHead}>
-        <h2 id="today-daily-notes-title" className={styles.stripTitle}>
+        <h2 id={titleId} className={styles.stripTitle}>
           {t('title')}
         </h2>
         <span className={styles.stripSub}>{t('count', { count: notes.length })}</span>

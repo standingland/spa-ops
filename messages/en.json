@@ -994,6 +994,7 @@
   },
   "dailyNotes": {
     "title": "Staff daily notes",
+    "dismiss": "Got it",
     "subtitleOwner": "Post updates or alerts for all staff on Staff Home and Today.",
     "subtitleReadOnly": "Today’s notes from the owner appear on Staff Home and Today.",
     "count": "{count} active today",

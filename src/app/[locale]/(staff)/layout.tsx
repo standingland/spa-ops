@@ -2,6 +2,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getBrand } from '@/lib/brand';
+import { DailyNotesLoginPopup } from '@/modules/daily-notes/components/DailyNotesLoginPopup';
 import { requireRole } from '@/modules/identity/session';
 import { visibleAdminTools } from '@/modules/identity/nav';
 import { getStaffNavigation } from '@/modules/identity/staffNavigation';
@@ -63,6 +64,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         />
         <main className="staff-main">{children}</main>
       </div>
+      <DailyNotesLoginPopup key={session.userId} userId={session.userId} />
     </div>
   );
 }
