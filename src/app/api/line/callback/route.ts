@@ -30,13 +30,17 @@ export async function GET(request: NextRequest) {
   };
 
   const code = q.get('code');
-  if (!state || !code || returned !== cookieState) return to('login');
+  if (!state || !code || returned !== cookieState) {
+    console.warn('[line-callback] rejected before token exchange:', !cookieState ? 'state cookie missing (different host, or cookie blocked)' : !state ? 'state cookie invalid or expired' : !code ? `no code from LINE (error=${q.get('error') ?? ''} ${q.get('error_description') ?? ''})` : 'state in URL differs from cookie');
+    return to('login');
+  }
   try {
     const guest = await exchangeCode(code, `${lineConfig().publicBaseUrl}/api/line/callback`, state.nonce);
     const res = to();
     res.cookies.set(SESSION_COOKIE, signSession(guest, SESSION_TTL_SEC), cookieOpts(SESSION_TTL_SEC));
     return res;
-  } catch {
+  } catch (e) {
+    console.warn('[line-callback]', e instanceof Error ? e.message : 'unknown error');
     return to('login');
   }
 }
