@@ -10,7 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { acceptWaitlist, cancelWaitlist } from '../actions';
 import type { MyAppointments as Data, Appointment } from '../schema';
 
-export function MyAppointments({ data, page }: { data: Data; page: number }) {
+export function MyAppointments({ data, page, name }: { data: Data; page: number; name: string }) {
   const t = useTranslations('care'); const tb = useTranslations('booking'); const te = useTranslations(); const locale = useLocale(); const router = useRouter();
   const [busy, transition] = useTransition(); const [error, setError] = useState('');
   const label = (s: { service_name_th: string; service_name_en: string | null }) => locale === 'en' && s.service_name_en ? s.service_name_en : s.service_name_th;
@@ -29,7 +29,14 @@ export function MyAppointments({ data, page }: { data: Data; page: number }) {
     </div>
   </Card>;
   return <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-    <h1 className="font-serif text-title">{t('myAppointments')}</h1><p className="text-caption text-ink-muted">{t('timezone')}</p>
+    <header className="flex flex-col gap-3">
+      <h1 className="font-serif text-title">{t('profile')}</h1>
+      <Card className="flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0"><p className="text-caption text-ink-muted">{t('lineAccount')}</p><p className="break-words text-heading">{name || t('guest')}</p></div>
+        <Link className="inline-flex min-h-11 items-center underline" href="/book">{t('newBooking')}</Link>
+      </Card>
+      <p className="text-caption text-ink-muted">{t('timezone')}</p>
+    </header>
     {error && <Alert tone="error">{error}</Alert>}
     <section className="flex flex-col gap-3"><h2 className="font-serif text-heading">{t('upcoming')}</h2>{data.upcoming.length ? data.upcoming.map(appointment) : <Card>{t('noUpcoming')}</Card>}</section>
     <section className="flex flex-col gap-3"><h2 className="font-serif text-heading">{t('waitlist')}</h2>{data.waitlist.length ? data.waitlist.map((w) => <Card key={w.id} className="flex flex-col gap-3" data-testid="my-waitlist">
