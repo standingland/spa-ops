@@ -9,8 +9,13 @@ vi.mock('next/headers', () => ({
   headers: async () => new Headers({ 'x-forwarded-for': '1.2.3.4' }),
 }));
 
+const dispatchNow = vi.fn();
+const afterCbs: Array<() => unknown> = [];
+vi.mock('next/server', () => ({ after: (cb: () => unknown) => { afterCbs.push(cb); } }));
+vi.mock('@/modules/notifications/now', () => ({ dispatchNow: () => dispatchNow() }));
+
 const saved = { ...process.env };
-beforeEach(() => { rpc.mockReset(); jar.clear(); process.env.PUBLIC_TOKEN_SECRET = 'k'.repeat(32); });
+beforeEach(() => { rpc.mockReset(); dispatchNow.mockReset(); afterCbs.length = 0; jar.clear(); process.env.PUBLIC_TOKEN_SECRET = 'k'.repeat(32); });
 afterEach(() => { process.env = { ...saved }; });
 
 const input = { therapistId: '11111111-1111-4111-8111-111111111111', serviceId: '22222222-2222-4222-8222-222222222222', start: '2030-01-15T05:00:00.000Z', idempotencyKey: '33333333-3333-4333-8333-333333333333' };
@@ -77,4 +82,35 @@ test('cancelOnline cancels with a valid token and maps CANCEL_TOO_LATE', async (
   expect(rpc).toHaveBeenCalledWith('public_cancel', { p_booking_id: 'b-1' });
   rpc.mockResolvedValueOnce({ data: null, error: { message: 'CANCEL_TOO_LATE' } });
   expect(await cancelOnline(signCancelToken('b-1', 60))).toEqual({ ok: false, code: 'CANCEL_TOO_LATE' });
+});
+
+test('a successful online booking sends its confirmation right after the response, without waiting for the scheduler', async () => {
+  const { bookOnline } = await import('./actions');
+  const { signSession } = await import('./session');
+  jar.set('guest_session', signSession({ lineUserId: 'U1', name: 'Nok' }, 60));
+  rpc.mockResolvedValue({ data: [{ booking_id: 'b-1', starts_at: input.start }], error: null });
+  expect((await bookOnline(input)).ok).toBe(true);
+  expect(dispatchNow).not.toHaveBeenCalled();   // runs after the response, not inside it
+  expect(afterCbs).toHaveLength(1);
+  await afterCbs[0]();
+  expect(dispatchNow).toHaveBeenCalledOnce();
+});
+
+test('a failed dispatch after booking is swallowed: the booking stands and the scheduler retries later', async () => {
+  const { bookOnline } = await import('./actions');
+  const { signSession } = await import('./session');
+  jar.set('guest_session', signSession({ lineUserId: 'U1', name: 'Nok' }, 60));
+  rpc.mockResolvedValue({ data: [{ booking_id: 'b-1', starts_at: input.start }], error: null });
+  dispatchNow.mockRejectedValue(new Error('LINE down'));
+  expect((await bookOnline(input)).ok).toBe(true);
+  await expect(Promise.resolve(afterCbs[0]())).resolves.toBeUndefined();
+});
+
+test('a booking that fails sends nothing', async () => {
+  const { bookOnline } = await import('./actions');
+  const { signSession } = await import('./session');
+  jar.set('guest_session', signSession({ lineUserId: 'U1', name: 'Nok' }, 60));
+  rpc.mockResolvedValue({ data: null, error: { message: 'SLOT_TAKEN' } });
+  await bookOnline(input);
+  expect(afterCbs).toHaveLength(0);
 });

@@ -42,7 +42,7 @@ Messages are sent by `POST /api/internal/dispatch` with `Authorization: Bearer <
 * `pg_cron` + `pg_net` inside Supabase calling the URL every minute (see `docs/deployment.md` step 6), or
 * any external scheduler that can send a POST with the bearer header.
 
-Without it, confirmations stay queued and nothing reaches LINE.
+A new online booking sends its confirmation right after the response, without waiting for the scheduler. If that send fails (for example LINE is down), the message stays queued and the scheduler retries it. Reminders, waitlist offers and every retry still depend on the scheduler, so it is still required.
 
 ## 5. Switch on, then test
 
@@ -60,4 +60,4 @@ Without it, confirmations stay queued and nothing reaches LINE.
 | Login returns `LINE_AUTH_FAILED` | callback URL mismatch, or the Login channel is not Published |
 | Webhook Verify fails | `LINE_MESSAGING_CHANNEL_SECRET` is the Login secret, or the deploy predates the variable |
 | Notification `failed` with `LINE_PUSH_FAILED` | guest blocked the account, or an expired/wrong access token |
-| Notification stuck `pending` | scheduler in section 4 is not running |
+| Notification stuck `pending` or `failed` | scheduler in section 4 is not running, so retries never happen |

@@ -1,8 +1,10 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { after } from 'next/server';
 import { z } from 'zod';
 import { failFrom } from '@/lib/action';
+import { dispatchNow } from '@/modules/notifications/now';
 import { allow } from './rateLimit';
 import { publicDb } from './db';
 import { SESSION_COOKIE, cancelTtlSec } from './http';
@@ -35,6 +37,8 @@ export async function bookOnline(input: z.input<typeof BookInput>): Promise<{ ok
   }
   const bookingId = (data as { booking_id: string }[])[0]?.booking_id;
   if (!bookingId) return { ok: false, code: 'UNKNOWN' };
+  // Send the confirmation now instead of waiting up to a scheduler interval. A failure is left for the scheduler to retry.
+  after(async () => { try { await dispatchNow(); } catch { /* stays queued */ } });
   return { ok: true, bookingId, cancelToken: signCancelToken(bookingId, cancelTtlSec(p.data.start)) };
 }
 
