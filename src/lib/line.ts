@@ -27,17 +27,22 @@ const form = (o: Record<string, string>) => ({
 /** Trades the login code for the guest's LINE user id and display name, checking the ID token and the nonce. */
 export async function exchangeCode(code: string, redirectUri: string, expectedNonce: string): Promise<{ lineUserId: string; name: string }> {
   const c = lineConfig();
-  const fail = () => new Error('LINE_AUTH_FAILED');
+  // The reason goes to the server log only (the guest sees one generic message); it never includes the code or a secret.
+  const fail = (why: string) => new Error(`LINE_AUTH_FAILED: ${why}`);
+  const lineError = async (r: Response) => {
+    const b = (await r.json().catch(() => ({}))) as { error?: string; error_description?: string };
+    return `${r.status} ${b.error ?? ''} ${b.error_description ?? ''}`.trim();
+  };
   const t = await fetch(`${c.apiBase}/oauth2/v2.1/token`, form({
     grant_type: 'authorization_code', code, redirect_uri: redirectUri, client_id: c.loginChannelId, client_secret: c.loginChannelSecret,
   }));
-  if (!t.ok) throw fail();
+  if (!t.ok) throw fail(`token exchange ${await lineError(t)} (redirect_uri sent: ${redirectUri})`);
   const idToken = ((await t.json()) as { id_token?: string }).id_token;
-  if (!idToken) throw fail();
+  if (!idToken) throw fail('token response has no id_token');
   const v = await fetch(`${c.apiBase}/oauth2/v2.1/verify`, form({ id_token: idToken, client_id: c.loginChannelId }));
-  if (!v.ok) throw fail();
+  if (!v.ok) throw fail(`id token verify ${await lineError(v)}`);
   const p = (await v.json()) as { sub?: string; name?: string; nonce?: string };
-  if (!p.sub || p.nonce !== expectedNonce) throw fail();
+  if (!p.sub || p.nonce !== expectedNonce) throw fail('id token has no sub or the nonce does not match');
   return { lineUserId: p.sub, name: p.name?.trim() || '' };
 }
 

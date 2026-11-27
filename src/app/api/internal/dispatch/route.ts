@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { bearerMatches, parseEnv } from '@/lib/env';
-import { dispatchPending } from '@/modules/notifications/dispatch';
-import { logSender, scheduleGuestCare, supabaseOutbox } from '@/modules/notifications/outbox';
-import { routeSender } from '@/modules/notifications/senders';
-import { lineSender } from '@/lib/line';
+import { dispatchNow } from '@/modules/notifications/now';
+import { scheduleGuestCare } from '@/modules/notifications/outbox';
 
 /** Called by a scheduler. Requires `Authorization: Bearer <CRON_SECRET>`. */
 export async function POST(request: Request) {
@@ -13,6 +11,6 @@ export async function POST(request: Request) {
   const line = parseEnv(process.env).line;
   try { if (line) await scheduleGuestCare(); }
   catch { return NextResponse.json({ error: 'guest care scheduling failed' }, { status: 500 }); }
-  const result = await dispatchPending(supabaseOutbox(), routeSender(line ? lineSender : null, logSender), { senderName: process.env.NOTIFY_SENDER_NAME ?? 'Studio' });
+  const result = await dispatchNow();
   return NextResponse.json(result);
 }
