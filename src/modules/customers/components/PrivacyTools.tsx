@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ErrorText } from '@/components/ErrorText';
 import { Alert } from '@/components/ui/alert';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Field, Input } from '@/components/ui/field';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -33,26 +32,33 @@ export function PrivacyTools({ customerId, displayName, isOwner, anonymised }: {
   }
 
   return (
-    <section className="flex min-w-0 flex-col gap-4" aria-label={t('privacy')} data-testid="privacy-tools">
-      <Card className="flex flex-col gap-3">
-        <h2 className="font-serif text-heading text-ink">{t('privacy')}</h2>
-        <p className="text-body text-ink-muted">{t('privacyHelp')}</p>
-        <div className="flex flex-wrap gap-3">
-          <a href={`/api/customers/${customerId}/export`} download data-testid="export-json" className={buttonVariants({ variant: 'secondary' })}>{t('export')}</a>
+    <section className="customer-privacy-stack" aria-label={t('privacy')} data-testid="privacy-tools">
+      <div className="workspace-surface customer-panel customer-privacy-export">
+        <div className="customer-privacy-copy">
+          <h2 className="workspace-section-title">{t('privacy')}</h2>
+          <p className="text-caption text-ink-muted">{t('privacyHelp')}</p>
         </div>
-      </Card>
+        <div className="customer-privacy-action">
+          <a href={`/api/customers/${customerId}/export`} download data-testid="export-json" className={buttonVariants({ variant: 'secondary', size: 'sm' })}>{t('export')}</a>
+        </div>
+      </div>
+
       {isOwner && !anonymised && (
-        <Card tone="danger" className="flex flex-col gap-3">
-          <h2 className="font-serif text-heading text-danger">{t('dangerZone')}</h2>
-          {!open && (
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="secondary" data-testid="anonymise-open" onClick={() => setOpen(true)} className="border-danger text-danger">{t('anonymise')}</Button>
+        <div className="workspace-surface customer-panel customer-danger-zone">
+          <div className="customer-danger-head">
+            <div>
+              <h2 className="workspace-section-title text-danger">{t('dangerZone')}</h2>
+              <p className="text-caption text-ink-muted">{t('anonymiseKeeps')}</p>
             </div>
-          )}
+            {!open && (
+              <Button type="button" variant="secondary" size="sm" data-testid="anonymise-open" onClick={() => setOpen(true)} className="border-danger text-danger">
+                {t('anonymise')}
+              </Button>
+            )}
+          </div>
           {open && (
-            <form onSubmit={submit} className="flex flex-col gap-3">
+            <form onSubmit={submit} className="customer-danger-form">
               <p className="text-body font-semibold text-danger">{t('anonymiseWarning')}</p>
-              <p className="text-body text-ink">{t('anonymiseKeeps')}</p>
               <Field label={t('reason')}>
                 <Input data-testid="anonymise-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
               </Field>
@@ -60,13 +66,13 @@ export function PrivacyTools({ customerId, displayName, isOwner, anonymised }: {
                 <Input data-testid="anonymise-confirm-text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} autoComplete="off" />
               </Field>
               {error && <Alert tone="error"><ErrorText text={error} /></Alert>}
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="customer-form-actions">
                 <Button type="submit" variant="danger" disabled={busy} data-testid="anonymise-submit">{t('anonymiseNow')}</Button>
                 <Button type="button" variant="link" className="min-h-11 px-2 pointer-fine:min-h-0" onClick={() => setOpen(false)}>{te('common.cancel')}</Button>
               </div>
             </form>
           )}
-        </Card>
+        </div>
       )}
     </section>
   );

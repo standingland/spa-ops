@@ -837,7 +837,15 @@
     "anonymiseWarning": "This cannot be undone: the name, phone, email and private notes are deleted for good.",
     "anonymiseKeeps": "Bookings and payments stay for the accounts, but are no longer linked to a person.",
     "typeName": "Type \"{name}\" to confirm",
-    "anonymiseNow": "Remove permanently"
+    "anonymiseNow": "Remove permanently",
+    "backToDirectory": "Back to customers",
+    "consentOptedIn": "Messages enabled",
+    "consentOptedOut": "Messages off",
+    "unsavedChanges": "Unsaved changes",
+    "reset": "Reset",
+    "noPrivateNotes": "No private notes yet.",
+    "noteSaved": "Note added",
+    "avgDaysValue": "{days} days"
   },
   "reports": {
     "title": "Reports",
